@@ -68,7 +68,7 @@ function markPlanRange(key, fn) {
 }
 function assemblePlans() {
   if (!CITY_D.plans) return;
-  const byKind = { a: [], p: [] };
+  const byKind = { a: [], p: [], r: [] };
   for (const p of CITY_D.plans) {
     const rings = p.r.map(r => decodeLine(r, 0));
     let mnx = 1e9, mny = 1e9, mxx = -1e9, mxy = -1e9, area = 0;
@@ -87,8 +87,10 @@ function assemblePlans() {
   };
   markPlanRange('planP', () => { for (const rs of byKind.p) for (const r of rs) buildFlatPoly(PL_ACC, r, 1.6); });
   markPlanRange('planA', () => { for (const rs of byKind.a) for (const r of rs) buildFlatPoly(PL_ACC, r, 1.7); });
+  markPlanRange('planR', () => { for (const rs of byKind.r) for (const r of rs) buildFlatPoly(PL_ACC, r, 1.75); });
   markPlanRange('planPLine', () => { for (const rs of byKind.p) for (const r of rs) buildRibbon(PL_ACC, closeRing(r), 5, 1.8); });
   markPlanRange('planALine', () => { for (const rs of byKind.a) for (const r of rs) buildRibbon(PL_ACC, closeRing(r), 5, 1.9); });
+  markPlanRange('planRLine', () => { for (const rs of byKind.r) for (const r of rs) buildRibbon(PL_ACC, closeRing(r), 5, 1.95); });
 }
 function planAtPoint(x, y) {
   let best = null;

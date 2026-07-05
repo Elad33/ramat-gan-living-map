@@ -45,12 +45,18 @@ const ringArea = pts => {
 
 // ---------- plans ----------
 const feats = [];
-for (const f of ['../plans/plans_0.json', '../plans/plans_1000.json'])
+const planFiles = fs.readdirSync('.').filter(f => /^plans_\d+\.json$/.test(f));
+if (!planFiles.length && fs.existsSync('../plans/plans_0.json')) planFiles.push('../plans/plans_0.json', '../plans/plans_1000.json');
+for (const f of planFiles)
   feats.push(...JSON.parse(fs.readFileSync(f, 'utf8')).features);
+console.log('plan pages:', planFiles.length, 'features:', feats.length);
 
 const ACTIVE = ['קבלת תכנית', 'קיום תנאי סף', 'בתהליך הפקדה', 'פרסום הפקדה', 'רישום התנגדויות', 'החלטה בדיון', 'בתהליך אישור', 'בתהליך פרסום', 'פרסום הכנה', 'פרסום הבקשה', 'תיקון תכנית', 'הועברה לו'];
 const APPROVED = ['פרסום אישור', 'התכנית אושרה', 'סיום טיפול'];
 const CUTOFF = Date.UTC(2019, 0, 1);
+const RENEWAL_CUTOFF = Date.UTC(2014, 0, 1);
+// urban renewal / TAMA-38 instruments, identified by plan name
+const RENEWAL_RE = /תמ.?["']?א.?\s*\/?\s*38|פינוי[\s-]*בינוי|התחדשות עירונית|הריסה ובני|עיבוי/;
 
 const plans = [];
 const seen = new Set();
@@ -62,12 +68,12 @@ for (const f of feats) {
   const isRG = county.includes('רמת גן') || ((county === '' || county === '-') && jur.includes('רמת גן'));
   if (!isRG) { statSkip++; continue; }
   const st = (a.internet_short_status || '').trim();
+  const isRenewal = RENEWAL_RE.test(a.pl_name || '');
+  const dt = a.pl_date_8 || a.last_update_date || 0;
   let kind = null;
-  if (ACTIVE.some(s => st.startsWith(s))) kind = 'a';
-  else if (APPROVED.some(s => st.startsWith(s))) {
-    const dt = a.pl_date_8 || a.last_update_date || 0;
-    if (dt >= CUTOFF) kind = 'p';
-  }
+  if (isRenewal && (ACTIVE.some(s => st.startsWith(s)) || (APPROVED.some(s => st.startsWith(s)) && dt >= RENEWAL_CUTOFF))) kind = 'r';
+  else if (ACTIVE.some(s => st.startsWith(s))) kind = 'a';
+  else if (APPROVED.some(s => st.startsWith(s)) && dt >= CUTOFF) kind = 'p';
   if (!kind) { statSkip++; continue; }
   if ((a.pl_area_dunam || 0) > 2500) { statSkip++; continue; }
   if ((a.entity_subtype_desc || '').includes('כוללנית')) { statSkip++; continue; }
@@ -103,7 +109,8 @@ for (const f of feats) {
   });
   if (kind === 'a') statActive++; else statApproved++;
 }
-console.log('plans kept:', plans.length, '(active:', statActive, 'approved-recent:', statApproved, 'skipped:', statSkip + ')');
+const statRenewal = plans.filter(p => p.k === 'r').length;
+console.log('plans kept:', plans.length, '(active:', statActive, 'approved-recent:', statApproved, 'renewal/tama38:', statRenewal, 'skipped:', statSkip + ')');
 
 // ---------- transit ----------
 const tr = JSON.parse(fs.readFileSync('transit.json', 'utf8'));
@@ -147,10 +154,11 @@ for (const e of tr.elements) {
     } else if (t.highway === 'bus_stop') {
       if (!inCity(x, y)) continue;
       const nm = t['name:he'] || t.name || '';
-      const key = Math.round(x / 300) + ':' + Math.round(y / 300) + ':' + nm;
-      if (seenStop.has(key)) continue; // both directions of same stop pair
+      const code = parseInt(t.ref, 10) || 0;
+      const key = code || (Math.round(x / 300) + ':' + Math.round(y / 300) + ':' + nm);
+      if (seenStop.has(key)) continue;
       seenStop.add(key);
-      busStops.push([nm, x, y]);
+      busStops.push([nm, code, x, y]);
     }
   }
 }

@@ -1,0 +1,393 @@
+<title>מערכת ניהול · המפה החיה של רמת גן</title>
+<style>
+/*__FONTS__*/
+</style>
+<style>
+:root{
+  --bg:#0a0f1d; --panel:#101728; --panel2:#0d1322; --hairline:rgba(227,194,126,.28); --hairline-soft:rgba(227,194,126,.13);
+  --ink:#f2ecdd; --ink-dim:#b9b2a0; --ink-faint:#7d7869; --gold:#e3c27e; --gold-deep:#a8863d;
+  --emerald:#46c08a; --rose:#e86a8a; --sky:#5ba8e8; --amber:#e8a44c; --danger:#e0596a;
+  --r:14px; --shadow:0 14px 40px rgba(0,0,0,.45);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+*::-webkit-scrollbar{width:8px}
+*::-webkit-scrollbar-thumb{background:rgba(227,194,126,.25);border-radius:4px}
+body{background:var(--bg);color:var(--ink);font-family:'Assistant',-apple-system,'Segoe UI',sans-serif;
+  direction:rtl;min-height:100vh;font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
+button{font-family:inherit;color:inherit;background:none;border:none;cursor:pointer;font-size:inherit}
+input,select,textarea{font-family:inherit;font-size:inherit;color:var(--ink)}
+:focus-visible{outline:2px solid var(--gold);outline-offset:2px;border-radius:4px}
+
+header{display:flex;align-items:center;gap:14px;padding:22px 28px;border-bottom:1px solid var(--hairline-soft)}
+header svg{width:38px;height:38px}
+header h1{font-family:'Frank Ruhl Libre',serif;font-weight:800;font-size:22px}
+header .sub{font-size:12.5px;color:var(--ink-faint);margin-top:2px}
+.badge{margin-right:auto;font-size:11px;font-weight:800;letter-spacing:.06em;padding:4px 12px;border-radius:999px;
+  background:linear-gradient(135deg,var(--gold),var(--gold-deep));color:#14100a}
+
+.tabs{display:flex;gap:4px;padding:14px 28px 0;border-bottom:1px solid var(--hairline-soft)}
+.tab{padding:10px 20px;font-weight:700;color:var(--ink-faint);border-radius:10px 10px 0 0;border:1px solid transparent;border-bottom:none}
+.tab.on{color:var(--gold);background:var(--panel);border-color:var(--hairline-soft)}
+main{max-width:860px;margin:0 auto;padding:26px 20px 80px}
+.view{display:none}
+.view.on{display:block}
+
+.card{background:var(--panel);border:1px solid var(--hairline-soft);border-radius:18px;padding:20px 22px;margin-bottom:16px}
+.card h2{font-family:'Frank Ruhl Libre',serif;font-size:19px;font-weight:800;margin-bottom:4px}
+.card .hint{font-size:13px;color:var(--ink-faint);margin-bottom:14px;line-height:1.6}
+.f-row{margin-top:12px}
+.f-row label{display:block;font-size:12px;font-weight:700;letter-spacing:.08em;color:var(--gold);margin-bottom:6px}
+.f-in{width:100%;background:var(--panel2);border:1px solid var(--hairline-soft);border-radius:10px;padding:10px 13px;outline:none;transition:border-color .2s}
+.f-in:focus{border-color:var(--gold)}
+textarea.f-in{resize:vertical;min-height:70px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+@media(max-width:640px){.grid2,.grid3{grid-template-columns:1fr}}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:10px 20px;border-radius:11px;font-weight:700;transition:all .2s}
+.btn-gold{background:linear-gradient(135deg,var(--gold),var(--gold-deep));color:#14100a}
+.btn-gold:hover{filter:brightness(1.08)}
+.btn-ghost{border:1px solid var(--hairline-soft);color:var(--ink-dim)}
+.btn-ghost:hover{border-color:var(--hairline);color:var(--ink)}
+.btn-danger{color:var(--danger);border:1px solid transparent}
+.btn-danger:hover{border-color:var(--danger)}
+.acts{display:flex;gap:10px;margin-top:18px;flex-wrap:wrap}
+
+.item{display:flex;align-items:flex-start;gap:12px;padding:13px 15px;border:1px solid var(--hairline-soft);border-radius:14px;margin-top:10px}
+.item .tx{flex:1;min-width:0}
+.item .t{font-weight:700}
+.item .m{font-size:12.5px;color:var(--ink-faint);margin-top:3px}
+.chip{display:inline-block;font-size:11px;font-weight:700;padding:2px 9px;border-radius:999px;margin-left:6px;
+  background:color-mix(in srgb,var(--c) 16%,transparent);color:var(--c)}
+.loc-ok{color:var(--emerald);font-weight:600;font-size:13px}
+.loc-missing{color:var(--amber);font-size:13px}
+
+#mapModal{position:fixed;inset:0;z-index:50;background:rgba(4,7,14,.7);display:none;align-items:center;justify-content:center;padding:18px}
+#mapModal.on{display:flex}
+#mapModal .box{width:min(1000px,96vw);height:min(700px,88vh);background:var(--panel);border:1px solid var(--hairline);
+  border-radius:18px;overflow:hidden;display:flex;flex-direction:column;box-shadow:var(--shadow)}
+#mapModal .bar{display:flex;align-items:center;justify-content:space-between;padding:12px 18px;border-bottom:1px solid var(--hairline-soft)}
+#mapModal iframe{flex:1;border:none;width:100%}
+#toast{position:fixed;bottom:24px;left:50%;transform:translate(-50%,90px);background:var(--panel);border:1px solid var(--hairline);
+  border-radius:999px;padding:11px 22px;font-weight:600;transition:transform .4s cubic-bezier(.22,1,.3,1);z-index:60;box-shadow:var(--shadow)}
+#toast.show{transform:translate(-50%,0)}
+pre{background:var(--panel2);border:1px solid var(--hairline-soft);border-radius:12px;padding:14px;font-size:12px;
+  direction:ltr;text-align:left;overflow:auto;max-height:300px;margin-top:12px}
+.ok-msg{color:var(--emerald);font-weight:700;margin-top:10px}
+.err-msg{color:var(--danger);font-weight:700;margin-top:10px}
+a{color:var(--gold)}
+</style>
+
+<header>
+  <svg viewBox="0 0 64 64" fill="none"><path d="M14 22 L24 10 H40 L50 22 L32 54 Z" stroke="var(--gold)" stroke-width="2.4" stroke-linejoin="round" fill="rgba(227,194,126,.09)"/><path d="M14 22 H50 M24 10 L28 22 L32 54 M40 10 L36 22 L32 54" stroke="var(--gold)" stroke-width="1.2" opacity=".6"/></svg>
+  <div>
+    <h1>מערכת ניהול — המפה החיה</h1>
+    <div class="sub">עיריית רמת גן · אירועים, הודעות ותוכן על המפה</div>
+  </div>
+  <span class="badge">צוות העירייה</span>
+</header>
+
+<div class="tabs">
+  <button class="tab on" data-v="events">אירועים עירוניים</button>
+  <button class="tab" data-v="notices">מידע לתושב</button>
+  <button class="tab" data-v="publish">פרסום</button>
+</div>
+
+<main>
+  <!-- ================= events ================= -->
+  <section class="view on" id="v-events">
+    <div class="card">
+      <h2 id="evFormTitle">אירוע עירוני חדש</h2>
+      <div class="hint">האירוע יופיע על המפה עם סימון «עירייה», כולל אנימציה חיה כשמתקרבים אליו.</div>
+      <div class="f-row"><label>שם האירוע</label><input class="f-in" id="eTitle" maxlength="70" placeholder="למשל: קיץ בפארק — מופע פתיחה"/></div>
+      <div class="grid2">
+        <div class="f-row"><label>קטגוריה</label>
+          <select class="f-in" id="eCat">
+            <option value="city">אירוע עירוני</option><option value="culture">תרבות ובמה</option>
+            <option value="sport">ספורט ותנועה</option><option value="community">קהילה ומשפחה</option>
+            <option value="poi">נקודת ציון</option>
+          </select></div>
+        <div class="f-row"><label>אנימציה על המפה</label>
+          <select class="f-in" id="eAnim">
+            <option value="">לפי הקטגוריה (מומלץ)</option>
+            <option value="concert">הופעה — זמר וקהל</option>
+            <option value="market">שוק / יריד — דוכנים ודגלים</option>
+            <option value="sport">ספורט — רצים</option>
+            <option value="community">קהילה — אנשים ובלונים</option>
+            <option value="landmark">נקודת ציון — ניצוצות</option>
+            <option value="default">זוהר עדין</option>
+          </select></div>
+      </div>
+      <div class="grid3">
+        <div class="f-row"><label>תאריך</label><input class="f-in" id="eDate" type="date"/></div>
+        <div class="f-row"><label>שעה</label><input class="f-in" id="eTime" type="time"/></div>
+        <div class="f-row"><label>מיקום</label>
+          <button class="btn btn-ghost" id="ePick" style="width:100%">בחירה על המפה 📍</button>
+          <div id="eLoc" class="loc-missing" style="margin-top:6px">טרם נבחר מיקום</div>
+        </div>
+      </div>
+      <div class="f-row"><label>תיאור</label><textarea class="f-in" id="eDesc" maxlength="400" placeholder="פרטי האירוע לתושבים…"></textarea></div>
+      <div class="f-row"><label>קישור לפרטים / הרשמה (לא חובה)</label><input class="f-in" id="eLink" type="url" placeholder="https://…" style="direction:ltr;text-align:left"/></div>
+      <div class="acts">
+        <button class="btn btn-gold" id="eSave">שמירת האירוע</button>
+        <button class="btn btn-ghost" id="eReset" style="display:none">ביטול עריכה</button>
+      </div>
+    </div>
+    <div class="card">
+      <h2>אירועים מפורסמים</h2>
+      <div class="hint">עריכה או הסרה של אירועים קיימים. הסרה נכנסת לתוקף רק אחרי פרסום.</div>
+      <div id="evItems"></div>
+    </div>
+  </section>
+
+  <!-- ================= notices ================= -->
+  <section class="view" id="v-notices">
+    <div class="card">
+      <h2 id="nFormTitle">הודעה חדשה לתושב</h2>
+      <div class="hint">ההודעה תופיע בפעמון «מידע לתושב» שבמפה, בין התאריכים שתבחרו.</div>
+      <div class="f-row"><label>כותרת</label><input class="f-in" id="nTitle" maxlength="80" placeholder="למשל: עבודות לילה ברחוב ז'בוטינסקי"/></div>
+      <div class="f-row"><label>תוכן ההודעה</label><textarea class="f-in" id="nBody" maxlength="500"></textarea></div>
+      <div class="grid3">
+        <div class="f-row"><label>מתאריך</label><input class="f-in" id="nFrom" type="date"/></div>
+        <div class="f-row"><label>עד תאריך</label><input class="f-in" id="nTo" type="date"/></div>
+        <div class="f-row"><label>קישור (לא חובה)</label><input class="f-in" id="nLink" type="url" style="direction:ltr;text-align:left" placeholder="https://…"/></div>
+      </div>
+      <div class="acts">
+        <button class="btn btn-gold" id="nSave">שמירת ההודעה</button>
+        <button class="btn btn-ghost" id="nReset" style="display:none">ביטול עריכה</button>
+      </div>
+    </div>
+    <div class="card">
+      <h2>הודעות מפורסמות</h2>
+      <div id="nItems"></div>
+    </div>
+  </section>
+
+  <!-- ================= publish ================= -->
+  <section class="view" id="v-publish">
+    <div class="card">
+      <h2>פרסום השינויים</h2>
+      <div class="hint">
+        השינויים נשמרים כטיוטה בדפדפן זה. כדי שיופיעו לכל התושבים — פרסמו אותם למאגר התוכן (GitHub).
+        המפה מושכת את הקובץ ישירות, כך שהשינויים יופיעו לתושבים <b>תוך דקות ספורות</b>.
+      </div>
+      <div class="grid2">
+        <div class="f-row"><label>מאגר (owner/repo)</label><input class="f-in" id="gRepo" value="Elad33/ramat-gan-living-map" style="direction:ltr;text-align:left"/></div>
+        <div class="f-row"><label>Branch</label><input class="f-in" id="gBranch" value="main" style="direction:ltr;text-align:left"/></div>
+      </div>
+      <div class="f-row"><label>GitHub Token (עם הרשאת כתיבה למאגר)</label>
+        <input class="f-in" id="gToken" type="password" placeholder="ghp_… / github_pat_…" style="direction:ltr;text-align:left"/>
+        <div class="hint" style="margin:6px 0 0">הטוקן נשמר בדפדפן זה בלבד (sessionStorage) ואינו נשלח לשום מקום מלבד GitHub.</div>
+      </div>
+      <div class="acts">
+        <button class="btn btn-gold" id="gPublish">פרסום לתושבים 🚀</button>
+        <button class="btn btn-ghost" id="gDownload">הורדת הקובץ (גיבוי / העלאה ידנית)</button>
+        <button class="btn btn-danger" id="gReload">משיכת הגרסה המפורסמת (דריסת הטיוטה)</button>
+      </div>
+      <div id="gMsg"></div>
+      <pre id="gPreview"></pre>
+    </div>
+  </section>
+</main>
+
+<div id="mapModal">
+  <div class="box">
+    <div class="bar"><b>לחצו על המפה לבחירת מיקום</b><button class="btn btn-ghost" id="mapClose">סגירה</button></div>
+    <iframe id="mapFrame" title="בחירת מיקום על המפה"></iframe>
+  </div>
+</div>
+<div id="toast"></div>
+
+<script>
+'use strict';
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const CATS = {city:['אירוע עירוני','#e3c27e'],culture:['תרבות ובמה','#e86a8a'],sport:['ספורט ותנועה','#46c08a'],community:['קהילה ומשפחה','#5ba8e8'],poi:['נקודת ציון','#e8a44c']};
+const DRAFT_KEY = 'rg.cms.draft.v1';
+const RAW_URL = () => 'https://raw.githubusercontent.com/' + $('gRepo').value.trim() + '/' + $('gBranch').value.trim() + '/data/city-events.json';
+let doc = { updated: '', keepPast: false, events: [], notices: [] };
+let editingEv = null, editingN = null, pickLoc = null;
+
+let toastT = 0;
+function toast(t){ const el=$('toast'); el.textContent=t; el.classList.add('show'); clearTimeout(toastT); toastT=setTimeout(()=>el.classList.remove('show'),3000); }
+
+// ---------- tabs ----------
+document.querySelectorAll('.tab').forEach(tab => tab.addEventListener('click', () => {
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('on', t === tab));
+  document.querySelectorAll('.view').forEach(v => v.classList.toggle('on', v.id === 'v-' + tab.dataset.v));
+  if (tab.dataset.v === 'publish') $('gPreview').textContent = JSON.stringify(payload(), null, 2);
+}));
+
+// ---------- load ----------
+function saveDraft(){ localStorage.setItem(DRAFT_KEY, JSON.stringify(doc)); }
+async function load() {
+  const draft = localStorage.getItem(DRAFT_KEY);
+  if (draft) {
+    try { doc = JSON.parse(draft); renderAll(); toast('נטענה טיוטה מקומית — פרסמו כדי שתעלה לאוויר'); return; } catch(e){}
+  }
+  await pullPublished(false);
+}
+async function pullPublished(overwrite) {
+  for (const u of [RAW_URL() + '?t=' + Date.now(), 'data/city-events.json']) {
+    try {
+      const r = await fetch(u, { cache: 'no-store' });
+      if (r.ok) {
+        doc = await r.json();
+        doc.events = doc.events || []; doc.notices = doc.notices || [];
+        if (overwrite) { localStorage.removeItem(DRAFT_KEY); toast('נמשכה הגרסה המפורסמת'); }
+        renderAll();
+        return;
+      }
+    } catch (e) {}
+  }
+  renderAll();
+  toast('לא נמצא קובץ מפורסם — מתחילים מרשימה ריקה');
+}
+$('gReload').addEventListener('click', () => { if (confirm('לדרוס את הטיוטה המקומית בגרסה המפורסמת?')) pullPublished(true); });
+
+// ---------- events CRUD ----------
+function renderEvents() {
+  $('evItems').innerHTML = doc.events.length ? doc.events.map((ev, i) => {
+    const c = CATS[ev.cat] || CATS.city;
+    return '<div class="item"><div class="tx"><div class="t">' + esc(ev.title) +
+      '<span class="chip" style="--c:' + c[1] + '">' + c[0] + '</span></div>' +
+      '<div class="m">' + (ev.date || 'ללא תאריך') + (ev.time ? ' · ' + ev.time : '') + ' · ' + esc(ev.addr || '') + '</div></div>' +
+      '<button class="btn btn-ghost" data-edit="' + i + '">עריכה</button>' +
+      '<button class="btn btn-danger" data-del="' + i + '">הסרה</button></div>';
+  }).join('') : '<div class="m" style="color:var(--ink-faint)">אין אירועים מפורסמים.</div>';
+}
+$('evItems').addEventListener('click', e => {
+  const ed = e.target.closest('[data-edit]'), dl = e.target.closest('[data-del]');
+  if (ed) {
+    editingEv = +ed.dataset.edit;
+    const ev = doc.events[editingEv];
+    $('eTitle').value = ev.title || ''; $('eCat').value = CATS[ev.cat] ? ev.cat : 'city';
+    $('eAnim').value = ev.anim || ''; $('eDate').value = ev.date || ''; $('eTime').value = ev.time || '';
+    $('eDesc').value = ev.desc || ''; $('eLink').value = ev.link || '';
+    pickLoc = { x: ev.x, y: ev.y, addr: ev.addr || '' };
+    $('eLoc').className = 'loc-ok'; $('eLoc').textContent = '✓ ' + (ev.addr || 'מיקום נבחר');
+    $('evFormTitle').textContent = 'עריכת אירוע'; $('eReset').style.display = '';
+    scrollTo({ top: 0, behavior: 'smooth' });
+  }
+  if (dl && confirm('להסיר את האירוע «' + doc.events[+dl.dataset.del].title + '»?')) {
+    doc.events.splice(+dl.dataset.del, 1);
+    saveDraft(); renderEvents(); toast('האירוע הוסר מהטיוטה — פרסמו כדי להחיל');
+  }
+});
+function resetEvForm() {
+  editingEv = null; pickLoc = null;
+  ['eTitle','eDate','eTime','eDesc','eLink'].forEach(id => $(id).value = '');
+  $('eCat').value = 'city'; $('eAnim').value = '';
+  $('eLoc').className = 'loc-missing'; $('eLoc').textContent = 'טרם נבחר מיקום';
+  $('evFormTitle').textContent = 'אירוע עירוני חדש'; $('eReset').style.display = 'none';
+}
+$('eReset').addEventListener('click', resetEvForm);
+$('eSave').addEventListener('click', () => {
+  const title = $('eTitle').value.trim();
+  if (!title) { $('eTitle').focus(); return toast('חסר שם אירוע'); }
+  if (!pickLoc) { return toast('בחרו מיקום על המפה'); }
+  const ev = {
+    id: editingEv != null ? doc.events[editingEv].id : 'c' + Date.now().toString(36),
+    title, cat: $('eCat').value, anim: $('eAnim').value,
+    date: $('eDate').value, time: $('eTime').value,
+    desc: $('eDesc').value.trim(), link: $('eLink').value.trim(),
+    x: pickLoc.x, y: pickLoc.y, addr: pickLoc.addr,
+  };
+  if (editingEv != null) doc.events[editingEv] = ev; else doc.events.push(ev);
+  saveDraft(); renderEvents(); resetEvForm();
+  toast('נשמר בטיוטה ✓ — עברו ל«פרסום» כדי להעלות לאוויר');
+});
+
+// ---------- map pick ----------
+$('ePick').addEventListener('click', () => {
+  $('mapFrame').src = 'index.html?pick';
+  $('mapModal').classList.add('on');
+});
+$('mapClose').addEventListener('click', () => { $('mapModal').classList.remove('on'); $('mapFrame').src = ''; });
+window.addEventListener('message', e => {
+  const d = e.data;
+  if (!d || d.type !== 'rg-pick') return;
+  pickLoc = { x: Math.round(d.x * 10) / 10, y: Math.round(d.y * 10) / 10, addr: d.addr || '' };
+  $('eLoc').className = 'loc-ok'; $('eLoc').textContent = '✓ ' + (d.addr || 'מיקום נבחר');
+  setTimeout(() => { $('mapModal').classList.remove('on'); $('mapFrame').src = ''; }, 650);
+});
+
+// ---------- notices CRUD ----------
+function renderNoticesList() {
+  $('nItems').innerHTML = doc.notices.length ? doc.notices.map((n, i) =>
+    '<div class="item"><div class="tx"><div class="t">' + esc(n.title) + '</div>' +
+    '<div class="m">' + (n.from || '—') + ' ← ' + (n.to || '—') + '</div></div>' +
+    '<button class="btn btn-ghost" data-edit="' + i + '">עריכה</button>' +
+    '<button class="btn btn-danger" data-del="' + i + '">הסרה</button></div>').join('')
+    : '<div class="m" style="color:var(--ink-faint)">אין הודעות מפורסמות.</div>';
+}
+$('nItems').addEventListener('click', e => {
+  const ed = e.target.closest('[data-edit]'), dl = e.target.closest('[data-del]');
+  if (ed) {
+    editingN = +ed.dataset.edit;
+    const n = doc.notices[editingN];
+    $('nTitle').value = n.title || ''; $('nBody').value = n.body || '';
+    $('nFrom').value = n.from || ''; $('nTo').value = n.to || ''; $('nLink').value = n.link || '';
+    $('nFormTitle').textContent = 'עריכת הודעה'; $('nReset').style.display = '';
+  }
+  if (dl && confirm('להסיר את ההודעה?')) { doc.notices.splice(+dl.dataset.del, 1); saveDraft(); renderNoticesList(); }
+});
+function resetNForm() {
+  editingN = null;
+  ['nTitle','nBody','nFrom','nTo','nLink'].forEach(id => $(id).value = '');
+  $('nFormTitle').textContent = 'הודעה חדשה לתושב'; $('nReset').style.display = 'none';
+}
+$('nReset').addEventListener('click', resetNForm);
+$('nSave').addEventListener('click', () => {
+  const title = $('nTitle').value.trim();
+  if (!title) { $('nTitle').focus(); return toast('חסרה כותרת'); }
+  const n = {
+    id: editingN != null ? doc.notices[editingN].id : 'n' + Date.now().toString(36),
+    title, body: $('nBody').value.trim(), link: $('nLink').value.trim(),
+    from: $('nFrom').value, to: $('nTo').value,
+  };
+  if (editingN != null) doc.notices[editingN] = n; else doc.notices.push(n);
+  saveDraft(); renderNoticesList(); resetNForm();
+  toast('נשמר בטיוטה ✓');
+});
+
+// ---------- publish ----------
+function payload() {
+  return { updated: new Date().toISOString().slice(0, 10), keepPast: false, events: doc.events, notices: doc.notices };
+}
+$('gDownload').addEventListener('click', () => {
+  const blob = new Blob([JSON.stringify(payload(), null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = 'city-events.json'; a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+});
+$('gToken').value = sessionStorage.getItem('rg.cms.token') || '';
+$('gToken').addEventListener('input', () => sessionStorage.setItem('rg.cms.token', $('gToken').value));
+$('gPublish').addEventListener('click', async () => {
+  const repo = $('gRepo').value.trim(), branch = $('gBranch').value.trim(), token = $('gToken').value.trim();
+  const msg = $('gMsg');
+  if (!token) { msg.innerHTML = '<div class="err-msg">חסר GitHub Token</div>'; return; }
+  msg.innerHTML = '<div class="hint">מפרסם…</div>';
+  try {
+    const api = 'https://api.github.com/repos/' + repo + '/contents/data/city-events.json';
+    const headers = { Authorization: 'Bearer ' + token, Accept: 'application/vnd.github+json' };
+    let sha;
+    const cur = await fetch(api + '?ref=' + branch, { headers });
+    if (cur.ok) sha = (await cur.json()).sha;
+    const content = btoa(unescape(encodeURIComponent(JSON.stringify(payload(), null, 2))));
+    const put = await fetch(api, {
+      method: 'PUT', headers,
+      body: JSON.stringify({ message: '📣 עדכון תוכן עירוני (CMS)', content, branch, sha }),
+    });
+    if (!put.ok) throw new Error('GitHub: ' + put.status + ' ' + (await put.text()).slice(0, 140));
+    localStorage.removeItem(DRAFT_KEY);
+    msg.innerHTML = '<div class="ok-msg">✓ פורסם בהצלחה! התוכן יופיע לתושבים תוך דקות ספורות.</div>';
+    toast('פורסם לתושבים 🎉');
+  } catch (e) {
+    msg.innerHTML = '<div class="err-msg">הפרסום נכשל: ' + esc(e.message) + '</div>';
+  }
+});
+
+// ---------- render all ----------
+function renderAll() { renderEvents(); renderNoticesList(); }
+load();
+</script>

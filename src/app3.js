@@ -21,6 +21,7 @@ const THEMES = {
       road6: [0.135, 0.165, 0.235, 0.55], road7: [0.15, 0.18, 0.25, 0.6],
       planA: [0.66, 0.50, 0.92, 0.16], planALine: [0.76, 0.62, 0.98, 0.75],
       planP: [0.22, 0.72, 0.66, 0.14], planPLine: [0.30, 0.82, 0.75, 0.7],
+      planR: [0.93, 0.52, 0.34, 0.18], planRLine: [0.97, 0.60, 0.42, 0.8],
       rail: [0.88, 0.34, 0.30, 0.95], railTunnel: [0.88, 0.34, 0.30, 0.34],
     },
     dust: [0.8, 0.62, 0.30], dustAmt: 0.55,
@@ -43,6 +44,7 @@ const THEMES = {
       road6: [0.875, 0.875, 0.862, 0.8], road7: [0.885, 0.882, 0.868, 0.85],
       planA: [0.48, 0.34, 0.78, 0.15], planALine: [0.44, 0.30, 0.74, 0.8],
       planP: [0.10, 0.52, 0.47, 0.13], planPLine: [0.08, 0.55, 0.49, 0.75],
+      planR: [0.80, 0.35, 0.18, 0.16], planRLine: [0.74, 0.30, 0.14, 0.85],
       rail: [0.78, 0.22, 0.19, 0.95], railTunnel: [0.78, 0.22, 0.19, 0.3],
     },
     dust: [1, 1, 1], dustAmt: 0,
@@ -145,16 +147,27 @@ const railStopEls = (CITY_D.railStops || []).map(s => {
   labelsRoot.appendChild(el);
   return { el, name: s[0], x: M2(s[1]), y: M2(s[2]) };
 });
+const BUS_SIGN_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true">' +
+  '<rect x="1" y="1" width="22" height="22" rx="6.5" fill="#2b8fd6" stroke="rgba(255,255,255,.85)" stroke-width="1.6"/>' +
+  '<path d="M7 6.2h10c.9 0 1.5.6 1.5 1.5v7.1c0 .7-.4 1.2-1 1.4v1.3a.9.9 0 0 1-1.8 0v-1.1H8.3v1.1a.9.9 0 0 1-1.8 0v-1.3c-.6-.2-1-.7-1-1.4V7.7c0-.9.6-1.5 1.5-1.5Z" fill="#fff"/>' +
+  '<rect x="6.6" y="8" width="10.8" height="4" rx=".8" fill="#2b8fd6"/>' +
+  '<circle cx="8.6" cy="14.4" r="1.05" fill="#2b8fd6"/><circle cx="15.4" cy="14.4" r="1.05" fill="#2b8fd6"/></svg>';
 const BUS_POOL = 90;
 const busPool = [];
 for (let i = 0; i < BUS_POOL; i++) {
   const el = document.createElement('div');
   el.className = 'lbl lbl-bus';
+  el.innerHTML = BUS_SIGN_SVG;
   el.style.display = 'none';
+  el.addEventListener('click', e => {
+    e.stopPropagation();
+    const s = busPool[i].__stop;
+    if (s) showBusPop(s);
+  });
   labelsRoot.appendChild(el);
   busPool.push(el);
 }
-const busStops = (CITY_D.busStops || []).map(s => ({ name: s[0], x: M2(s[1]), y: M2(s[2]) }));
+const busStops = (CITY_D.busStops || []).map(s => ({ name: s[0], code: s[1], x: M2(s[2]), y: M2(s[3]) }));
 function positionTransit() {
   const on = MAP.LAYERS.transit;
   const d = MAP.cam.dist;
@@ -166,18 +179,88 @@ function positionTransit() {
     s.el.style.transform = 'translate3d(' + sx + 'px,' + sy + 'px,0) translate(-50%,-50%)';
   }
   let used = 0;
-  if (on && d < 1000) {
+  if (on && d < 1500) {
+    const sc = d < 500 ? 1 : d < 900 ? 0.85 : 0.7;
     for (const s of busStops) {
       if (used >= BUS_POOL) break;
       const [sx, sy, vis] = MAP.project(s.x, s.y, 0);
-      if (!vis || sx < -10 || sx > innerWidth + 10 || sy < -10 || sy > innerHeight + 10) continue;
+      if (!vis || sx < -14 || sx > innerWidth + 14 || sy < 96 || sy > innerHeight + 14) continue;
       const el = busPool[used++];
+      el.__stop = s;
       el.style.display = '';
-      el.title = s.name ? 'תחנת אוטובוס · ' + s.name : 'תחנת אוטובוס';
-      el.style.transform = 'translate3d(' + sx + 'px,' + sy + 'px,0) translate(-50%,-50%)';
+      el.title = 'תחנת אוטובוס' + (s.name ? ' · ' + s.name : '') + (s.code ? ' (' + s.code + ')' : '') + ' — לחצו לזמני הגעה';
+      el.style.transform = 'translate3d(' + sx + 'px,' + sy + 'px,0) translate(-50%,-50%) scale(' + sc + ')';
     }
   }
-  for (let i = used; i < BUS_POOL; i++) busPool[i].style.display = 'none';
+  for (let i = used; i < BUS_POOL; i++) { busPool[i].style.display = 'none'; busPool[i].__stop = null; }
+}
+
+// ---------- real-time bus arrivals ----------
+const BUS_API_LOCAL = '/api/bus?stop=';
+const BUS_API_REMOTE = 'https://ramat-gan-living-map.vercel.app/api/bus?stop=';
+const OPERATORS = { 2: 'רכבת ישראל', 3: 'אגד', 5: 'דן', 6: 'דן בדרום', 7: 'דן באר שבע', 15: 'מטרופולין', 16: 'סופרבוס', 18: 'קווים', 25: 'אלקטרה אפיקים', 34: 'תנופה' };
+let busTimer = 0, busPopStop = null;
+async function fetchArrivals(code) {
+  const urls = location.protocol === 'https:' && !location.hostname.includes('claude')
+    ? [BUS_API_LOCAL + code, BUS_API_REMOTE + code] : [BUS_API_REMOTE + code];
+  for (const u of urls) {
+    try {
+      const r = await fetch(u, { cache: 'no-store' });
+      if (!r.ok) continue;
+      const data = await r.json();
+      if (data && data.ok) return data;
+    } catch (e) {}
+  }
+  return null;
+}
+function busRowsHtml(data) {
+  const now = Date.now();
+  const rows = (data.arrivals || [])
+    .map(a => ({ ...a, t: new Date(a.eta.replace(' ', 'T')).getTime() }))
+    .filter(a => isFinite(a.t) && a.t > now - 60000)
+    .sort((a, b) => a.t - b.t)
+    .slice(0, 9);
+  if (!rows.length) return '<div class="bus-wait">אין הגעות צפויות כרגע בתחנה זו.</div>';
+  return '<div class="bus-list">' + rows.map(a => {
+    const mins = Math.max(0, Math.round((a.t - now) / 60000));
+    const clock = new Date(a.t).toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' });
+    return '<div class="bus-row"><span class="bus-line">' + escapeHtml(a.line || '?') + '</span>' +
+      '<span class="bus-op">' + (OPERATORS[a.operator] || '') + '</span>' +
+      '<span class="bus-eta">' + (mins <= 0 ? 'עכשיו' : mins + ' דק׳') + '<small>' + clock + '</small></span></div>';
+  }).join('') + '</div>';
+}
+async function refreshBusPop() {
+  if (!busPopStop) return;
+  const body = $('busBody');
+  if (!body) return;
+  const data = await fetchArrivals(busPopStop.code);
+  if (!busPopStop || !$('busBody')) return; // closed meanwhile
+  if (!data) {
+    $('busBody').innerHTML = '<div class="bus-wait">נתוני הזמן האמת אינם זמינים כרגע.<br/>נסו שוב בעוד רגע, או בקרו באתר החי של המפה.</div>';
+    return;
+  }
+  const day = new Date().getDay(); // 5=שישי 6=שבת
+  const wk = (day === 5 || day === 6) ? '<span class="wk-chip">סופ״ש — כולל את קווי הסבבוס ורשת «נעים בסופ״ש»</span>' : '';
+  $('busBody').innerHTML = busRowsHtml(data) + wk +
+    '<div class="bus-note">מתעדכן כל 30 שניות · זמן אמת (SIRI) · משרד התחבורה</div>';
+}
+function showBusPop(stop) {
+  closePop();
+  busPopStop = stop;
+  popFor = null;
+  popAnchor = { x: stop.x, y: stop.y, lift: 20 };
+  const pop = $('pop');
+  pop.innerHTML =
+    '<div class="bus-head"><span class="bus-sign">' + BUS_SIGN_SVG + '</span>' +
+    '<div><div class="nm">' + escapeHtml(stop.name || 'תחנת אוטובוס') + '</div>' +
+    '<div class="cd">תחנה ' + (stop.code || '—') + '</div></div></div>' +
+    '<div id="busBody"><div class="bus-wait"><span class="spin"></span>טוען זמני הגעה…</div></div>' +
+    '<div class="acts"><button class="pop-act" data-act="close">סגירה</button></div>';
+  pop.classList.add('open');
+  placePop();
+  refreshBusPop();
+  clearInterval(busTimer);
+  busTimer = setInterval(refreshBusPop, 30000);
 }
 
 // collision grid for label layout
@@ -521,8 +604,16 @@ function seedEvents() {
   ];
 }
 const hiddenCats = new Set();
+let cityEvents = [];   // official content from the CMS file
+let cityNotices = [];
+const allEvents = () => cityEvents.concat(events);
 const evMarkers = new Map(); // id -> el
-function pinSVG(color) {
+function pinSVG(color, official) {
+  if (official) {
+    return '<svg viewBox="0 0 38 48" width="38" height="48" fill="none">' +
+      '<path d="M19 2C10.9 2 4.5 8.4 4.5 16.3 4.5 27 19 45 19 45S33.5 27 33.5 16.3C33.5 8.4 27.1 2 19 2Z" fill="' + color + '" stroke="rgba(255,255,255,.75)" stroke-width="1.6"/>' +
+      '<path d="M19 8.5l2.2 4.5 5 .7-3.6 3.5.9 5-4.5-2.4-4.5 2.4.9-5-3.6-3.5 5-.7Z" fill="rgba(255,255,255,.95)"/></svg>';
+  }
   return '<svg viewBox="0 0 34 44" width="34" height="44" fill="none">' +
     '<path d="M17 2C9.8 2 4 7.7 4 14.8 4 24.5 17 41 17 41S30 24.5 30 14.8C30 7.7 24.2 2 17 2Z" fill="' + color + '" stroke="rgba(0,0,0,.28)" stroke-width="1.2"/>' +
     '<circle cx="17" cy="14.5" r="5" fill="rgba(255,255,255,.92)"/>' +
@@ -534,23 +625,115 @@ function ensureMarker(ev) {
   const el = document.createElement('div');
   el.className = 'mk';
   el.style.setProperty('--c', c);
-  el.innerHTML = '<div class="pulse"></div><div class="pin">' + pinSVG(c) + '</div>';
+  el.innerHTML = '<div class="pulse"></div><div class="pin">' + pinSVG(c, ev.official) + '</div>';
   el.addEventListener('click', e => { e.stopPropagation(); showPop(ev.id); });
   markersRoot.appendChild(el);
   evMarkers.set(ev.id, el);
   return el;
 }
+
+// ---------- ambient event scenes ----------
+const CAT_ANIM = { culture: 'concert', city: 'market', sport: 'sport', community: 'community', poi: 'landmark' };
+const SC_INK = 'style="fill:var(--ink)"', SC_GOLD = 'style="fill:var(--gold)"';
+function sceneSVG(type, color) {
+  const C = color || '#e3c27e';
+  if (type === 'concert') return '<svg viewBox="0 0 132 88">' +
+    '<polygon points="46,10 66,80 26,80" style="fill:' + C + ';opacity:.08"/>' +
+    '<polygon points="86,10 106,80 66,80" style="fill:' + C + ';opacity:.08"/>' +
+    '<ellipse cx="66" cy="82" rx="42" ry="5.5" style="fill:' + C + ';opacity:.22"/>' +
+    '<g class="sc-bob"><circle cx="66" cy="52" r="4.6" ' + SC_INK + '/><path d="M66 57c-4 0-6 5-6 12h12c0-7-2-12-6-12Z" ' + SC_INK + '/><rect x="71" y="56" width="1.6" height="13" rx=".8" ' + SC_GOLD + '/><circle cx="71.8" cy="55" r="1.7" ' + SC_GOLD + '/></g>' +
+    '<g class="sc-note"><path d="M56 50v-8l5-1.4V48a2.6 2.6 0 1 1-1.6-2.4" style="fill:none;stroke:' + C + ';stroke-width:1.6"/></g>' +
+    '<g class="sc-note n2"><circle cx="79" cy="44" r="2.2" style="fill:' + C + '"/><rect x="80.7" y="32" width="1.5" height="12" style="fill:' + C + '"/></g>' +
+    '<g class="sc-note n3"><circle cx="70" cy="38" r="1.9" style="fill:' + C + ';opacity:.8"/><rect x="71.4" y="28" width="1.3" height="10" style="fill:' + C + ';opacity:.8"/></g>' +
+    ['40,78', '52,80', '66,81', '80,80', '92,78'].map((p, i) =>
+      '<circle cx="' + p.split(',')[0] + '" cy="' + p.split(',')[1] + '" r="2.6" class="sc-bob' + (i % 3 ? i % 3 + 1 : '') + '" style="fill:var(--ink);opacity:.55"/>').join('') +
+    '</svg>';
+  if (type === 'market') return '<svg viewBox="0 0 132 88">' +
+    '<path class="sc-wave" d="M14 34 Q66 48 118 34" style="fill:none;stroke:' + C + ';stroke-width:1.2;opacity:.7"/>' +
+    [20, 36, 52, 68, 84, 100].map((x, i) =>
+      '<polygon class="sc-wave" style="animation-delay:' + (i * .3) + 's" points="' + x + ',' + (36 + Math.sin(i) * 3) + ' ' + (x + 8) + ',' + (36 + Math.sin(i) * 3) + ' ' + (x + 4) + ',' + (44 + Math.sin(i) * 3) + '" fill="' + (i % 2 ? C : 'var(--rose)') + '" opacity=".85"/>').join('') +
+    '<g><rect x="24" y="58" width="3" height="24" ' + SC_INK + ' opacity=".6"/><rect x="55" y="58" width="3" height="24" ' + SC_INK + ' opacity=".6"/>' +
+    [0, 1, 2, 3].map(i => '<rect x="' + (20 + i * 11) + '" y="52" width="11" height="8" rx="1.5" style="fill:' + (i % 2 ? C : '#fff') + ';opacity:.9"/>').join('') + '</g>' +
+    '<g><rect x="78" y="60" width="3" height="22" ' + SC_INK + ' opacity=".6"/><rect x="106" y="60" width="3" height="22" ' + SC_INK + ' opacity=".6"/>' +
+    [0, 1, 2].map(i => '<rect x="' + (76 + i * 12) + '" y="54" width="12" height="8" rx="1.5" style="fill:' + (i % 2 ? '#fff' : C) + ';opacity:.9"/>').join('') + '</g>' +
+    '<circle class="sc-glow" cx="66" cy="28" r="3.2" style="fill:' + C + '"/>' +
+    '</svg>';
+  if (type === 'sport') return '<svg viewBox="0 0 132 88">' +
+    '<ellipse cx="66" cy="82" rx="46" ry="5" style="fill:none;stroke:' + C + ';stroke-width:1.2;stroke-dasharray:6 5;opacity:.55"/>' +
+    [0, 1, 2].map(i => '<g class="sc-run' + (i ? ' r' + (i + 1) : '') + '"><g transform="translate(60,58)">' +
+      '<circle cx="0" cy="0" r="3.4" ' + SC_INK + '/>' +
+      '<path d="M0 3 L-1 12" style="stroke:var(--ink);stroke-width:2.4;stroke-linecap:round"/>' +
+      '<path class="sc-leg" d="M-1 12 L-5 21" style="stroke:var(--ink);stroke-width:2.2;stroke-linecap:round"/>' +
+      '<path class="sc-leg l2" d="M-1 12 L4 20" style="stroke:var(--ink);stroke-width:2.2;stroke-linecap:round"/>' +
+      '<path d="M-8 16 h-9" style="stroke:' + C + ';stroke-width:1.4;opacity:.6"/><path d="M-8 9 h-6" style="stroke:' + C + ';stroke-width:1.2;opacity:.4"/>' +
+      '</g></g>').join('') +
+    '</svg>';
+  if (type === 'community') return '<svg viewBox="0 0 132 88">' +
+    '<g class="sc-bln"><circle cx="46" cy="30" r="5.5" style="fill:var(--rose);opacity:.9"/><path d="M46 35.5 q2 8 0 14" style="fill:none;stroke:var(--ink);stroke-width:.9;opacity:.5"/></g>' +
+    '<g class="sc-bln b2"><circle cx="88" cy="26" r="5" style="fill:var(--sky);opacity:.9"/><path d="M88 31 q-2 8 0 14" style="fill:none;stroke:var(--ink);stroke-width:.9;opacity:.5"/></g>' +
+    [[52, 'sc-bob'], [66, 'sc-bob2'], [80, 'sc-bob3']].map(([x, cl], i) =>
+      '<g class="' + cl + '"><circle cx="' + x + '" cy="' + (60 - (i === 1 ? 4 : 0)) + '" r="4" ' + SC_INK + '/>' +
+      '<path d="M' + x + ' ' + (64 - (i === 1 ? 4 : 0)) + ' c-4.5 0-6.5 6-6.5 18h13c0-12-2-18-6.5-18Z" style="fill:' + (i === 1 ? C : 'var(--ink)') + ';opacity:.85"/></g>').join('') +
+    '<path d="M58 72 h16 M72 72 h14" style="stroke:var(--ink);stroke-width:1.6;opacity:.4"/>' +
+    '</svg>';
+  if (type === 'landmark') return '<svg viewBox="0 0 132 88">' +
+    '<circle cx="66" cy="60" r="17" style="fill:none;stroke:' + C + ';stroke-width:1;opacity:.4"/>' +
+    '<path class="sc-spark" d="M66 44l3.2 12.2L82 60l-12.8 3.8L66 76l-3.2-12.2L50 60l12.8-3.8Z" style="fill:' + C + '"/>' +
+    '<path class="sc-spark s2" d="M46 40l1.6 5 5 1.6-5 1.6-1.6 5-1.6-5-5-1.6 5-1.6Z" style="fill:' + C + ';opacity:.8"/>' +
+    '<path class="sc-spark s3" d="M88 34l1.4 4.2 4.2 1.4-4.2 1.4-1.4 4.2-1.4-4.2-4.2-1.4 4.2-1.4Z" style="fill:' + C + ';opacity:.8"/>' +
+    '</svg>';
+  return '<svg viewBox="0 0 132 88">' + // default: golden ripples
+    ['', 'p2', 'p3'].map(cl => '<circle class="sc-rip ' + cl + '" cx="66" cy="74" r="26" style="fill:none;stroke:' + C + ';stroke-width:1.6"/>').join('') +
+    [[44, 58], [88, 54], [60, 42], [78, 66]].map(([x, y], i) =>
+      '<circle class="sc-spark' + (i % 3 ? ' s' + (i % 3 + 1) : '') + '" cx="' + x + '" cy="' + y + '" r="1.8" style="fill:' + C + '"/>').join('') +
+    '</svg>';
+}
+const sceneEls = new Map(); // ev.id -> el
+function ensureScene(ev) {
+  if (sceneEls.has(ev.id)) return sceneEls.get(ev.id);
+  const el = document.createElement('div');
+  el.className = 'scene';
+  const type = ev.anim || CAT_ANIM[ev.cat] || 'default';
+  el.innerHTML = sceneSVG(type, (catById[ev.cat] || CATS[0]).color);
+  markersRoot.appendChild(el);
+  sceneEls.set(ev.id, el);
+  return el;
+}
+
 function positionMarkers() {
-  for (const ev of events) {
+  const d = MAP.cam.dist;
+  // meters-per-pixel at screen centre, for scene scaling
+  let ppm = 0;
+  if (d < 900) {
+    const [ax, ay] = MAP.project(MAP.cam.cx, MAP.cam.cy, 0);
+    const [bx, by] = MAP.project(MAP.cam.cx + 10, MAP.cam.cy, 0);
+    ppm = Math.hypot(bx - ax, by - ay) / 10;
+  }
+  const list = allEvents();
+  for (const ev of list) {
     const el = ensureMarker(ev);
-    if (hiddenCats.has(ev.cat)) { el.style.display = 'none'; continue; }
+    if (hiddenCats.has(ev.cat)) { el.style.display = 'none'; hideScene(ev.id); continue; }
     const [sx, sy, vis] = MAP.project(ev.x, ev.y, 0);
     el.style.display = vis ? '' : 'none';
     el.style.transform = 'translate3d(' + sx + 'px,' + sy + 'px,0)';
+    // ambient scene when close
+    const s = ppm ? clamp(46 * ppm / 132, 0.3, 2.4) : 0;
+    if (vis && s >= 0.42) {
+      const sc = ensureScene(ev);
+      sc.style.display = '';
+      sc.style.transform = 'translate3d(' + sx + 'px,' + (sy + 2) + 'px,0) translate(-50%,-100%) scale(' + s.toFixed(3) + ')';
+    } else hideScene(ev.id);
   }
-  // popup follows its anchor (event or plan)
+  // drop markers for deleted events
+  for (const [id, el] of evMarkers) if (!list.some(e => e.id === id)) { el.remove(); evMarkers.delete(id); hideScene(id, true); }
   if (popAnchor) placePop();
   positionTransit();
+}
+function hideScene(id, remove) {
+  const el = sceneEls.get(id);
+  if (!el) return;
+  if (remove) { el.remove(); sceneEls.delete(id); }
+  else el.style.display = 'none';
 }
 function fmtWhen(ev) {
   if (!ev.date) return 'בקרוב';
@@ -566,16 +749,17 @@ function chipHtml(cat) {
 }
 function renderEvList() {
   const list = $('evList');
-  const vis = events.filter(e => !hiddenCats.has(e.cat))
-    .sort((a, b) => (a.date || '9999') < (b.date || '9999') ? -1 : 1);
-  $('evCount').textContent = events.length || '';
+  const vis = allEvents().filter(e => !hiddenCats.has(e.cat))
+    .sort((a, b) => (b.official ? 1 : 0) - (a.official ? 1 : 0) || ((a.date || '9999') < (b.date || '9999') ? -1 : 1));
+  $('evCount').textContent = allEvents().length || '';
   if (!vis.length) {
     list.innerHTML = '<div class="ev-none">אין עדיין אירועים על המפה.<br/>לחצו על «הוספת אירוע» וסמנו נקודה בעיר.</div>';
     return;
   }
   list.innerHTML = vis.map(ev =>
     '<div class="ev-card" data-id="' + ev.id + '">' +
-    '<div class="row1">' + chipHtml(ev.cat) + '<span class="when">' + fmtWhen(ev) + '</span></div>' +
+    '<div class="row1">' + chipHtml(ev.cat) + (ev.official ? '<span class="official-chip">עירייה</span>' : '') +
+    '<span class="when">' + fmtWhen(ev) + '</span></div>' +
     '<h3>' + escapeHtml(ev.title) + '</h3>' +
     '<div class="where"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex:none"><path d="M12 21s-7-5.8-7-11a7 7 0 0 1 14 0c0 5.2-7 11-7 11Z"/></svg>' + escapeHtml(ev.addr || 'רמת גן') + '</div>' +
     (ev.desc ? '<div class="desc">' + escapeHtml(ev.desc) + '</div>' : '') +
@@ -584,7 +768,7 @@ function renderEvList() {
 $('evList').addEventListener('click', e => {
   const card = e.target.closest('.ev-card');
   if (!card) return;
-  const ev = events.find(x => x.id === card.dataset.id);
+  const ev = allEvents().find(x => x.id === card.dataset.id);
   if (!ev) return;
   closePanel();
   MAP.flyTo({ cx: ev.x, cy: ev.y, dist: 620, done: () => showPop(ev.id) });
@@ -593,19 +777,22 @@ $('evList').addEventListener('click', e => {
 // popup (shared between events and plans)
 let popFor = null, popAnchor = null;
 function showPop(id) {
-  const ev = events.find(e => e.id === id);
+  const ev = allEvents().find(e => e.id === id);
   if (!ev) return;
+  busPopStop = null; clearInterval(busTimer);
   popFor = id;
   popAnchor = { x: ev.x, y: ev.y, lift: 62 };
   const pop = $('pop');
   pop.innerHTML =
-    '<div class="row1">' + chipHtml(ev.cat) + '<span class="when">' + fmtWhen(ev) + '</span></div>' +
+    '<div class="row1">' + chipHtml(ev.cat) + (ev.official ? '<span class="official-chip">עירייה</span>' : '') +
+    '<span class="when">' + fmtWhen(ev) + '</span></div>' +
     '<h3>' + escapeHtml(ev.title) + '</h3>' +
     '<div class="where"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="2" style="flex:none"><path d="M12 21s-7-5.8-7-11a7 7 0 0 1 14 0c0 5.2-7 11-7 11Z"/><circle cx="12" cy="10" r="2.6"/></svg>' + escapeHtml(ev.addr || 'רמת גן') + '</div>' +
     (ev.desc ? '<div class="desc">' + escapeHtml(ev.desc) + '</div>' : '') +
+    (ev.link ? '<a class="pop-link" href="' + escapeHtml(ev.link) + '" target="_blank" rel="noopener">לפרטים והרשמה<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M7 17 17 7M8 7h9v9"/></svg></a>' : '') +
     '<div class="acts">' +
     '<button class="pop-act" data-act="fly"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>התקרבות</button>' +
-    '<button class="pop-act del" data-act="del"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2m-8 0 1 13h8l1-13"/></svg>הסרה</button>' +
+    (ev.official ? '' : '<button class="pop-act del" data-act="del"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2m-8 0 1 13h8l1-13"/></svg>הסרה</button>') +
     '<button class="pop-act" data-act="close">סגירה</button></div>';
   pop.classList.add('open');
   placePop();
@@ -623,6 +810,7 @@ function placePop() {
 const PLAN_KIND = {
   a: { label: 'בהליך תכנון', color: '#a186e0' },
   p: { label: 'אושרה לאחרונה', color: '#2fb3a8' },
+  r: { label: 'תמ״א 38 / התחדשות עירונית', color: '#e8845a' },
 };
 function showPlanPop(plan, x, y) {
   popFor = null;
@@ -648,10 +836,10 @@ function showPlanPop(plan, x, y) {
 $('pop').addEventListener('click', e => {
   const btn = e.target.closest('.pop-act');
   if (!btn) return;
-  const ev = events.find(x => x.id === popFor);
+  const ev = allEvents().find(x => x.id === popFor);
   if (btn.dataset.act === 'close') { closePop(); }
   else if (btn.dataset.act === 'fly' && ev) MAP.flyTo({ cx: ev.x, cy: ev.y, dist: 320 });
-  else if (btn.dataset.act === 'del' && ev) {
+  else if (btn.dataset.act === 'del' && ev && !ev.official) {
     events = events.filter(x => x.id !== ev.id);
     const el = evMarkers.get(ev.id);
     if (el) { el.remove(); evMarkers.delete(ev.id); }
@@ -659,7 +847,12 @@ $('pop').addEventListener('click', e => {
     showToast('האירוע הוסר מהמפה');
   }
 });
-function closePop() { $('pop').classList.remove('open'); popFor = null; popAnchor = null; }
+function closePop() {
+  $('pop').classList.remove('open');
+  popFor = null; popAnchor = null;
+  busPopStop = null;
+  clearInterval(busTimer);
+}
 window.addEventListener('mapclick', e => {
   if (placing) return;
   closePop();
@@ -720,7 +913,7 @@ $('fCats').addEventListener('click', e => {
 function openEvModal() {
   selCat = 'city';
   buildCatGrid();
-  $('fTitle').value = ''; $('fDesc').value = ''; $('fTime').value = '';
+  $('fTitle').value = ''; $('fDesc').value = ''; $('fTime').value = ''; $('fAnim').value = '';
   const today = new Date().toISOString().slice(0, 10);
   $('fDate').value = ''; $('fDate').min = today;
   $('fLoc').innerHTML = '<b>' + escapeHtml(reverseGeocode(pendingLoc.x, pendingLoc.y)) + '</b>';
@@ -736,6 +929,7 @@ $('fSave').addEventListener('click', () => {
   const ev = {
     id: 'ev-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
     title, cat: selCat,
+    anim: $('fAnim').value || '',
     date: $('fDate').value || '', time: $('fTime').value || '',
     desc: $('fDesc').value.trim(),
     x: pendingLoc.x, y: pendingLoc.y,
@@ -800,6 +994,7 @@ $('evImportFile').addEventListener('change', async e => {
       events.push({
         id: String(ev.id || 'im-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6)),
         title: ev.title.slice(0, 60), cat: catById[ev.cat] ? ev.cat : 'city',
+        anim: typeof ev.anim === 'string' ? ev.anim : '',
         date: typeof ev.date === 'string' ? ev.date.slice(0, 10) : '',
         time: typeof ev.time === 'string' ? ev.time.slice(0, 5) : '',
         desc: typeof ev.desc === 'string' ? ev.desc.slice(0, 300) : '',
@@ -838,6 +1033,73 @@ window.addEventListener('keydown', e => {
     else closeResults();
   }
 });
+
+// ---------- official city content (published from the CMS) ----------
+const CITY_CONTENT_URLS = [
+  'https://raw.githubusercontent.com/Elad33/ramat-gan-living-map/main/data/city-events.json',
+  'data/city-events.json',
+];
+function normalizeCityEvent(ev, i) {
+  if (!ev || typeof ev.title !== 'string' || typeof ev.x !== 'number' || typeof ev.y !== 'number') return null;
+  return {
+    id: 'city-' + String(ev.id || i),
+    title: ev.title.slice(0, 70), cat: catById[ev.cat] ? ev.cat : 'city',
+    anim: typeof ev.anim === 'string' ? ev.anim : '',
+    date: typeof ev.date === 'string' ? ev.date.slice(0, 10) : '',
+    time: typeof ev.time === 'string' ? ev.time.slice(0, 5) : '',
+    desc: typeof ev.desc === 'string' ? ev.desc.slice(0, 400) : '',
+    link: typeof ev.link === 'string' && /^https?:/.test(ev.link) ? ev.link : '',
+    x: ev.x, y: ev.y,
+    addr: typeof ev.addr === 'string' ? ev.addr.slice(0, 80) : reverseGeocode(ev.x, ev.y),
+    official: true,
+  };
+}
+async function loadCityContent() {
+  let data = null;
+  for (const u of CITY_CONTENT_URLS) {
+    try {
+      const r = await fetch(u, { cache: 'no-store', signal: AbortSignal.timeout(8000) });
+      if (r.ok) { data = await r.json(); break; }
+    } catch (e) {}
+  }
+  if (!data) return;
+  const today = new Date().toISOString().slice(0, 10);
+  cityEvents = (data.events || []).map(normalizeCityEvent).filter(Boolean)
+    .filter(ev => !ev.endDate || ev.endDate >= today)
+    .filter(ev => !(ev.date && !data.keepPast && ev.date < today));
+  cityNotices = (data.notices || []).filter(n => n && typeof n.title === 'string')
+    .filter(n => (!n.from || n.from <= today) && (!n.to || n.to >= today));
+  renderNotices();
+  renderEvList();
+  positionMarkers();
+  MAP.requestRender();
+}
+function renderNotices() {
+  const badge = $('bellBadge');
+  badge.textContent = cityNotices.length;
+  badge.classList.toggle('on', cityNotices.length > 0);
+  $('noticesList').innerHTML = cityNotices.length
+    ? cityNotices.map(n =>
+      '<div class="notice"><h4>' + escapeHtml(n.title) + '</h4>' +
+      (n.body ? '<div class="nb">' + escapeHtml(n.body) + '</div>' : '') +
+      (n.link && /^https?:/.test(n.link) ? '<div class="nd"><a href="' + escapeHtml(n.link) + '" target="_blank" rel="noopener">לפרטים נוספים ←</a></div>' : '') +
+      (n.to ? '<div class="nd">בתוקף עד ' + escapeHtml(n.to) + '</div>' : '') +
+      '</div>').join('')
+    : '<div class="ev-none">אין הודעות חדשות מהעירייה.</div>';
+}
+$('bellBtn').addEventListener('click', () => $('noticesBg').classList.add('open'));
+$('noticesClose').addEventListener('click', () => $('noticesBg').classList.remove('open'));
+$('noticesBg').addEventListener('pointerdown', e => { if (e.target === e.currentTarget) e.currentTarget.classList.remove('open'); });
+
+// ---------- CMS pick mode (map embedded in admin as an iframe) ----------
+const PICK_MODE = /[?&#]pick\b/.test(location.search + location.hash);
+if (PICK_MODE) {
+  window.addEventListener('mapclick', e => {
+    const addr = reverseGeocode(e.detail.x, e.detail.y);
+    try { parent.postMessage({ type: 'rg-pick', x: e.detail.x, y: e.detail.y, addr }, '*'); } catch (err) {}
+    showToast('<b>' + escapeHtml(addr) + '</b> נבחר ✓');
+  });
+}
 
 // ---------- boot ----------
 const raf = () => new Promise(r => {
@@ -885,6 +1147,15 @@ async function boot() {
       if (saved) { MAP.LAYERS.plans = !!saved.plans; MAP.LAYERS.transit = !!saved.transit; layerToastShown = { plans: true, transit: true }; }
     } catch (e) {}
     syncLayerButtons();
+    loadCityContent(); // async; merges official events when it lands
+    if (PICK_MODE) {
+      for (const id of ['evToggle', 'legend', 'bellBtn', 'aboutBtn', 'brand']) { const el = $(id); if (el) el.style.display = 'none'; }
+      $('markers').style.display = 'none';
+      canvas.classList.add('placing');
+      $('placeHint').firstChild.textContent = 'לחצו על המפה לבחירת מיקום ';
+      $('placeCancel').style.display = 'none';
+      $('placeHint').classList.add('show');
+    }
     window.__overlayTick = overlayTick;
     MAP.start();
     setP(1, '');

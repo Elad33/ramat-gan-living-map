@@ -39,3 +39,21 @@ fs.writeFileSync('../dist-artifact.html', fs.readFileSync('template.html', 'utf8
   .split('/*__DATA__*/').join(data)
   .split('/*__APP__*/').join(app));
 console.log('built ../dist-artifact.html');
+
+// CMS admin page
+let adminBody = fs.readFileSync('admin-template.html', 'utf8').split('/*__FONTS__*/').join(fonts);
+const adminTitle = (adminBody.match(/<title>([^<]+)<\/title>/) || [])[1] || 'מערכת ניהול';
+adminBody = adminBody.replace(/<title>[^<]+<\/title>\s*/, '');
+fs.writeFileSync('../admin.html', `<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>${adminTitle}</title>
+<meta name="robots" content="noindex"/>
+</head>
+<body>
+${adminBody}
+</body>
+</html>`);
+console.log('built ../admin.html');
