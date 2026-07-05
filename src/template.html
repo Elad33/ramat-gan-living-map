@@ -1,0 +1,452 @@
+<title>רמת גן · המפה החיה</title>
+<style>
+/*__FONTS__*/
+</style>
+<style>
+:root{
+  --bg:#070b16; --panel:rgba(13,18,33,.78); --panel-solid:#0e1425; --hairline:rgba(227,194,126,.28);
+  --hairline-soft:rgba(227,194,126,.14); --ink:#f2ecdd; --ink-dim:#b9b2a0; --ink-faint:#7d7869;
+  --gold:#e3c27e; --gold-strong:#f0d296; --gold-deep:#a8863d;
+  --emerald:#46c08a; --rose:#e86a8a; --sky:#5ba8e8; --amber:#e8a44c;
+  --danger:#e0596a;
+  --shadow:0 18px 50px rgba(0,0,0,.55),0 2px 10px rgba(0,0,0,.4);
+  --r-lg:18px; --r-md:12px; --r-sm:8px;
+  --font-ui:'Assistant',-apple-system,'Segoe UI',sans-serif;
+  --font-display:'Frank Ruhl Libre','Assistant',serif;
+  --marker-halo:rgba(7,11,22,.85);
+}
+:root[data-theme="light"]{
+  --bg:#e9ecef; --panel:rgba(252,251,247,.85); --panel-solid:#fcfbf7; --hairline:rgba(122,96,42,.35);
+  --hairline-soft:rgba(122,96,42,.16); --ink:#1a2233; --ink-dim:#4d576b; --ink-faint:#8b93a3;
+  --gold:#a8863d; --gold-strong:#8a6d2c; --gold-deep:#c9a961;
+  --emerald:#1e8a5e; --rose:#c74e6e; --sky:#2f7fc4; --amber:#c07f2a;
+  --danger:#c44557;
+  --shadow:0 18px 45px rgba(26,34,51,.18),0 2px 8px rgba(26,34,51,.12);
+  --marker-halo:rgba(252,251,247,.9);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+*::-webkit-scrollbar{width:8px;height:8px}
+*::-webkit-scrollbar-thumb{background:rgba(227,194,126,.25);border-radius:4px}
+*::-webkit-scrollbar-thumb:hover{background:rgba(227,194,126,.45)}
+*::-webkit-scrollbar-track{background:transparent}
+*{scrollbar-width:thin;scrollbar-color:rgba(227,194,126,.3) transparent}
+html,body{height:100%}
+html{direction:rtl}
+body{direction:rtl;background:var(--bg);color:var(--ink);font-family:var(--font-ui);overflow:hidden;
+  -webkit-font-smoothing:antialiased;font-size:15px;line-height:1.45}
+button{font-family:inherit;color:inherit;background:none;border:none;cursor:pointer;font-size:inherit}
+input,select,textarea{font-family:inherit;font-size:inherit;color:var(--ink)}
+:focus-visible{outline:2px solid var(--gold);outline-offset:2px;border-radius:4px}
+::selection{background:rgba(227,194,126,.35)}
+
+#gl{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none;cursor:grab}
+#gl.dragging{cursor:grabbing}
+#gl.placing{cursor:crosshair}
+#overlay{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:2}
+
+/* ---------- loading ---------- */
+#loader{position:fixed;inset:0;z-index:100;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  background:radial-gradient(120% 90% at 50% 30%,#0d1528 0%,#070b16 70%);transition:opacity .9s ease;gap:0}
+:root[data-theme="light"] #loader{background:radial-gradient(120% 90% at 50% 30%,#f4f2ec 0%,#e2e6ea 70%)}
+#loader.done{opacity:0;pointer-events:none}
+.ldr-mark{width:64px;height:64px;margin-bottom:26px;animation:markFloat 3.2s ease-in-out infinite}
+@keyframes markFloat{0%,100%{transform:translateY(0) }50%{transform:translateY(-7px)}}
+.ldr-city{font-family:var(--font-display);font-weight:800;font-size:52px;letter-spacing:.02em;color:var(--ink)}
+.ldr-sub{margin-top:6px;font-size:15px;letter-spacing:.42em;color:var(--gold);text-transform:uppercase;padding-right:.42em}
+.ldr-bar{margin-top:38px;width:min(320px,70vw);height:2px;background:var(--hairline-soft);border-radius:2px;overflow:hidden}
+.ldr-bar i{display:block;height:100%;width:0%;background:linear-gradient(90deg,var(--gold),var(--gold-strong));
+  border-radius:2px;transition:width .3s ease}
+.ldr-step{margin-top:14px;font-size:13px;color:var(--ink-faint);min-height:1.4em;letter-spacing:.05em}
+#loader .err{color:var(--danger);max-width:440px;text-align:center;padding:0 20px}
+
+/* ---------- brand ---------- */
+#brand{position:fixed;top:22px;right:24px;z-index:20;display:flex;align-items:center;gap:14px;pointer-events:none;
+  animation:fadeSlide .8s .2s ease backwards}
+#brand svg{width:44px;height:44px;flex:none;filter:drop-shadow(0 2px 10px rgba(227,194,126,.35))}
+#brand .t1{font-family:var(--font-display);font-weight:800;font-size:27px;line-height:1.05;color:var(--ink);text-shadow:0 1px 14px rgba(0,0,0,.35)}
+:root[data-theme="light"] #brand .t1{text-shadow:none}
+#brand .t2{font-size:12px;letter-spacing:.34em;color:var(--gold);margin-top:3px;padding-right:2px}
+@keyframes fadeSlide{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:none}}
+
+/* ---------- search ---------- */
+#searchWrap{position:fixed;top:92px;right:24px;z-index:30;width:min(390px,calc(100vw - 48px));animation:fadeSlide .8s .35s ease backwards}
+#searchBox{display:flex;align-items:center;gap:10px;background:var(--panel);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
+  border:1px solid var(--hairline);border-radius:999px;padding:12px 18px;box-shadow:var(--shadow);transition:border-color .25s}
+#searchBox:focus-within{border-color:var(--gold)}
+#searchBox svg{flex:none;opacity:.75}
+#searchInput{flex:1;background:none;border:none;outline:none;font-size:16px;color:var(--ink)}
+#searchInput::placeholder{color:var(--ink-faint)}
+#searchClear{flex:none;width:22px;height:22px;border-radius:50%;display:none;align-items:center;justify-content:center;color:var(--ink-faint)}
+#searchClear:hover{color:var(--ink)}
+#searchBox.hasText #searchClear{display:flex}
+#results{margin-top:10px;background:var(--panel);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
+  border:1px solid var(--hairline-soft);border-radius:var(--r-lg);box-shadow:var(--shadow);overflow:hidden;display:none;max-height:min(430px,55vh);overflow-y:auto}
+#results.open{display:block}
+.res-group{padding:10px 18px 4px;font-size:11px;letter-spacing:.22em;color:var(--gold);border-top:1px solid var(--hairline-soft)}
+.res-group:first-child{border-top:none}
+.res-item{display:flex;align-items:center;gap:12px;width:100%;text-align:right;padding:10px 18px;transition:background .15s}
+.res-item:hover,.res-item.active{background:rgba(227,194,126,.12)}
+.res-item .ic{flex:none;width:30px;height:30px;border-radius:9px;display:flex;align-items:center;justify-content:center;
+  background:rgba(227,194,126,.13);color:var(--gold)}
+.res-item .tx{flex:1;min-width:0}
+.res-item .nm{display:block;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.res-item .sb{display:block;font-size:12.5px;color:var(--ink-faint)}
+.res-empty{padding:18px;text-align:center;color:var(--ink-faint);font-size:14px}
+
+/* ---------- controls ---------- */
+#ctrls{position:fixed;bottom:110px;left:20px;z-index:20;display:flex;flex-direction:column;gap:10px;animation:fadeSlide .8s .5s ease backwards}
+.ctrl,.ctrl-group{background:var(--panel);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  border:1px solid var(--hairline-soft);border-radius:14px;box-shadow:var(--shadow)}
+.ctrl{width:44px;height:44px;display:flex;align-items:center;justify-content:center;color:var(--ink-dim);transition:color .2s,border-color .2s}
+.ctrl:hover{color:var(--gold);border-color:var(--hairline)}
+.ctrl-group{display:flex;flex-direction:column;overflow:hidden}
+.ctrl-group .ctrl{border:none;border-radius:0;box-shadow:none;background:none}
+.ctrl-group .ctrl+.ctrl{border-top:1px solid var(--hairline-soft)}
+#compassN{transition:transform .1s linear;transform-origin:center}
+.ctrl.active{color:var(--gold)}
+
+/* ---------- events panel ---------- */
+#evToggle{position:fixed;bottom:28px;right:24px;z-index:30;display:flex;align-items:center;gap:10px;
+  background:linear-gradient(135deg,var(--gold),var(--gold-deep));color:#14100a;font-weight:700;font-size:15px;
+  padding:13px 22px;border-radius:999px;box-shadow:0 10px 30px rgba(227,194,126,.35),var(--shadow);
+  transition:transform .2s,box-shadow .2s;animation:fadeSlide .8s .65s ease backwards}
+:root[data-theme="light"] #evToggle{color:#fffdf6;box-shadow:0 10px 26px rgba(138,109,44,.4)}
+#evToggle:hover{transform:translateY(-2px)}
+#evPanel{position:fixed;top:0;bottom:0;right:0;z-index:40;width:min(400px,100vw);background:var(--panel-solid);
+  border-left:1px solid var(--hairline-soft);box-shadow:var(--shadow);transform:translateX(105%);transition:transform .45s cubic-bezier(.22,1,.3,1);
+  display:flex;flex-direction:column}
+#evPanel.open{transform:none}
+.ev-head{padding:26px 26px 18px;border-bottom:1px solid var(--hairline-soft)}
+.ev-head-row{display:flex;align-items:center;justify-content:space-between}
+.ev-head h2{font-family:var(--font-display);font-weight:800;font-size:24px}
+.ev-head .sub{font-size:13px;color:var(--ink-faint);margin-top:4px}
+.x-btn{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;color:var(--ink-faint)}
+.x-btn:hover{color:var(--ink);background:rgba(227,194,126,.1)}
+#evAddBtn{margin:16px 26px 0;display:flex;align-items:center;justify-content:center;gap:8px;width:calc(100% - 52px);
+  padding:12px;border:1px dashed var(--hairline);border-radius:var(--r-md);color:var(--gold);font-weight:600;transition:background .2s,border-color .2s}
+#evAddBtn:hover{background:rgba(227,194,126,.08);border-color:var(--gold)}
+#evList{flex:1;overflow-y:auto;padding:16px 26px 30px;display:flex;flex-direction:column;gap:12px}
+.ev-card{border:1px solid var(--hairline-soft);border-radius:var(--r-lg);padding:15px 16px;cursor:pointer;
+  transition:border-color .2s,transform .2s;background:rgba(255,255,255,.02)}
+:root[data-theme="light"] .ev-card{background:rgba(255,255,255,.6)}
+.ev-card:hover{border-color:var(--hairline);transform:translateY(-1px)}
+.ev-card .row1{display:flex;align-items:center;gap:9px}
+.ev-chip{font-size:11.5px;font-weight:700;letter-spacing:.06em;padding:3px 10px;border-radius:999px}
+.ev-card .when{margin-right:auto;font-size:12.5px;color:var(--ink-faint);font-variant-numeric:tabular-nums}
+.ev-card h3{margin-top:9px;font-size:16.5px;font-weight:700;line-height:1.3}
+.ev-card .where{margin-top:5px;font-size:13px;color:var(--ink-dim);display:flex;align-items:center;gap:6px}
+.ev-card .desc{margin-top:7px;font-size:13.5px;color:var(--ink-dim);line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.ev-none{text-align:center;color:var(--ink-faint);padding:36px 10px;font-size:14px;line-height:1.7}
+
+/* ---------- legend / filters ---------- */
+#legend{position:fixed;bottom:28px;left:50%;transform:translateX(-50%);z-index:20;display:flex;gap:8px;flex-wrap:wrap;justify-content:center;
+  max-width:min(720px,calc(100vw - 260px));animation:fadeSlide .8s .8s ease backwards}
+.lg-chip{display:flex;align-items:center;gap:7px;padding:8px 14px;border-radius:999px;background:var(--panel);
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid var(--hairline-soft);
+  font-size:13px;font-weight:600;color:var(--ink-dim);box-shadow:var(--shadow);transition:all .2s;white-space:nowrap}
+.lg-chip i{width:9px;height:9px;border-radius:50%;background:var(--c);box-shadow:0 0 8px var(--c)}
+.lg-chip.on{color:var(--ink);border-color:var(--hairline)}
+.lg-chip:not(.on){opacity:.45}
+@media (max-width:760px){#legend{display:none}}
+
+/* ---------- scrims for UI legibility ---------- */
+#scrimTop,#scrimBottom{position:fixed;left:0;right:0;pointer-events:none;z-index:1}
+#scrimTop{top:0;height:130px;background:linear-gradient(to bottom,color-mix(in srgb,var(--bg) 62%,transparent),transparent)}
+#scrimBottom{bottom:0;height:110px;background:linear-gradient(to top,color-mix(in srgb,var(--bg) 55%,transparent),transparent)}
+
+/* ---------- layer buttons & events tools ---------- */
+.ctrl.on{color:var(--gold);background:rgba(227,194,126,.10)}
+.ev-tools{display:flex;gap:8px;margin:10px 26px 0}
+.ev-tool{display:flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;color:var(--ink-faint);
+  padding:6px 12px;border:1px solid var(--hairline-soft);border-radius:999px;transition:all .15s}
+.ev-tool:hover{color:var(--gold);border-color:var(--hairline)}
+
+/* ---------- transit overlay ---------- */
+.lbl-rail{display:flex;align-items:center;gap:7px;font-size:13px;font-weight:700;color:var(--ink);
+  text-shadow:0 0 10px var(--marker-halo),0 0 4px var(--marker-halo);pointer-events:auto;cursor:default}
+.lbl-rail .rs{width:11px;height:11px;border-radius:3px;transform:rotate(45deg);flex:none;
+  background:#e0504b;border:2px solid rgba(255,255,255,.85);box-shadow:0 0 10px rgba(224,80,75,.7)}
+.lbl-bus{width:8px;height:8px;border-radius:50%;background:#4fb6e8;border:1.5px solid rgba(255,255,255,.75);
+  box-shadow:0 0 7px rgba(79,182,232,.55);pointer-events:auto}
+:root[data-theme="light"] .lbl-bus{background:#1d7fb5;border-color:#fff}
+:root[data-theme="light"] .lbl-rail .rs{background:#c73833;border-color:#fff}
+
+/* ---------- plan popup bits ---------- */
+.pop-meta{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:9px;font-size:12.5px;color:var(--ink-faint)}
+.pop-meta b{color:var(--ink-dim);font-variant-numeric:tabular-nums}
+.pop-link{display:inline-flex;align-items:center;gap:6px;margin-top:11px;font-size:13px;font-weight:700;color:var(--gold);text-decoration:none}
+.pop-link:hover{text-decoration:underline;text-underline-offset:3px}
+
+/* ---------- map labels ---------- */
+.lbl{position:absolute;top:0;right:auto;left:0;transform-origin:center;white-space:nowrap;pointer-events:none;will-change:transform,opacity}
+.lbl-hood{font-family:var(--font-display);font-weight:500;font-size:15px;letter-spacing:.34em;color:var(--gold);
+  text-transform:uppercase;text-shadow:0 0 12px var(--marker-halo),0 0 4px var(--marker-halo),0 1px 2px var(--marker-halo);opacity:.92}
+.lbl-street{font-size:12px;font-weight:600;letter-spacing:.12em;color:var(--ink-dim);
+  text-shadow:0 0 8px var(--marker-halo),0 0 3px var(--marker-halo),0 1px 1px var(--marker-halo)}
+.lbl-poi{display:flex;align-items:center;gap:6px;font-size:12.5px;font-weight:700;color:var(--ink);
+  text-shadow:0 0 10px var(--marker-halo),0 0 4px var(--marker-halo);pointer-events:auto;cursor:pointer}
+.lbl-poi .dot{width:7px;height:7px;border-radius:2px;transform:rotate(45deg);background:var(--gold);box-shadow:0 0 9px var(--gold);flex:none}
+.lbl-poi:hover{color:var(--gold)}
+
+/* ---------- event markers ---------- */
+.mk{position:absolute;top:0;left:0;pointer-events:auto;cursor:pointer;will-change:transform;z-index:5}
+.mk .pin{position:relative;width:34px;height:44px;transform:translate(-50%,-100%);transition:transform .2s;transform-origin:bottom center}
+.mk:hover .pin{transform:translate(-50%,-100%) scale(1.12)}
+.mk .pulse{position:absolute;left:50%;bottom:-4px;width:26px;height:10px;transform:translateX(-50%);border-radius:50%;
+  background:var(--c);opacity:.4;animation:pulse 2.6s ease-out infinite}
+@keyframes pulse{0%{transform:translateX(-50%) scale(.4);opacity:.5}70%{transform:translateX(-50%) scale(1.7);opacity:0}100%{opacity:0}}
+@media (prefers-reduced-motion:reduce){.mk .pulse{animation:none;opacity:.25}.ldr-mark{animation:none}}
+
+/* ---------- popup card ---------- */
+#pop{position:absolute;z-index:8;width:min(320px,calc(100vw - 40px));background:var(--panel);backdrop-filter:blur(20px);
+  -webkit-backdrop-filter:blur(20px);border:1px solid var(--hairline);border-radius:var(--r-lg);box-shadow:var(--shadow);
+  padding:18px 20px;pointer-events:auto;display:none}
+#pop.open{display:block;animation:popIn .25s cubic-bezier(.2,1.4,.4,1)}
+@keyframes popIn{from{opacity:0;transform:translateY(8px) scale(.97)}to{opacity:1;transform:none}}
+#pop .row1{display:flex;align-items:center;gap:9px}
+#pop .when{margin-right:auto;font-size:12.5px;color:var(--ink-faint);font-variant-numeric:tabular-nums}
+#pop h3{font-family:var(--font-display);font-size:20px;font-weight:800;margin-top:10px;line-height:1.25}
+#pop .where{margin-top:6px;font-size:13px;color:var(--ink-dim);display:flex;gap:6px;align-items:center}
+#pop .desc{margin-top:10px;font-size:14px;color:var(--ink-dim);line-height:1.55;max-height:130px;overflow-y:auto}
+#pop .acts{margin-top:14px;display:flex;gap:8px;border-top:1px solid var(--hairline-soft);padding-top:12px}
+.pop-act{flex:1;padding:8px;border-radius:var(--r-sm);font-size:13.5px;font-weight:600;color:var(--ink-dim);
+  display:flex;align-items:center;justify-content:center;gap:6px;transition:all .15s}
+.pop-act:hover{background:rgba(227,194,126,.12);color:var(--gold)}
+.pop-act.del:hover{background:rgba(224,89,106,.12);color:var(--danger)}
+
+/* ---------- modal (add event / about) ---------- */
+.modal-bg{position:fixed;inset:0;z-index:60;background:rgba(4,7,14,.55);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+  display:none;align-items:center;justify-content:center;padding:20px}
+:root[data-theme="light"] .modal-bg{background:rgba(26,34,51,.3)}
+.modal-bg.open{display:flex}
+.modal{width:min(440px,100%);max-height:calc(100vh - 40px);overflow-y:auto;background:var(--panel-solid);
+  border:1px solid var(--hairline);border-radius:22px;box-shadow:var(--shadow);padding:28px;animation:popIn .3s cubic-bezier(.2,1.4,.4,1)}
+.modal h2{font-family:var(--font-display);font-weight:800;font-size:23px}
+.modal .m-sub{font-size:13.5px;color:var(--ink-faint);margin-top:5px;line-height:1.5}
+.f-row{margin-top:16px}
+.f-row label{display:block;font-size:12.5px;font-weight:700;letter-spacing:.1em;color:var(--gold);margin-bottom:7px}
+.f-in{width:100%;background:rgba(255,255,255,.04);border:1px solid var(--hairline-soft);border-radius:var(--r-md);
+  padding:11px 14px;font-size:15px;outline:none;transition:border-color .2s}
+:root[data-theme="light"] .f-in{background:rgba(255,255,255,.7)}
+.f-in:focus{border-color:var(--gold)}
+textarea.f-in{resize:vertical;min-height:74px}
+.cat-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.cat-opt{display:flex;align-items:center;gap:8px;padding:10px 12px;border:1px solid var(--hairline-soft);border-radius:var(--r-md);
+  font-size:13.5px;font-weight:600;color:var(--ink-dim);transition:all .15s;text-align:right}
+.cat-opt i{width:10px;height:10px;border-radius:50%;background:var(--c);flex:none;box-shadow:0 0 7px var(--c)}
+.cat-opt.sel{border-color:var(--c);color:var(--ink);background:color-mix(in srgb,var(--c) 10%,transparent)}
+.f-two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.loc-line{display:flex;align-items:center;gap:8px;font-size:13.5px;color:var(--ink-dim);background:rgba(227,194,126,.07);
+  border:1px solid var(--hairline-soft);border-radius:var(--r-md);padding:10px 13px}
+.loc-line b{color:var(--ink)}
+.m-acts{margin-top:24px;display:flex;gap:10px}
+.btn{flex:1;padding:12px;border-radius:var(--r-md);font-weight:700;font-size:15px;transition:all .2s;text-align:center}
+.btn-gold{background:linear-gradient(135deg,var(--gold),var(--gold-deep));color:#14100a}
+:root[data-theme="light"] .btn-gold{color:#fffdf6}
+.btn-gold:hover{filter:brightness(1.08)}
+.btn-ghost{border:1px solid var(--hairline-soft);color:var(--ink-dim)}
+.btn-ghost:hover{border-color:var(--hairline);color:var(--ink)}
+
+/* ---------- toast & hint ---------- */
+#toast{position:fixed;top:24px;left:50%;transform:translate(-50%,-160px);opacity:0;z-index:70;background:var(--panel);
+  backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid var(--hairline);border-radius:999px;
+  padding:11px 22px;font-size:14.5px;font-weight:600;box-shadow:var(--shadow);pointer-events:none;
+  transition:transform .45s cubic-bezier(.22,1,.3,1),opacity .3s;
+  display:flex;align-items:center;gap:9px;max-width:calc(100vw - 40px)}
+#toast.show{transform:translate(-50%,0);opacity:1}
+#placeHint{position:fixed;top:24px;left:50%;transform:translate(-50%,-160px);opacity:0;z-index:35;background:linear-gradient(135deg,var(--gold),var(--gold-deep));
+  color:#14100a;border-radius:999px;padding:11px 22px;font-size:14.5px;font-weight:700;box-shadow:var(--shadow);
+  transition:transform .45s cubic-bezier(.22,1,.3,1),opacity .3s;display:flex;align-items:center;gap:12px}
+:root[data-theme="light"] #placeHint{color:#fffdf6}
+#placeHint:not(.show){pointer-events:none}
+#placeHint.show{transform:translate(-50%,0);opacity:1}
+#placeHint button{font-weight:700;text-decoration:underline;text-underline-offset:3px}
+
+/* ---------- attribution & info ---------- */
+#attrib{position:fixed;bottom:8px;left:10px;z-index:15;font-size:10.5px;color:var(--ink-faint);letter-spacing:.02em;direction:ltr}
+#attrib a{color:inherit}
+#aboutBtn{position:fixed;top:22px;left:22px;z-index:20;animation:fadeSlide .8s .5s ease backwards}
+.about-body{margin-top:14px;font-size:14.5px;color:var(--ink-dim);line-height:1.75}
+.about-body b{color:var(--ink)}
+.about-body .k{display:inline-block;background:rgba(227,194,126,.12);border:1px solid var(--hairline-soft);
+  border-radius:6px;padding:0 7px;font-size:12.5px;color:var(--gold);margin:0 2px}
+.about-hr{border:none;border-top:1px solid var(--hairline-soft);margin:14px 0}
+.about-small{font-size:12px;color:var(--ink-faint);line-height:1.6}
+
+/* highlight ring for search results */
+#hiRing{position:absolute;z-index:4;width:60px;height:60px;margin:-30px;border-radius:50%;pointer-events:none;display:none;
+  border:2px solid var(--gold);box-shadow:0 0 24px rgba(227,194,126,.6),inset 0 0 18px rgba(227,194,126,.35);
+  animation:ringPulse 1.8s ease-out infinite}
+@keyframes ringPulse{0%{transform:scale(.75);opacity:1}100%{transform:scale(1.5);opacity:0}}
+@media (prefers-reduced-motion:reduce){#hiRing{animation:none;opacity:.9}}
+
+@media (max-width:640px){
+  #brand{right:16px;top:14px}
+  #brand .t1{font-size:22px}
+  #searchWrap{top:76px;right:16px;width:calc(100vw - 32px)}
+  #ctrls{bottom:96px;left:12px}
+  #evToggle{bottom:20px;right:16px;padding:12px 18px}
+}
+</style>
+
+<div id="loader" role="status">
+  <svg class="ldr-mark" viewBox="0 0 64 64" fill="none" aria-hidden="true">
+    <path d="M14 22 L24 10 H40 L50 22 L32 54 Z" stroke="#e3c27e" stroke-width="2.2" stroke-linejoin="round"/>
+    <path d="M14 22 H50 M24 10 L28 22 L32 54 M40 10 L36 22 L32 54" stroke="#e3c27e" stroke-width="1.1" opacity=".65"/>
+  </svg>
+  <div class="ldr-city">רמת גן</div>
+  <div class="ldr-sub">המפה החיה</div>
+  <div class="ldr-bar"><i id="ldrFill"></i></div>
+  <div class="ldr-step" id="ldrStep">טוען נתוני עיר…</div>
+</div>
+
+<canvas id="gl"></canvas>
+<div id="scrimTop"></div>
+<div id="scrimBottom"></div>
+<div id="overlay">
+  <div id="labels"></div>
+  <div id="markers"></div>
+  <div id="hiRing"></div>
+  <div id="pop"></div>
+</div>
+
+<div id="brand">
+  <svg viewBox="0 0 64 64" fill="none" aria-hidden="true">
+    <path d="M14 22 L24 10 H40 L50 22 L32 54 Z" stroke="var(--gold)" stroke-width="2.4" stroke-linejoin="round" fill="rgba(227,194,126,.09)"/>
+    <path d="M14 22 H50 M24 10 L28 22 L32 54 M40 10 L36 22 L32 54" stroke="var(--gold)" stroke-width="1.2" opacity=".6"/>
+  </svg>
+  <div><div class="t1">רמת גן</div><div class="t2">המפה החיה</div></div>
+</div>
+
+<div id="searchWrap">
+  <div id="searchBox">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="2.2" stroke-linecap="round" aria-hidden="true">
+      <circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>
+    </svg>
+    <input id="searchInput" type="text" placeholder="חפשו כתובת, רחוב, שכונה או מקום…" autocomplete="off" aria-label="חיפוש במפה"/>
+    <button id="searchClear" aria-label="נקה חיפוש">
+      <svg width="14" height="14" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
+  </div>
+  <div id="results" role="listbox"></div>
+</div>
+
+<button id="aboutBtn" class="ctrl" aria-label="אודות המפה" title="אודות המפה">
+  <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9.2"/><path d="M12 11v6"/><circle cx="12" cy="7.6" r=".4" fill="currentColor"/></svg>
+</button>
+
+<div id="ctrls">
+  <div class="ctrl-group">
+    <button class="ctrl" id="plansBtn" aria-label="שכבת תכנון ובנייה" title="תכנון ובנייה — מה מתוכנן בעיר">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round" stroke-linecap="round"><path d="M3.5 20.5v-9l5-3v3.5l5-3.5v4l3-2 4 2.5v7.5Z"/><path d="M7 20.5v-3M11 20.5v-3M15 20.5v-3"/></svg>
+    </button>
+    <button class="ctrl" id="transitBtn" aria-label="שכבת תחבורה ציבורית" title="תחבורה ציבורית — רכבת קלה ותחנות">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round" stroke-linecap="round"><rect x="5.5" y="3.5" width="13" height="13.5" rx="3"/><path d="M5.5 10.5h13M9 20.5l-1.5-3M15 20.5l1.5-3M9.2 14h.01M14.8 14h.01"/></svg>
+    </button>
+  </div>
+  <button class="ctrl" id="themeBtn" aria-label="החלפת מצב תאורה" title="יום / דמדומים">
+    <svg id="icMoon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5Z"/></svg>
+    <svg id="icSun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="display:none"><circle cx="12" cy="12" r="4.4"/><path d="M12 2.5v2.4M12 19.1v2.4M2.5 12h2.4M19.1 12h2.4M5 5l1.7 1.7M17.3 17.3 19 19M19 5l-1.7 1.7M6.7 17.3 5 19"/></svg>
+  </button>
+  <button class="ctrl" id="tiltBtn" aria-label="מעבר בין תצוגה שטוחה לתלת־ממד" title="2D / 3D"><span id="tiltTxt" style="font-weight:800;font-size:12.5px;letter-spacing:.05em">2D</span></button>
+  <button class="ctrl" id="compassBtn" aria-label="איפוס כיוון לצפון" title="צפון">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" id="compassN">
+      <path d="M12 3 L15 12 L12 21 L9 12 Z" fill="none" stroke="currentColor" stroke-width="1.4"/>
+      <path d="M12 3 L15 12 H9 Z" fill="var(--gold)" stroke="none"/>
+    </svg>
+  </button>
+  <div class="ctrl-group">
+    <button class="ctrl" id="zoomIn" aria-label="התקרבות"><svg width="16" height="16" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
+    <button class="ctrl" id="zoomOut" aria-label="התרחקות"><svg width="16" height="16" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M5 12h14"/></svg></button>
+  </div>
+</div>
+
+<div id="legend" aria-label="סינון קטגוריות אירועים"></div>
+
+<button id="evToggle">
+  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round"><rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M8 3v4M16 3v4M3.5 10h17"/></svg>
+  אירועים בעיר
+  <span id="evCount" style="background:rgba(0,0,0,.18);border-radius:999px;padding:1px 9px;font-size:13px;font-variant-numeric:tabular-nums"></span>
+</button>
+
+<aside id="evPanel" aria-label="אירועים בעיר">
+  <div class="ev-head">
+    <div class="ev-head-row">
+      <h2>אירועים בעיר</h2>
+      <button class="x-btn" id="evClose" aria-label="סגירת רשימת אירועים"><svg width="16" height="16" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    </div>
+    <div class="sub">מה קורה ברמת גן — הוסיפו אירוע והוא יופיע על המפה</div>
+  </div>
+  <button id="evAddBtn">
+    <svg width="15" height="15" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+    הוספת אירוע על המפה
+  </button>
+  <div class="ev-tools">
+    <button class="ev-tool" id="evExport" title="שמירת האירועים כקובץ לשיתוף">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 15V4M8 8l4-4 4 4M4.5 15.5v3a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2v-3"/></svg>
+      ייצוא
+    </button>
+    <button class="ev-tool" id="evImport" title="טעינת אירועים מקובץ ששיתפו איתכם">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 4v11M8 11l4 4 4-4M4.5 15.5v3a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2v-3"/></svg>
+      ייבוא
+    </button>
+    <input type="file" id="evImportFile" accept=".json,application/json" style="display:none"/>
+  </div>
+  <div id="evList"></div>
+</aside>
+
+<div class="modal-bg" id="evModalBg">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="evModalTitle">
+    <h2 id="evModalTitle">אירוע חדש</h2>
+    <div class="m-sub">האירוע יופיע על המפה בנקודה שבחרתם ויישמר בדפדפן שלכם.</div>
+    <div class="f-row"><label for="fTitle">שם האירוע</label><input class="f-in" id="fTitle" maxlength="60" placeholder="למשל: הופעה בפארק הלאומי"/></div>
+    <div class="f-row"><label>קטגוריה</label><div class="cat-grid" id="fCats"></div></div>
+    <div class="f-two">
+      <div class="f-row"><label for="fDate">תאריך</label><input class="f-in" id="fDate" type="date"/></div>
+      <div class="f-row"><label for="fTime">שעה</label><input class="f-in" id="fTime" type="time"/></div>
+    </div>
+    <div class="f-row"><label>מיקום</label><div class="loc-line">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="2" stroke-linecap="round" style="flex:none"><path d="M12 21s-7-5.8-7-11a7 7 0 0 1 14 0c0 5.2-7 11-7 11Z"/><circle cx="12" cy="10" r="2.6"/></svg>
+      <span id="fLoc"><b>נבחר על המפה</b></span>
+    </div></div>
+    <div class="f-row"><label for="fDesc">תיאור (לא חובה)</label><textarea class="f-in" id="fDesc" maxlength="300" placeholder="פרטים על האירוע, שעות, קהל יעד…"></textarea></div>
+    <div class="m-acts">
+      <button class="btn btn-ghost" id="fCancel">ביטול</button>
+      <button class="btn btn-gold" id="fSave">שמירת האירוע</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="aboutBg">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="aboutTitle">
+    <h2 id="aboutTitle">המפה החיה של רמת גן</h2>
+    <div class="about-body">
+      מפה תלת־ממדית חיה של העיר — <b>כל רחוב, כל בניין וכל כתובת</b> מנתוני המיפוי הפתוח, ברינדור זוהר בהשראת Gaussian Splatting.
+      <hr class="about-hr"/>
+      <b>חיפוש</b> — הקלידו כתובת מדויקת («ביאליק 12»), רחוב, שכונה או מוסד עירוני.<br/>
+      <b>אירועים</b> — לחצו «אירועים בעיר» והוסיפו אירוע בכל נקודה על המפה. אפשר לייצא קובץ ולשתף עם שכנים.<br/>
+      <b>תכנון ובנייה</b> — הפעילו את שכבת התכנון ולחצו על שטח מסומן כדי לראות מה מתוכנן שם: שם התוכנית, סטטוס, יח״ד וקישור לתיק הרשמי.<br/>
+      <b>תחבורה</b> — הקו האדום של הרכבת הקלה, תחנותיו ותחנות האוטובוס בעיר.<br/>
+      <b>ניווט</b> — גררו להזזה, גלגלת להתקרבות, <span class="k">גרירה ימנית</span> או <span class="k">Ctrl+גרירה</span> לסיבוב והטיה. במגע: שתי אצבעות.
+      <hr class="about-hr"/>
+      <div class="about-small">
+        נתוני מפה: © OpenStreetMap contributors (ODbL) · נתוני תכנון: מינהל התכנון (iplan) · גבהים משוערים לפי קומות במקומות שבהם אין מדידה · האירועים נשמרים מקומית בדפדפן זה בלבד.
+      </div>
+    </div>
+    <div class="m-acts"><button class="btn btn-gold" id="aboutClose">התחלת סיור</button></div>
+  </div>
+</div>
+
+<div id="placeHint">
+  לחצו על המפה לבחירת מיקום האירוע
+  <button id="placeCancel">ביטול</button>
+</div>
+<div id="toast"></div>
+<div id="attrib">© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors</div>
+
+<script>
+/*__DATA__*/
+</script>
+<script>
+/*__APP__*/
+</script>

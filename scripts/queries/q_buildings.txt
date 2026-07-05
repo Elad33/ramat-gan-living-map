@@ -1,0 +1,4 @@
+[out:json][timeout:300];
+area["boundary"="administrative"]["admin_level"="8"]["name"="רמת גן"]->.a;
+way["building"](area.a);
+out geom qt;

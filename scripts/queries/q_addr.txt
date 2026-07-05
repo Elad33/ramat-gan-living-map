@@ -1,0 +1,7 @@
+[out:json][timeout:300];
+area["boundary"="administrative"]["admin_level"="8"]["name"="רמת גן"]->.a;
+(
+  node["addr:housenumber"](area.a);
+  way["addr:housenumber"](area.a);
+);
+out tags center qt;
