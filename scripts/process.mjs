@@ -119,6 +119,27 @@ const addBuilding = (el, ring) => {
   const name = t['name:he'] || t.name;
   if (name && !/^\d+$/.test(name)) bldNames.push([bld.length - 1, name]);
 };
+// Verified height fixes for towers OSM hasn't tagged yet (applied only while tags are missing).
+// Exchange Ramat Gan (topped out 2023): residential 206m/61fl, office 198m/50fl —
+// the office tower has the larger floor plate, so assign by footprint area.
+{
+  const exchange = buildings.elements.filter(e => /^exchange ramat gan$/i.test(e.tags?.name || ''));
+  if (exchange.length === 2 && exchange.every(e => !e.tags.height && !e.tags['building:levels'])) {
+    const area = el => {
+      const pts = projGeom(el.geometry);
+      let s = 0;
+      for (let i = 0; i < pts.length; i++) {
+        const j = (i + 1) % pts.length;
+        s += pts[i][0] * pts[j][1] - pts[j][0] * pts[i][1];
+      }
+      return Math.abs(s / 2);
+    };
+    exchange.sort((a, b) => area(b) - area(a));
+    exchange[0].tags.height = '198'; // office
+    exchange[1].tags.height = '206'; // residential
+    console.log('applied Exchange towers height fix (198m office / 206m residential)');
+  }
+}
 for (const el of buildings.elements) {
   if (el.type !== 'way' || !el.geometry || seenWays.has(el.id)) continue;
   seenWays.add(el.id);

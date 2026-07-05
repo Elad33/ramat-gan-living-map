@@ -17,7 +17,10 @@ async function page(offset) {
     try {
       const r = await fetch(BASE, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'User-Agent': 'ramat-gan-living-map/1.0 (+https://github.com/Elad33/ramat-gan-living-map)',
+        },
         body: params.toString(),
         signal: AbortSignal.timeout(120000),
       });

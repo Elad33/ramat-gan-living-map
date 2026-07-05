@@ -1182,6 +1182,17 @@ async function boot() {
         if (/panel/.test(qs)) { renderEvList(); openPanel(); }
         if (/modal/.test(qs)) { pendingLoc = { x: MAP.cam.cx, y: MAP.cam.cy }; openEvModal(); }
         if (/results/.test(qs)) { sInput.value = 'ביאליק 12'; sBox.classList.add('hasText'); renderResults(runSearch('ביאליק 12')); }
+        if (/buspop/.test(qs)) {
+          // open the arrivals popup for a busy stop (aba hillel) for QA
+          const stop = busStops.find(s => s.code === 21644) || busStops[0];
+          if (stop) {
+            MAP.setLayer('transit', true); syncLayerButtons();
+            Object.assign(MAP.cam, { cx: stop.x, cy: stop.y + 60, dist: 500, tilt: 0.6, bearing: 0 });
+            MAP.drawOnce();
+            showBusPop(stop);
+            setTimeout(() => MAP.drawOnce(), 2500); // re-snapshot after arrivals land
+          }
+        }
         if (/plans/.test(qs)) { MAP.setLayer('plans', true); syncLayerButtons(); MAP.drawOnce(); }
         if (/transit/.test(qs)) { MAP.setLayer('transit', true); syncLayerButtons(); positionTransit(); MAP.drawOnce(); }
         if (/planpop/.test(qs)) {

@@ -11,7 +11,7 @@ permissions:
 jobs:
   refresh:
     runs-on: ubuntu-latest
-    timeout-minutes: 50
+    timeout-minutes: 55
     steps:
       - uses: actions/checkout@v4
 
@@ -19,22 +19,17 @@ jobs:
         with:
           node-version: 22
 
-      - name: משיכת נתוני OSM (Overpass)
+      - name: משיכה ועיבוד (כישלון רך — נשארים עם הנתונים הקיימים)
         run: |
           mkdir -p raw && cd raw
-          node ../scripts/fetch-osm.mjs
-
-      - name: משיכת תוכניות (iplan)
-        run: |
-          cd raw
-          node ../scripts/fetch-plans.mjs
-
-      - name: עיבוד הנתונים
-        run: |
-          cd raw
-          node ../scripts/process.mjs
-          node ../scripts/process2.mjs
-          cp data.js data2.js ../data/
+          if node ../scripts/fetch-osm.mjs && node ../scripts/fetch-plans.mjs; then
+            node ../scripts/process.mjs
+            node ../scripts/process2.mjs
+            cp data.js data2.js ../data/
+            echo "נתונים חדשים עובדו בהצלחה"
+          else
+            echo "::warning::שליפת הנתונים נכשלה הלילה — האתר נשאר עם הנתונים הקיימים"
+          fi
 
       - name: בניית האתר
         run: |
@@ -45,8 +40,8 @@ jobs:
         run: |
           git config user.name "map-refresh-bot"
           git config user.email "actions@github.com"
-          if ! git diff --quiet -- data/ index.html dist-artifact.html; then
-            git add data/data.js data/data2.js index.html dist-artifact.html
+          if ! git diff --quiet -- data/ index.html dist-artifact.html admin.html; then
+            git add data/data.js data/data2.js index.html dist-artifact.html admin.html
             git commit -m "🔄 רענון נתונים יומי ($(date -u +%Y-%m-%d))"
             git push
           else

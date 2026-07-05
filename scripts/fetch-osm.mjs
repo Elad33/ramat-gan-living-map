@@ -9,17 +9,20 @@ const MIRRORS = [
   'https://overpass-api.de/api/interpreter',
   'https://overpass.kumi.systems/api/interpreter',
   'https://overpass.private.coffee/api/interpreter',
+  'https://overpass.osm.jp/api/interpreter',
 ];
+// Overpass policy: identify yourself. Anonymous UAs get 406, shared-CI IPs get 429.
+const UA = 'ramat-gan-living-map/1.0 (+https://github.com/Elad33/ramat-gan-living-map; daily data refresh)';
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 
 async function overpass(queryFile, outFile) {
   const q = fs.readFileSync(path.join(QDIR, queryFile), 'utf8');
-  for (let attempt = 0; attempt < 6; attempt++) {
+  for (let attempt = 0; attempt < 10; attempt++) {
     const url = MIRRORS[attempt % MIRRORS.length];
     try {
       const r = await fetch(url, {
         method: 'POST',
-        headers: { 'Content-Type': 'text/plain' },
+        headers: { 'Content-Type': 'text/plain', 'User-Agent': UA },
         body: q,
         signal: AbortSignal.timeout(240000),
       });
@@ -31,7 +34,7 @@ async function overpass(queryFile, outFile) {
       return;
     } catch (e) {
       console.log('…retry', outFile, 'attempt', attempt + 1, String(e.message).slice(0, 80));
-      await sleep(15000 + attempt * 10000);
+      await sleep(20000 + attempt * 15000);
     }
   }
   throw new Error('failed to fetch ' + outFile);
