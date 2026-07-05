@@ -1,0 +1,54 @@
+name: רענון נתונים יומי
+
+on:
+  schedule:
+    - cron: '0 2 * * *'   # 05:00 שעון ישראל בקיץ
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: משיכת נתוני OSM (Overpass)
+        run: |
+          mkdir -p raw && cd raw
+          node ../scripts/fetch-osm.mjs
+
+      - name: משיכת תוכניות (iplan)
+        run: |
+          cd raw
+          node ../scripts/fetch-plans.mjs
+
+      - name: עיבוד הנתונים
+        run: |
+          cd raw
+          node ../scripts/process.mjs
+          node ../scripts/process2.mjs
+          cp data.js data2.js ../data/
+
+      - name: בניית האתר
+        run: |
+          cd src
+          node build.mjs
+
+      - name: קומיט אם השתנה
+        run: |
+          git config user.name "map-refresh-bot"
+          git config user.email "actions@github.com"
+          if ! git diff --quiet -- data/ index.html dist-artifact.html; then
+            git add data/data.js data/data2.js index.html dist-artifact.html
+            git commit -m "🔄 רענון נתונים יומי ($(date -u +%Y-%m-%d))"
+            git push
+          else
+            echo "אין שינוי בנתונים"
+          fi
