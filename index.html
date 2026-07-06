@@ -2986,9 +2986,109 @@ function normalizeMuniEvent(ev) {
     official: true, muni: true,
   };
 }
+// ---- live fetch straight from the municipality API (CORS-open; users browse from local IPs) ----
+const MUNI_API = 'https://api-m.ramat-gan.muni.il/api/EventLobby/he/event-lobby';
+const MUNI_SITE = 'https://www.ramat-gan.muni.il';
+const canonName = s => norm(s).replace(/^(רחוב|שדרות|דרך|שד)\s+/, '')
+  .split(' ').map(w => w.replace(/י+/g, 'י')).sort().join(' ').replace(/י/g, '');
+const MUNI_STOPWORDS = new Set(['בית', 'מרכז', 'רחוב', 'תיאטרון', 'מועדון', 'ספריית', 'ספריה', 'הספריה', 'אולם', 'מתחם', 'גן', 'פארק', 'תרבות', 'קהילתי', 'עירוני', 'העירוני', 'שם', 'על']);
+let streetCanonIdx = null, roadCentIdx = null;
+function buildMuniGeoIdx() {
+  if (streetCanonIdx) return;
+  streetCanonIdx = new Map();
+  for (const e of streetIndex.values()) streetCanonIdx.set(canonName(e.name), e);
+  roadCentIdx = new Map();
+  for (const r of namedRoads) {
+    const k = canonName(r.name);
+    const c = roadCentIdx.get(k) || { x: 0, y: 0, n: 0 };
+    c.x += r.x; c.y += r.y; c.n++;
+    roadCentIdx.set(k, c);
+  }
+}
+function roadCentroid(name) {
+  const c = roadCentIdx.get(canonName(name));
+  return c ? { x: c.x / c.n, y: c.y / c.n, approx: true } : null;
+}
+function muniGeocode(address, locName) {
+  buildMuniGeoIdx();
+  if (address) {
+    const a = norm(address);
+    const m = a.match(/^(.*?)[\s,]+(\d+)/);
+    const stName = (m ? m[1] : a).replace(/^(רחוב|שדרות|דרך)\s+/, '');
+    const st = streetIndex.get(stName) || streetIndex.get(stripHe(stName)) || streetCanonIdx.get(canonName(stName));
+    if (st) {
+      if (m) {
+        const loc = resolveAddress(st, m[2]);
+        if (loc) return { x: loc.x, y: loc.y, approx: !!loc.approx };
+      }
+      if (st.cx) return { x: st.cx, y: st.cy, approx: true };
+    }
+    const rc = roadCentroid(stName);
+    if (rc) return rc;
+  }
+  const q = norm(locName || '');
+  if (q.length >= 3) {
+    if (q.includes('מייקרס')) { const rc = roadCentroid('משטרת מסובים'); if (rc) return rc; }
+    if (q.includes('בית קריניצי')) { const rc = roadCentroid('קריניצי'); if (rc) return rc; }
+    const qh = stripHe(q);
+    const poisIdx = searchItems.filter(it => it.type === 'poi');
+    for (const p of poisIdx) if (p.n === q || p.n === qh) return { x: p.x, y: p.y, approx: false };
+    for (const p of poisIdx) if ((p.n.includes(q) || q.includes(p.n)) && p.n.length > 4) return { x: p.x, y: p.y, approx: true };
+    const words = q.split(' ').filter(w => w.length >= 4 && !MUNI_STOPWORDS.has(w));
+    for (const p of poisIdx) if (words.some(w => p.n.split(' ').includes(w))) return { x: p.x, y: p.y, approx: true };
+  }
+  return null;
+}
+function muniCatMap(muniCat, title) {
+  const s = (muniCat || '') + ' ' + (title || '');
+  if (/ספורט|ריצה|מרוץ|צעדה|אופניים|יוגה|התעמלות/.test(s)) return ['sport', 'sport'];
+  if (/תיאטרון|מוזיקה|הופע|קונצרט|מחול|אמנות|סרט|קולנוע|הצגה/.test(s)) return ['culture', 'concert'];
+  if (/יריד|שוק|פסטיבל/.test(s)) return ['city', 'market'];
+  if (/סיור|טיול|מורשת/.test(s)) return ['poi', 'landmark'];
+  return ['community', 'community'];
+}
+async function fetchMuniLive() {
+  try {
+    const r = await fetch(MUNI_API, { signal: AbortSignal.timeout(9000) });
+    if (!r.ok) return null;
+    const data = await r.json();
+    const today = localISO(0);
+    const featured = new Set((data.content.sliderEvents || []).map(e => e.detailsLink?.url).filter(Boolean));
+    const seen = new Set();
+    const out = [];
+    for (const e of [...(data.content.sliderEvents || []), ...(data.content.closeEvents || [])]) {
+      const key = e.detailsLink?.url || (e.title || '') + '|' + (e.date || '');
+      if (seen.has(key)) continue;
+      seen.add(key);
+      const date = (e.date || '').slice(0, 10);
+      if (!date || date < today) continue;
+      let time = /T(\d{2}:\d{2})/.exec(e.hour || '')?.[1] || '';
+      if (time === '00:00') time = '';
+      const locName = e.eventLocation?.name || e.location || '';
+      const address = e.eventLocation?.address || '';
+      const geo = muniGeocode(address, locName) || (e.location ? muniGeocode('', e.location) : null);
+      const [cat, anim] = muniCatMap(e.category?.name, e.title);
+      out.push(normalizeMuniEvent({
+        id: 'muni-' + key.replace(/[^a-z0-9-]/gi, '').slice(-60),
+        title: (e.title || '').trim().slice(0, 90),
+        cat, anim, muniCat: e.category?.name || '',
+        audience: (e.audienceType || []).map(a => a.name).slice(0, 3),
+        date, time,
+        locName: locName.slice(0, 60), address: address.slice(0, 60),
+        x: geo ? geo.x : null, y: geo ? geo.y : null,
+        approx: geo ? !!geo.approx : undefined,
+        link: e.detailsLink?.url ? MUNI_SITE + e.detailsLink.url : MUNI_SITE + '/event-lobby',
+        img: e.linkMobilePreview ? MUNI_SITE + e.linkMobilePreview : null,
+        featured: featured.has(e.detailsLink?.url),
+      }));
+    }
+    const list = out.filter(Boolean);
+    return list.length ? list : null;
+  } catch (e) { return null; }
+}
 async function loadCityContent() {
   const today = localISO(0);
-  const [data, muni] = await Promise.all([fetchFirst(CITY_CONTENT_URLS), fetchFirst(MUNI_EVENTS_URLS)]);
+  const [data, muniLive] = await Promise.all([fetchFirst(CITY_CONTENT_URLS), fetchMuniLive()]);
   if (data) {
     cityEvents = (data.events || []).map(normalizeCityEvent).filter(Boolean)
       .filter(ev => !ev.endDate || ev.endDate >= today)
@@ -2996,8 +3096,11 @@ async function loadCityContent() {
     cityNotices = (data.notices || []).filter(n => n && typeof n.title === 'string')
       .filter(n => (!n.from || n.from <= today) && (!n.to || n.to >= today));
   }
-  if (muni) {
-    muniEvents = (muni.events || []).map(normalizeMuniEvent).filter(Boolean)
+  if (muniLive) {
+    muniEvents = muniLive; // freshest: straight from the municipality, seconds old
+  } else {
+    const muni = await fetchFirst(MUNI_EVENTS_URLS); // fallback: committed snapshot
+    if (muni) muniEvents = (muni.events || []).map(normalizeMuniEvent).filter(Boolean)
       .filter(ev => ev.date >= today);
   }
   rebuildMarkerList();
@@ -3006,6 +3109,8 @@ async function loadCityContent() {
   positionMarkers();
   MAP.requestRender();
 }
+// long-open tabs keep themselves fresh
+setInterval(loadCityContent, 30 * 60 * 1000);
 function renderNotices() {
   const badge = $('bellBadge');
   badge.textContent = cityNotices.length;
