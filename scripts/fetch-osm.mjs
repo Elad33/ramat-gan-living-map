@@ -54,6 +54,8 @@ await sleep(3000);
 await overpass('q_transit.txt', 'transit.json');
 await sleep(3000);
 await overpass('q_bldrel_bbox.txt', 'bldrel.json');
+await sleep(3000);
+await overpass('q_parts.txt', 'parts.json');
 for (const i of [0, 1, 2, 3]) {
   await sleep(5000);
   await overpass('q_bld' + i + '.txt', 'bld' + i + '.json');

@@ -94,7 +94,7 @@ const bld = [];      // [h_dm, x0,y0,dx,dy,...]
 const bldNames = []; // [idx, name]
 let skipped = 0;
 const seenWays = new Set();
-const addBuilding = (el, ring) => {
+const addBuilding = (el, ring, opts = {}) => {
   const t = el.tags || {};
   let hM = parseH(t.height);
   if (hM == null && t['building:levels']) {
@@ -102,7 +102,8 @@ const addBuilding = (el, ring) => {
     if (lv != null) hM = lv * 3.1 + 1.6;
   }
   let hdm;
-  if (hM != null) hdm = Math.round(hM * 10);
+  if (opts.hdm != null) hdm = opts.hdm;
+  else if (hM != null) hdm = Math.round(hM * 10);
   else {
     const base = typeDefault(t.building || 'yes');
     hdm = base + (hash(el.id) % 41) - 20; // ±2m deterministic variation
@@ -115,31 +116,70 @@ const addBuilding = (el, ring) => {
   let cx = 0, cy = 0;
   for (const p of pts) { cx += p[0]; cy += p[1]; }
   if (!inCity(cx / pts.length, cy / pts.length)) { skipped++; return; }
-  bld.push([hdm, ...delta(pts)]);
+  // outlines whose 3D volume is mapped as parts become a low plinth
+  if (!opts.isPart && typeof outlineCoverage === 'function' && parts.length) {
+    let ringA = 0;
+    for (let i = 0; i < pts.length; i++) {
+      const j = (i + 1) % pts.length;
+      ringA += pts[i][0] * pts[j][1] - pts[j][0] * pts[i][1];
+    }
+    ringA = Math.abs(ringA / 2) / 100;
+    if (ringA > 0 && outlineCoverage(pts) > ringA * 0.35) hdm = 30;
+  }
+  bld.push([hdm, opts.zbdm || 0, ...delta(pts)]);
   const name = t['name:he'] || t.name;
   if (name && !/^\d+$/.test(name)) bldNames.push([bld.length - 1, name]);
 };
-// Verified height fixes for towers OSM hasn't tagged yet (applied only while tags are missing).
-// Exchange Ramat Gan (topped out 2023): residential 206m/61fl, office 198m/50fl —
-// the office tower has the larger floor plate, so assign by footprint area.
-{
-  const exchange = buildings.elements.filter(e => /^exchange ramat gan$/i.test(e.tags?.name || ''));
-  if (exchange.length === 2 && exchange.every(e => !e.tags.height && !e.tags['building:levels'])) {
-    const area = el => {
-      const pts = projGeom(el.geometry);
-      let s = 0;
-      for (let i = 0; i < pts.length; i++) {
-        const j = (i + 1) % pts.length;
-        s += pts[i][0] * pts[j][1] - pts[j][0] * pts[i][1];
-      }
-      return Math.abs(s / 2);
-    };
-    exchange.sort((a, b) => area(b) - area(a));
-    exchange[0].tags.height = '198'; // office
-    exchange[1].tags.height = '206'; // residential
-    console.log('applied Exchange towers height fix (198m office / 206m residential)');
+// ---------- building:part support ----------
+// Complex buildings (Exchange towers, malls, hospitals) are mapped as a flat
+// outline + 3D parts. Render the parts as volumes; demote covered outlines.
+const partsRaw = fs.existsSync('parts.json') ? read('parts.json') : { elements: [] };
+const PART_SKIP = /^(balcony|deck|steps|roof|entrance|construction|no)$/;
+const parts = [];
+for (const el of partsRaw.elements) {
+  if (el.type !== 'way' || !el.geometry) continue;
+  const t = el.tags || {};
+  if (PART_SKIP.test(t['building:part'] || '')) continue;
+  const pts = dedupe(projGeom(el.geometry));
+  let cx = 0, cy = 0, area = 0;
+  for (let i = 0; i < pts.length; i++) {
+    const j = (i + 1) % pts.length;
+    area += pts[i][0] * pts[j][1] - pts[j][0] * pts[i][1];
+    cx += pts[i][0]; cy += pts[i][1];
   }
+  area = Math.abs(area / 2) / 100; // m²
+  cx /= pts.length; cy /= pts.length;
+  if (area < 12 || !inCity(cx, cy)) continue;
+  let hM = parseH(t.height);
+  if (hM == null && t['building:levels'] != null) {
+    const lv = parseH(t['building:levels']);
+    if (lv != null) hM = lv * 3.1 + 1.2;
+  }
+  if (hM == null) continue;
+  const minLv = parseH(t['building:min_level']);
+  const zbM = minLv != null ? minLv * 3.1 : 0;
+  if (hM <= zbM) continue;
+  parts.push({ el, cx, cy, area, hdm: Math.round(hM * 10), zbdm: Math.round(zbM * 10) });
 }
+console.log('building parts kept:', parts.length);
+
+// index part centroids for outline-coverage tests
+function outlineCoverage(pts) { // returns covered part area inside this ring
+  let covered = 0;
+  let mnx = 1e9, mny = 1e9, mxx = -1e9, mxy = -1e9;
+  for (const p of pts) { mnx = Math.min(mnx, p[0]); mxx = Math.max(mxx, p[0]); mny = Math.min(mny, p[1]); mxy = Math.max(mxy, p[1]); }
+  for (const pt of parts) {
+    if (pt.cx < mnx || pt.cx > mxx || pt.cy < mny || pt.cy > mxy) continue;
+    let inside = false;
+    for (let i = 0, j = pts.length - 1; i < pts.length; j = i++) {
+      const xi = pts[i][0], yi = pts[i][1], xj = pts[j][0], yj = pts[j][1];
+      if ((yi > pt.cy) !== (yj > pt.cy) && pt.cx < (xj - xi) * (pt.cy - yi) / (yj - yi) + xi) inside = !inside;
+    }
+    if (inside) covered += pt.area;
+  }
+  return covered;
+}
+
 for (const el of buildings.elements) {
   if (el.type !== 'way' || !el.geometry || seenWays.has(el.id)) continue;
   seenWays.add(el.id);
@@ -154,7 +194,11 @@ for (const el of bldrel.elements) {
     }
   }
 }
-console.log('buildings:', bld.length, 'named:', bldNames.length, 'skipped:', skipped);
+// 3D building parts as standalone volumes (with vertical base offsets)
+for (const pt of parts) {
+  addBuilding(pt.el, pt.el.geometry, { hdm: pt.hdm, zbdm: pt.zbdm, isPart: true });
+}
+console.log('buildings:', bld.length, '(incl.', parts.length, 'parts) named:', bldNames.length, 'skipped:', skipped);
 
 // ---- roads ----
 const CLS = { trunk:0, trunk_link:0, motorway_link:0, primary:0, primary_link:0,

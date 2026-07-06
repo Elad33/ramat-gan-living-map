@@ -374,7 +374,8 @@ const B = {
 const SUN = [Math.SQRT1_2 * 0.9, Math.SQRT1_2, 0]; // from north-west-ish
 function buildBuilding(rec) {
   const h = rec[0] * UNIT;
-  let pts = decodeLine(rec, 1);
+  const zb = rec[1] * UNIT; // vertical base (building:part min_level)
+  let pts = decodeLine(rec, 2);
   let area = signedArea(pts);
   if (Math.abs(area) < 4) { B.centroids.push(null); B.heights.push(h); return; } // degenerate
   if (area < 0) { // enforce CCW
@@ -419,7 +420,7 @@ function buildBuilding(rec) {
     const vb = B.vcount + i * 4;
     const d0 = dist, d1 = dist + len; dist = d1;
     // v0 bottom-left, v1 bottom-right, v2 top-right, v3 top-left
-    wp.set([x0, y0, 0, x1, y1, 0, x1, y1, h, x0, y0, h], i * 12);
+    wp.set([x0, y0, zb, x1, y1, zb, x1, y1, h, x0, y0, h], i * 12);
     ws[i * 4] = ws[i * 4 + 1] = ws[i * 4 + 2] = ws[i * 4 + 3] = shade;
     wu[i * 4] = d0; wu[i * 4 + 1] = d1; wu[i * 4 + 2] = d1; wu[i * 4 + 3] = d0;
     wh[i * 4] = wh[i * 4 + 1] = wh[i * 4 + 2] = wh[i * 4 + 3] = h;

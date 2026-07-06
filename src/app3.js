@@ -255,7 +255,7 @@ function showBusPop(stop) {
     '<div><div class="nm">' + escapeHtml(stop.name || 'תחנת אוטובוס') + '</div>' +
     '<div class="cd">תחנה ' + (stop.code || '—') + '</div></div></div>' +
     '<div id="busBody"><div class="bus-wait"><span class="spin"></span>טוען זמני הגעה…</div></div>' +
-    '<div class="acts"><button class="pop-act" data-act="close">סגירה</button></div>';
+    '<div class="acts">' + navActsHtml(stop.x, stop.y) + '<button class="pop-act" data-act="close">סגירה</button></div>';
   pop.classList.add('open');
   placePop();
   refreshBusPop();
@@ -728,6 +728,7 @@ function positionMarkers() {
   for (const [id, el] of evMarkers) if (!list.some(e => e.id === id)) { el.remove(); evMarkers.delete(id); hideScene(id, true); }
   if (popAnchor) placePop();
   positionTransit();
+  if (typeof positionGeoDot === 'function') positionGeoDot();
 }
 function hideScene(id, remove) {
   const el = sceneEls.get(id);
@@ -791,6 +792,7 @@ function showPop(id) {
     (ev.desc ? '<div class="desc">' + escapeHtml(ev.desc) + '</div>' : '') +
     (ev.link ? '<a class="pop-link" href="' + escapeHtml(ev.link) + '" target="_blank" rel="noopener">לפרטים והרשמה<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M7 17 17 7M8 7h9v9"/></svg></a>' : '') +
     '<div class="acts">' +
+    navActsHtml(ev.x, ev.y) +
     '<button class="pop-act" data-act="fly"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>התקרבות</button>' +
     (ev.official ? '' : '<button class="pop-act del" data-act="del"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2m-8 0 1 13h8l1-13"/></svg>הסרה</button>') +
     '<button class="pop-act" data-act="close">סגירה</button></div>';
@@ -814,6 +816,7 @@ const PLAN_KIND = {
 };
 function showPlanPop(plan, x, y) {
   popFor = null;
+  curPlanNum = plan.n;
   popAnchor = { x, y, lift: 16 };
   const k = PLAN_KIND[plan.k];
   const meta = [];
@@ -829,7 +832,7 @@ function showPlanPop(plan, x, y) {
     '<div class="pop-meta">' + meta.join('<span>·</span>') + '</div>' +
     (plan.o ? '<div class="desc">' + escapeHtml(plan.o) + '</div>' : '') +
     (plan.url ? '<a class="pop-link" href="' + escapeHtml(plan.url) + '" target="_blank" rel="noopener">לתיק התכנון הרשמי<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M7 17 17 7M8 7h9v9"/></svg></a>' : '') +
-    '<div class="acts"><button class="pop-act" data-act="close">סגירה</button></div>';
+    '<div class="acts">' + navActsHtml(x, y) + '<button class="pop-act" data-act="close">סגירה</button></div>';
   pop.classList.add('open');
   placePop();
 }
@@ -851,6 +854,7 @@ function closePop() {
   $('pop').classList.remove('open');
   popFor = null; popAnchor = null;
   busPopStop = null;
+  curPlanNum = null;
   clearInterval(busTimer);
 }
 window.addEventListener('mapclick', e => {
@@ -1091,6 +1095,145 @@ $('bellBtn').addEventListener('click', () => $('noticesBg').classList.add('open'
 $('noticesClose').addEventListener('click', () => $('noticesBg').classList.remove('open'));
 $('noticesBg').addEventListener('pointerdown', e => { if (e.target === e.currentTarget) e.currentTarget.classList.remove('open'); });
 
+// ---------- geo helpers, deep links, share, locate, navigation ----------
+const GEO = CITY_D.meta;
+const toGeo = (x, y) => [GEO.lat0 + y / 110540, GEO.lon0 + x / (Math.cos(GEO.lat0 * Math.PI / 180) * 111320)];
+const fromGeo = (lat, lon) => [(lon - GEO.lon0) * Math.cos(GEO.lat0 * Math.PI / 180) * 111320, (lat - GEO.lat0) * 110540];
+function wazeLink(x, y) {
+  const [lat, lon] = toGeo(x, y);
+  return 'https://waze.com/ul?ll=' + lat.toFixed(6) + ',' + lon.toFixed(6) + '&navigate=yes';
+}
+function navActsHtml(x, y) {
+  return '<a class="pop-act" href="' + wazeLink(x, y) + '" target="_blank" rel="noopener">' +
+    '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11 21 3l-8 18-2.5-7.5Z"/></svg>ניווט</a>';
+}
+
+// deep links: #v=x,y,dist,tilt,bearing&ev=id / &stop=code / &plan=number
+let pendingDeepLink = null;
+function parseDeepLink() {
+  const h = location.hash.slice(1);
+  if (!h) return null;
+  const p = new URLSearchParams(h);
+  const out = {};
+  if (p.get('v')) {
+    const v = p.get('v').split(',').map(Number);
+    if (v.length >= 3 && v.every(isFinite)) out.cam = { cx: v[0], cy: v[1], dist: v[2], tilt: v[3] ?? 0.8, bearing: v[4] ?? 0 };
+  }
+  if (p.get('ev')) out.ev = p.get('ev');
+  if (p.get('stop')) out.stop = +p.get('stop');
+  if (p.get('plan')) out.plan = p.get('plan');
+  if (p.get('layers')) out.layers = p.get('layers');
+  return (out.cam || out.ev || out.stop || out.plan) ? out : null;
+}
+let curPlanNum = null; // tracked for sharing
+function buildShareUrl() {
+  const c = MAP.cam;
+  let h = '#v=' + [c.cx.toFixed(0), c.cy.toFixed(0), c.dist.toFixed(0), c.tilt.toFixed(2), c.bearing.toFixed(2)].join(',');
+  const lay = [MAP.LAYERS.plans ? 'p' : '', MAP.LAYERS.transit ? 't' : ''].join('');
+  if (lay) h += '&layers=' + lay;
+  if (busPopStop) h += '&stop=' + busPopStop.code;
+  else if (popFor) h += '&ev=' + encodeURIComponent(popFor);
+  else if (curPlanNum) h += '&plan=' + encodeURIComponent(curPlanNum);
+  return 'https://ramat-gan-living-map.vercel.app/' + h;
+}
+$('shareBtn').addEventListener('click', async () => {
+  const url = buildShareUrl();
+  const title = 'רמת גן · המפה החיה';
+  try {
+    if (navigator.share) { await navigator.share({ title, url }); return; }
+  } catch (e) { if (e.name === 'AbortError') return; }
+  try {
+    await navigator.clipboard.writeText(url);
+    showToast('הקישור הועתק — שלחו למי שתרצו 🔗');
+  } catch (e) { prompt('העתיקו את הקישור:', url); }
+});
+function applyDeepLink(dl) {
+  if (dl.layers) {
+    MAP.setLayer('plans', dl.layers.includes('p'));
+    MAP.setLayer('transit', dl.layers.includes('t'));
+    syncLayerButtons();
+  }
+  if (dl.cam) Object.assign(MAP.cam, {
+    cx: clamp(dl.cam.cx, MAP.camLimits.minX, MAP.camLimits.maxX),
+    cy: clamp(dl.cam.cy, MAP.camLimits.minY, MAP.camLimits.maxY),
+    dist: clamp(dl.cam.dist, MAP.camLimits.minDist, MAP.camLimits.maxDist),
+    tilt: clamp(dl.cam.tilt, MAP.camLimits.minTilt, MAP.camLimits.maxTilt),
+    bearing: dl.cam.bearing || 0,
+  });
+  MAP.computeVP(); MAP.requestRender();
+  setTimeout(() => {
+    if (dl.stop) {
+      const s = busStops.find(x => x.code === dl.stop);
+      if (s) { MAP.setLayer('transit', true); syncLayerButtons(); showBusPop(s); }
+    } else if (dl.ev) {
+      if (allEvents().some(e => e.id === dl.ev)) showPop(dl.ev);
+    } else if (dl.plan) {
+      const p = (CITY_D.plans || []).find(x => x.n === dl.plan);
+      if (p) {
+        MAP.setLayer('plans', true); syncLayerButtons();
+        const r = p.r[0];
+        showPlanPop(p, r[0] * UNIT, r[1] * UNIT);
+      }
+    }
+  }, 600);
+}
+
+// my location
+let geoWatch = null, geoPos = null;
+function positionGeoDot() {
+  const el = $('geoDot');
+  if (!geoPos) { el.style.display = 'none'; return; }
+  const [sx, sy, vis] = MAP.project(geoPos[0], geoPos[1], 0);
+  el.style.display = vis ? '' : 'none';
+  el.style.transform = 'translate3d(' + sx + 'px,' + sy + 'px,0)';
+}
+$('geoBtn').addEventListener('click', () => {
+  if (geoWatch != null) {
+    navigator.geolocation.clearWatch(geoWatch);
+    geoWatch = null; geoPos = null;
+    positionGeoDot();
+    $('geoBtn').classList.remove('on');
+    return;
+  }
+  if (!navigator.geolocation) { showToast('הדפדפן אינו תומך באיתור מיקום'); return; }
+  showToast('מאתר אתכם…');
+  let first = true;
+  geoWatch = navigator.geolocation.watchPosition(pos => {
+    const [x, y] = fromGeo(pos.coords.latitude, pos.coords.longitude);
+    const B = MAP.bbox;
+    if (x < B.minX - 4000 || x > B.maxX + 4000 || y < B.minY - 4000 || y > B.maxY + 4000) {
+      showToast('נראה שאתם מחוץ לרמת גן — המפה מכסה את העיר בלבד');
+      navigator.geolocation.clearWatch(geoWatch); geoWatch = null;
+      return;
+    }
+    geoPos = [x, y];
+    $('geoBtn').classList.add('on');
+    positionGeoDot();
+    if (first) { first = false; MAP.flyTo({ cx: x, cy: y, dist: 520 }); showToast('הנה אתם 📍'); }
+  }, err => {
+    showToast(err.code === 1 ? 'כדי למצוא אתכם, אשרו גישה למיקום' : 'איתור המיקום נכשל');
+    geoWatch = null;
+  }, { enableHighAccuracy: true, maximumAge: 5000 });
+});
+
+// PWA install
+let installPrompt = null;
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  installPrompt = e;
+  $('installBtn').style.display = '';
+});
+$('installBtn').addEventListener('click', async () => {
+  if (!installPrompt) return;
+  installPrompt.prompt();
+  const res = await installPrompt.userChoice.catch(() => null);
+  if (res && res.outcome === 'accepted') { showToast('המפה מותקנת אצלכם 🎉'); $('installBtn').style.display = 'none'; }
+  installPrompt = null;
+});
+if ('serviceWorker' in navigator && location.protocol === 'https:' && !location.hostname.includes('claude') && !MAP.QA_MODE) {
+  try { navigator.serviceWorker.register('sw.js'); } catch (e) {}
+}
+
 // ---------- CMS pick mode (map embedded in admin as an iframe) ----------
 const PICK_MODE = /[?&#]pick\b/.test(location.search + location.hash);
 if (PICK_MODE) {
@@ -1136,10 +1279,12 @@ async function boot() {
     uploadMeshes();
     setP(0.86, 'מלטש את הזוהר…');
     await raf();
-    // theme: stored → host stamp → OS preference
+    // theme: stored → host stamp → time of day (dusk look after sunset)
     const hostTheme = document.documentElement.getAttribute('data-theme');
     const stored = store.getItem('rg.theme');
-    applyTheme(stored && THEMES[stored] ? stored : (hostTheme && THEMES[hostTheme] ? hostTheme : (matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark')), false);
+    const hour = new Date().getHours();
+    const byTime = (hour >= 7 && hour < 18) ? 'light' : 'dark';
+    applyTheme(stored && THEMES[stored] ? stored : (hostTheme && THEMES[hostTheme] ? hostTheme : byTime), false);
     loadEvents();
     renderEvList();
     try {
@@ -1182,6 +1327,12 @@ async function boot() {
         if (/panel/.test(qs)) { renderEvList(); openPanel(); }
         if (/modal/.test(qs)) { pendingLoc = { x: MAP.cam.cx, y: MAP.cam.cy }; openEvModal(); }
         if (/results/.test(qs)) { sInput.value = 'ביאליק 12'; sBox.classList.add('hasText'); renderResults(runSearch('ביאליק 12')); }
+        const dlq = parseDeepLink();
+        if (dlq) {
+          applyDeepLink(dlq);
+          MAP.drawOnce();
+          setTimeout(() => MAP.drawOnce(), 1400);
+        }
         if (/buspop/.test(qs)) {
           // open the arrivals popup for a busy stop (aba hillel) for QA
           const stop = busStops.find(s => s.code === 21644) || busStops[0];
@@ -1214,7 +1365,25 @@ async function boot() {
         document.body.insertBefore(img, canvas.nextSibling);
       });
     } else {
-      MAP.flyTo({ ...tgt, dist: 2600, tilt: 0.8, bearing: -0.35, T: 3400 });
+      const dl = parseDeepLink();
+      if (dl) {
+        Object.assign(MAP.cam, { cx: tgt.cx, cy: tgt.cy, dist: 2600, tilt: 0.8, bearing: -0.35 });
+        applyDeepLink(dl);
+      } else {
+        MAP.flyTo({ ...tgt, dist: 2600, tilt: 0.8, bearing: -0.35, T: 3400 });
+      }
+      // "happening today" badge on the events button
+      setTimeout(() => {
+        const today = new Date().toISOString().slice(0, 10);
+        if (allEvents().some(e => e.date === today && !hiddenCats.has(e.cat))) {
+          const c = $('evCount');
+          c.style.background = 'var(--rose)'; c.style.color = '#fff';
+          if (!store.getItem('rg.todayToast.' + today)) {
+            store.setItem('rg.todayToast.' + today, '1');
+            showToast('🎉 יש אירועים בעיר היום — הציצו ברשימה');
+          }
+        }
+      }, 2500);
     }
   } catch (err) {
     ERRLOG.push(String(err && err.stack || err));
