@@ -1362,14 +1362,24 @@ function renderNotices() {
   const badge = $('bellBadge');
   badge.textContent = cityNotices.length;
   badge.classList.toggle('on', cityNotices.length > 0);
-  $('noticesList').innerHTML = cityNotices.length
+  $('noticesList').innerHTML = (cityNotices.length
     ? cityNotices.map(n =>
       '<div class="notice"><h4>' + escapeHtml(n.title) + '</h4>' +
       (n.body ? '<div class="nb">' + escapeHtml(n.body) + '</div>' : '') +
       (n.link && /^https?:/.test(n.link) ? '<div class="nd"><a href="' + escapeHtml(n.link) + '" target="_blank" rel="noopener">לפרטים נוספים ←</a></div>' : '') +
       (n.to ? '<div class="nd">בתוקף עד ' + escapeHtml(n.to) + '</div>' : '') +
       '</div>').join('')
-    : '<div class="ev-none">אין הודעות חדשות מהעירייה.</div>';
+    : '<div class="ev-none">אין הודעות חדשות מהעירייה.</div>') +
+    (store.getItem(SUB_KEY) === 'subscribed' ? '' :
+      '<div class="notice"><h4>📬 עדכוני אירועים במייל</h4>' +
+      '<div class="nb">רוצים לדעת כשמשהו חדש קורה בעיר?</div>' +
+      '<div class="nd"><a href="#" id="subFromBell">להרשמה ←</a></div></div>');
+  const bellSub = $('subFromBell');
+  if (bellSub) bellSub.addEventListener('click', e => {
+    e.preventDefault();
+    $('noticesBg').classList.remove('open');
+    showSubCard();
+  });
 }
 $('bellBtn').addEventListener('click', () => $('noticesBg').classList.add('open'));
 $('noticesClose').addEventListener('click', () => $('noticesBg').classList.remove('open'));
@@ -1542,6 +1552,77 @@ if ('serviceWorker' in navigator && location.protocol === 'https:' && !location.
   try { navigator.serviceWorker.register('sw.js'); } catch (e) {}
 }
 
+// ---------- email updates signup ----------
+const SUB_KEY = 'rg.sub.v1';
+const SUB_API_LOCAL = '/api/subscribe';
+const SUB_API_REMOTE = 'https://ramat-gan-living-map.vercel.app/api/subscribe';
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+function showSubCard() { $('subCard').classList.add('show'); setTimeout(() => $('subEmail').focus({ preventScroll: true }), 480); }
+function hideSubCard() { $('subCard').classList.remove('show'); }
+$('subLater').addEventListener('click', () => {
+  store.setItem(SUB_KEY, 'dismissed:' + Date.now());
+  hideSubCard();
+});
+$('subForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const input = $('subEmail'), btn = $('subGo'), err = $('subErr');
+  const email = input.value.trim().toLowerCase();
+  if (!EMAIL_RE.test(email)) {
+    input.classList.add('bad');
+    err.textContent = 'נראה שהכתובת לא תקינה';
+    input.focus();
+    return;
+  }
+  input.classList.remove('bad');
+  err.textContent = '';
+  btn.disabled = true;
+  btn.textContent = 'נרשמים…';
+  let ok = false;
+  const urls = location.hostname.includes('vercel.app') || location.hostname === 'localhost'
+    ? [SUB_API_LOCAL, SUB_API_REMOTE] : [SUB_API_REMOTE];
+  for (const u of urls) {
+    try {
+      const r = await fetch(u, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, source: 'map-popup' }),
+        signal: AbortSignal.timeout(9000),
+      });
+      const data = await r.json().catch(() => null);
+      if (r.ok && data && data.ok) { ok = true; break; }
+      if (r.status === 400) {
+        input.classList.add('bad');
+        err.textContent = 'נראה שהכתובת לא תקינה';
+        btn.disabled = false; btn.textContent = 'עדכנו אותי';
+        return;
+      }
+    } catch (e2) {}
+  }
+  if (!ok) {
+    err.textContent = 'לא הצלחנו להירשם כרגע, נסו שוב עוד רגע';
+    btn.disabled = false;
+    btn.textContent = 'עדכנו אותי';
+    return;
+  }
+  store.setItem(SUB_KEY, 'subscribed');
+  $('subCard').innerHTML =
+    '<div class="sub-done"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9.5"/><path d="m8 12.5 2.6 2.6L16 9.5"/></svg>' +
+    '<div>נרשמתם! נעדכן אתכם כשמשהו חדש קורה בעיר 🎉</div></div>';
+  setTimeout(hideSubCard, 3600);
+});
+function maybeOfferSubscription() {
+  if (typeof PICK_MODE !== 'undefined' && PICK_MODE) return;
+  if (MAP.QA_MODE && !/subpop/.test(location.search + location.hash)) return;
+  if (location.hostname.includes('claude')) return; // artifact host blocks network
+  const state = store.getItem(SUB_KEY) || '';
+  if (state === 'subscribed') return;
+  if (state.startsWith('dismissed:')) {
+    const when = +state.slice(10) || 0;
+    if (Date.now() - when < 30 * 864e5) return; // respect "not now" for a month
+  }
+  setTimeout(showSubCard, MAP.QA_MODE ? 300 : 9000); // let the intro flight land first
+}
+
 // ---------- CMS pick mode (map embedded in admin as an iframe) ----------
 const PICK_MODE = /[?&#]pick\b/.test(location.search + location.hash);
 if (PICK_MODE) {
@@ -1653,6 +1734,7 @@ async function boot() {
             setTimeout(() => MAP.drawOnce(), 2500); // re-snapshot after arrivals land
           }
         }
+        if (/subpop/.test(qs)) maybeOfferSubscription();
         if (/plans/.test(qs)) { MAP.setLayer('plans', true); syncLayerButtons(); MAP.drawOnce(); }
         if (/transit/.test(qs)) { MAP.setLayer('transit', true); syncLayerButtons(); positionTransit(); MAP.drawOnce(); }
         if (/planpop/.test(qs)) {
@@ -1681,6 +1763,7 @@ async function boot() {
       } else {
         MAP.flyTo({ ...tgt, dist: 2600, tilt: 0.8, bearing: -0.35, T: 3400 });
       }
+      maybeOfferSubscription();
       // "happening today" badge on the events button
       setTimeout(() => {
         const today = localISO(0);
