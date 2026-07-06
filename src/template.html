@@ -137,6 +137,28 @@ input,select,textarea{font-family:inherit;font-size:inherit;color:var(--ink)}
 .ev-card .where{margin-top:5px;font-size:13px;color:var(--ink-dim);display:flex;align-items:center;gap:6px}
 .ev-card .desc{margin-top:7px;font-size:13.5px;color:var(--ink-dim);line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .ev-none{text-align:center;color:var(--ink-faint);padding:36px 10px;font-size:14px;line-height:1.7}
+.ev-sec{font-family:var(--font-display);font-weight:800;font-size:15px;color:var(--gold);
+  letter-spacing:.14em;margin:14px 2px 2px;display:flex;align-items:center;gap:10px}
+.ev-sec::after{content:'';flex:1;height:1px;background:var(--hairline-soft)}
+.ev-card{display:flex;gap:12px;align-items:flex-start}
+.ev-card .card-tx{flex:1;min-width:0}
+.ev-thumb{flex:none;width:62px;height:62px;border-radius:12px;object-fit:cover;border:1px solid var(--hairline-soft)}
+.ev-card .muni-cat{font-size:11.5px;color:var(--ink-faint)}
+.ev-online{font-size:11.5px;font-weight:700;color:var(--sky)}
+/* venue marker count badge */
+.mk-count{position:absolute;top:-6px;right:-9px;min-width:19px;height:19px;border-radius:999px;
+  background:var(--rose);color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;
+  justify-content:center;padding:0 5px;border:1.5px solid rgba(255,255,255,.8);pointer-events:none}
+/* venue popup event rows */
+.ven-list{margin-top:10px;display:flex;flex-direction:column;gap:5px;max-height:250px;overflow-y:auto}
+.ven-row{display:flex;align-items:center;gap:9px;padding:7px 10px;border:1px solid var(--hairline-soft);
+  border-radius:10px;text-decoration:none;color:var(--ink);transition:border-color .15s,background .15s}
+.ven-row:hover{border-color:var(--hairline);background:rgba(227,194,126,.06)}
+.ven-row .vw{flex:none;font-size:11.5px;color:var(--gold);font-variant-numeric:tabular-nums;font-weight:700;
+  min-width:64px;line-height:1.3}
+.ven-row .vt{flex:1;min-width:0;font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ven-row svg{flex:none;opacity:.6}
+.pop-img{width:calc(100% + 40px);margin:10px -20px -4px;max-height:120px;object-fit:cover;display:block}
 
 /* ---------- legend / filters ---------- */
 #legend{position:fixed;bottom:28px;left:50%;transform:translateX(-50%);z-index:20;display:flex;gap:8px;flex-wrap:wrap;justify-content:center;
