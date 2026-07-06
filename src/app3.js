@@ -672,55 +672,102 @@ const CAT_ANIM = { culture: 'concert', city: 'market', sport: 'sport', community
 const SC_INK = 'style="fill:var(--ink)"', SC_GOLD = 'style="fill:var(--gold)"';
 function sceneSVG(type, color) {
   const C = color || '#e3c27e';
+  const INK = 'var(--ink)';
+  const person = (x, y, cl, fill) =>
+    '<g class="' + cl + '"><circle cx="' + x + '" cy="' + y + '" r="3.6" style="fill:' + (fill || INK) + '"/>' +
+    '<path d="M' + x + ' ' + (y + 4) + 'c-4 0-5.5 5.5-5.5 15h11c0-9.5-1.5-15-5.5-15Z" style="fill:' + (fill || INK) + ';opacity:.9"/></g>';
+
   if (type === 'concert') return '<svg viewBox="0 0 132 88">' +
-    '<polygon points="46,10 66,80 26,80" style="fill:' + C + ';opacity:.08"/>' +
-    '<polygon points="86,10 106,80 66,80" style="fill:' + C + ';opacity:.08"/>' +
-    '<ellipse cx="66" cy="82" rx="42" ry="5.5" style="fill:' + C + ';opacity:.22"/>' +
-    '<g class="sc-bob"><circle cx="66" cy="52" r="4.6" ' + SC_INK + '/><path d="M66 57c-4 0-6 5-6 12h12c0-7-2-12-6-12Z" ' + SC_INK + '/><rect x="71" y="56" width="1.6" height="13" rx=".8" ' + SC_GOLD + '/><circle cx="71.8" cy="55" r="1.7" ' + SC_GOLD + '/></g>' +
-    '<g class="sc-note"><path d="M56 50v-8l5-1.4V48a2.6 2.6 0 1 1-1.6-2.4" style="fill:none;stroke:' + C + ';stroke-width:1.6"/></g>' +
-    '<g class="sc-note n2"><circle cx="79" cy="44" r="2.2" style="fill:' + C + '"/><rect x="80.7" y="32" width="1.5" height="12" style="fill:' + C + '"/></g>' +
-    '<g class="sc-note n3"><circle cx="70" cy="38" r="1.9" style="fill:' + C + ';opacity:.8"/><rect x="71.4" y="28" width="1.3" height="10" style="fill:' + C + ';opacity:.8"/></g>' +
-    ['40,78', '52,80', '66,81', '80,80', '92,78'].map((p, i) =>
-      '<circle cx="' + p.split(',')[0] + '" cy="' + p.split(',')[1] + '" r="2.6" class="sc-bob' + (i % 3 ? i % 3 + 1 : '') + '" style="fill:var(--ink);opacity:.55"/>').join('') +
+    '<polygon class="sc-beam" points="40,4 62,80 22,80" style="fill:' + C + ';opacity:.14"/>' +
+    '<polygon class="sc-beam bm2" points="92,4 110,80 70,80" style="fill:' + C + ';opacity:.14"/>' +
+    '<ellipse cx="66" cy="82" rx="44" ry="5.5" style="fill:' + C + ';opacity:.22"/>' +
+    '<ellipse class="sc-ring" cx="66" cy="82" rx="30" ry="4.5" style="fill:none;stroke:' + C + ';stroke-width:1.6"/>' +
+    '<ellipse class="sc-ring r2" cx="66" cy="82" rx="30" ry="4.5" style="fill:none;stroke:' + C + ';stroke-width:1.6"/>' +
+    '<g><rect x="30" y="60" width="7" height="16" rx="1.5" style="fill:' + INK + ';opacity:.75"/><circle class="sc-glow" cx="33.5" cy="65" r="1.8" style="fill:' + C + '"/></g>' +
+    '<g><rect x="95" y="60" width="7" height="16" rx="1.5" style="fill:' + INK + ';opacity:.75"/><circle class="sc-glow" cx="98.5" cy="65" r="1.8" style="fill:' + C + '"/></g>' +
+    '<g class="sc-sway"><circle cx="66" cy="49" r="4.8" style="fill:' + INK + '"/>' +
+    '<path d="M66 54c-4.2 0-6.2 5.5-6.2 15h12.4c0-9.5-2-15-6.2-15Z" style="fill:' + INK + '"/>' +
+    '<path d="M70 57l5.5-3" style="stroke:' + INK + ';stroke-width:2;stroke-linecap:round"/>' +
+    '<circle cx="76.5" cy="53.4" r="1.9" style="fill:' + C + '"/>' +
+    '<path d="M76.5 55.3v12" style="stroke:' + C + ';stroke-width:1.1;opacity:.75"/></g>' +
+    '<g class="sc-note"><path d="M56 48v-9l5.5-1.6v8.6a2.7 2.7 0 1 1-1.7-2.5" style="fill:none;stroke:' + C + ';stroke-width:1.7"/></g>' +
+    '<g class="sc-note n2"><circle cx="80" cy="42" r="2.3" style="fill:' + C + '"/><rect x="81.8" y="29" width="1.5" height="13" style="fill:' + C + '"/></g>' +
+    '<g class="sc-note n3"><circle cx="70" cy="36" r="2" style="fill:' + C + ';opacity:.85"/><rect x="71.5" y="25" width="1.4" height="11" style="fill:' + C + ';opacity:.85"/></g>' +
+    ['40,79,', '51,81,b2', '66,82,b3', '81,81,b4', '92,79,b2'].map(p => {
+      const [x, y, d] = p.split(',');
+      return '<g class="sc-bob ' + d + '"><circle cx="' + x + '" cy="' + y + '" r="2.8" style="fill:' + INK + ';opacity:.6"/>' +
+        '<path d="M' + (x - 3) + ' ' + (y - 3) + 'l-2-3M' + (+x + 3) + ' ' + (y - 3) + 'l2-3" style="stroke:' + INK + ';stroke-width:1.3;opacity:.45;stroke-linecap:round"/></g>';
+    }).join('') +
     '</svg>';
+
   if (type === 'market') return '<svg viewBox="0 0 132 88">' +
-    '<path class="sc-wave" d="M14 34 Q66 48 118 34" style="fill:none;stroke:' + C + ';stroke-width:1.2;opacity:.7"/>' +
-    [20, 36, 52, 68, 84, 100].map((x, i) =>
-      '<polygon class="sc-wave" style="animation-delay:' + (i * .3) + 's" points="' + x + ',' + (36 + Math.sin(i) * 3) + ' ' + (x + 8) + ',' + (36 + Math.sin(i) * 3) + ' ' + (x + 4) + ',' + (44 + Math.sin(i) * 3) + '" fill="' + (i % 2 ? C : 'var(--rose)') + '" opacity=".85"/>').join('') +
-    '<g><rect x="24" y="58" width="3" height="24" ' + SC_INK + ' opacity=".6"/><rect x="55" y="58" width="3" height="24" ' + SC_INK + ' opacity=".6"/>' +
-    [0, 1, 2, 3].map(i => '<rect x="' + (20 + i * 11) + '" y="52" width="11" height="8" rx="1.5" style="fill:' + (i % 2 ? C : '#fff') + ';opacity:.9"/>').join('') + '</g>' +
-    '<g><rect x="78" y="60" width="3" height="22" ' + SC_INK + ' opacity=".6"/><rect x="106" y="60" width="3" height="22" ' + SC_INK + ' opacity=".6"/>' +
-    [0, 1, 2].map(i => '<rect x="' + (76 + i * 12) + '" y="54" width="12" height="8" rx="1.5" style="fill:' + (i % 2 ? '#fff' : C) + ';opacity:.9"/>').join('') + '</g>' +
-    '<circle class="sc-glow" cx="66" cy="28" r="3.2" style="fill:' + C + '"/>' +
+    '<path class="sc-wave" d="M12 30 Q66 46 120 30" style="fill:none;stroke:' + C + ';stroke-width:1.2;opacity:.7"/>' +
+    [18, 35, 52, 69, 86, 103].map((x, i) =>
+      '<polygon class="sc-wave" style="animation-delay:' + (i * .33) + 's" points="' + x + ',' + (32 + (i % 3)) + ' ' + (x + 9) + ',' + (32 + (i % 3)) + ' ' + (x + 4.5) + ',' + (41 + (i % 3)) + '" fill="' + (i % 2 ? C : 'var(--rose)') + '" opacity=".9"/>').join('') +
+    '<g><rect x="20" y="58" width="3" height="24" style="fill:' + INK + ';opacity:.65"/><rect x="52" y="58" width="3" height="24" style="fill:' + INK + ';opacity:.65"/>' +
+    [0, 1, 2, 3].map(i => '<rect x="' + (16 + i * 11) + '" y="51" width="11" height="9" rx="1.5" style="fill:' + (i % 2 ? C : '#f5efe0') + ';opacity:.95"/>').join('') +
+    '<rect x="22" y="68" width="28" height="5" rx="1" style="fill:' + INK + ';opacity:.35"/></g>' +
+    '<g><rect x="80" y="60" width="3" height="22" style="fill:' + INK + ';opacity:.65"/><rect x="108" y="60" width="3" height="22" style="fill:' + INK + ';opacity:.65"/>' +
+    [0, 1, 2].map(i => '<rect x="' + (78 + i * 12) + '" y="53" width="12" height="9" rx="1.5" style="fill:' + (i % 2 ? '#f5efe0' : C) + ';opacity:.95"/>').join('') + '</g>' +
+    '<path class="sc-steam" d="M92 56c-2-3 2-4 0-7" style="fill:none;stroke:#f5efe0;stroke-width:1.6;stroke-linecap:round"/>' +
+    '<path class="sc-steam s2" d="M98 56c-2-3 2-4 0-7" style="fill:none;stroke:#f5efe0;stroke-width:1.6;stroke-linecap:round"/>' +
+    '<path class="sc-steam s3" d="M95 57c-2-3 2-4 0-7" style="fill:none;stroke:' + C + ';stroke-width:1.4;stroke-linecap:round"/>' +
+    '<g class="sc-walk">' + person(66, 64, 'sc-bob') + '</g>' +
+    '<g class="sc-walk w2"><g class="sc-bob b2"><circle cx="66" cy="66" r="3" style="fill:' + INK + ';opacity:.7"/>' +
+    '<path d="M66 69.5c-3.2 0-4.5 4.5-4.5 12h9c0-7.5-1.3-12-4.5-12Z" style="fill:' + INK + ';opacity:.6"/></g></g>' +
+    '<circle class="sc-glow" cx="66" cy="26" r="3.4" style="fill:' + C + '"/>' +
+    '<circle class="sc-spark s2" cx="60" cy="22" r="1.3" style="fill:' + C + '"/>' +
     '</svg>';
+
   if (type === 'sport') return '<svg viewBox="0 0 132 88">' +
-    '<ellipse cx="66" cy="82" rx="46" ry="5" style="fill:none;stroke:' + C + ';stroke-width:1.2;stroke-dasharray:6 5;opacity:.55"/>' +
-    [0, 1, 2].map(i => '<g class="sc-run' + (i ? ' r' + (i + 1) : '') + '"><g transform="translate(60,58)">' +
-      '<circle cx="0" cy="0" r="3.4" ' + SC_INK + '/>' +
-      '<path d="M0 3 L-1 12" style="stroke:var(--ink);stroke-width:2.4;stroke-linecap:round"/>' +
-      '<path class="sc-leg" d="M-1 12 L-5 21" style="stroke:var(--ink);stroke-width:2.2;stroke-linecap:round"/>' +
-      '<path class="sc-leg l2" d="M-1 12 L4 20" style="stroke:var(--ink);stroke-width:2.2;stroke-linecap:round"/>' +
-      '<path d="M-8 16 h-9" style="stroke:' + C + ';stroke-width:1.4;opacity:.6"/><path d="M-8 9 h-6" style="stroke:' + C + ';stroke-width:1.2;opacity:.4"/>' +
+    '<path d="M8 82h116" style="stroke:' + C + ';stroke-width:1.4;stroke-dasharray:7 6;opacity:.55"/>' +
+    '<g><rect x="107" y="46" width="2.2" height="36" style="fill:' + INK + ';opacity:.8"/>' +
+    '<g class="sc-flag"><rect x="109" y="46" width="13" height="4.5" style="fill:' + C + '"/><rect x="109" y="50.5" width="13" height="4.5" style="fill:' + INK + ';opacity:.7"/></g></g>' +
+    [0, 1, 2].map(i => '<g class="sc-run' + (i ? ' r' + (i + 1) : '') + '"><g transform="translate(60,56)">' +
+      '<circle cx="0" cy="0" r="3.6" style="fill:' + INK + '"/>' +
+      '<path d="M0 3.5 L-1 13" style="stroke:' + INK + ';stroke-width:2.6;stroke-linecap:round"/>' +
+      '<path class="sc-arm" d="M-.5 6 L-6 11" style="stroke:' + INK + ';stroke-width:2.1;stroke-linecap:round"/>' +
+      '<path class="sc-arm a2" d="M-.5 6 L5 10" style="stroke:' + INK + ';stroke-width:2.1;stroke-linecap:round"/>' +
+      '<path class="sc-leg" d="M-1 13 L-5.5 22" style="stroke:' + INK + ';stroke-width:2.3;stroke-linecap:round"/>' +
+      '<path class="sc-leg l2" d="M-1 13 L4.5 21.5" style="stroke:' + INK + ';stroke-width:2.3;stroke-linecap:round"/>' +
+      '<path d="M-9 15h-8M-9 8h-5" style="stroke:' + C + ';stroke-width:1.4;opacity:.55"/>' +
       '</g></g>').join('') +
+    '<circle class="sc-ball" cx="34" cy="76" r="3.2" style="fill:' + C + '"/>' +
     '</svg>';
+
   if (type === 'community') return '<svg viewBox="0 0 132 88">' +
-    '<g class="sc-bln"><circle cx="46" cy="30" r="5.5" style="fill:var(--rose);opacity:.9"/><path d="M46 35.5 q2 8 0 14" style="fill:none;stroke:var(--ink);stroke-width:.9;opacity:.5"/></g>' +
-    '<g class="sc-bln b2"><circle cx="88" cy="26" r="5" style="fill:var(--sky);opacity:.9"/><path d="M88 31 q-2 8 0 14" style="fill:none;stroke:var(--ink);stroke-width:.9;opacity:.5"/></g>' +
-    [[52, 'sc-bob'], [66, 'sc-bob2'], [80, 'sc-bob3']].map(([x, cl], i) =>
-      '<g class="' + cl + '"><circle cx="' + x + '" cy="' + (60 - (i === 1 ? 4 : 0)) + '" r="4" ' + SC_INK + '/>' +
-      '<path d="M' + x + ' ' + (64 - (i === 1 ? 4 : 0)) + ' c-4.5 0-6.5 6-6.5 18h13c0-12-2-18-6.5-18Z" style="fill:' + (i === 1 ? C : 'var(--ink)') + ';opacity:.85"/></g>').join('') +
-    '<path d="M58 72 h16 M72 72 h14" style="stroke:var(--ink);stroke-width:1.6;opacity:.4"/>' +
+    '<g class="sc-bln"><circle cx="40" cy="26" r="6" style="fill:var(--rose);opacity:.95"/><path d="M40 32q2.5 9 0 16" style="fill:none;stroke:' + INK + ';stroke-width:.9;opacity:.5"/></g>' +
+    '<g class="sc-bln b2"><circle cx="92" cy="22" r="5.4" style="fill:var(--sky);opacity:.95"/><path d="M92 27.5q-2.5 9 0 16" style="fill:none;stroke:' + INK + ';stroke-width:.9;opacity:.5"/></g>' +
+    '<g class="sc-bln b3"><circle cx="66" cy="16" r="4.8" style="fill:' + C + ';opacity:.95"/><path d="M66 21q2 8 0 14" style="fill:none;stroke:' + INK + ';stroke-width:.9;opacity:.5"/></g>' +
+    '<rect class="sc-conf" x="46" y="34" width="3.2" height="2" style="fill:' + C + '"/>' +
+    '<rect class="sc-conf c2" x="58" y="30" width="3.2" height="2" style="fill:var(--rose)"/>' +
+    '<rect class="sc-conf c3" x="74" y="33" width="3.2" height="2" style="fill:var(--sky)"/>' +
+    '<rect class="sc-conf c4" x="86" y="30" width="3.2" height="2" style="fill:var(--gold)"/>' +
+    person(50, 58, 'sc-bob') + person(66, 54, 'sc-bob b2', C) + person(82, 58, 'sc-bob b3') +
+    '<path d="M55.5 68h7M76.5 68h-7" style="stroke:' + INK + ';stroke-width:1.7;opacity:.5;stroke-linecap:round"/>' +
+    '<path class="sc-glow" d="M66 36c-1.6-2.6-5.4-1.4-5.4 1.3 0 2 2.7 3.9 5.4 5.9 2.7-2 5.4-3.9 5.4-5.9 0-2.7-3.8-3.9-5.4-1.3Z" style="fill:var(--rose)"/>' +
     '</svg>';
+
   if (type === 'landmark') return '<svg viewBox="0 0 132 88">' +
-    '<circle cx="66" cy="60" r="17" style="fill:none;stroke:' + C + ';stroke-width:1;opacity:.4"/>' +
-    '<path class="sc-spark" d="M66 44l3.2 12.2L82 60l-12.8 3.8L66 76l-3.2-12.2L50 60l12.8-3.8Z" style="fill:' + C + '"/>' +
-    '<path class="sc-spark s2" d="M46 40l1.6 5 5 1.6-5 1.6-1.6 5-1.6-5-5-1.6 5-1.6Z" style="fill:' + C + ';opacity:.8"/>' +
-    '<path class="sc-spark s3" d="M88 34l1.4 4.2 4.2 1.4-4.2 1.4-1.4 4.2-1.4-4.2-4.2-1.4 4.2-1.4Z" style="fill:' + C + ';opacity:.8"/>' +
+    '<g class="sc-ray"><g style="opacity:.3">' +
+    [0, 45, 90, 135].map(a => '<rect x="65" y="34" width="2" height="52" rx="1" transform="rotate(' + a + ' 66 60)" style="fill:' + C + '"/>').join('') +
+    '</g></g>' +
+    '<circle cx="66" cy="60" r="16" style="fill:none;stroke:' + C + ';stroke-width:1;opacity:.4"/>' +
+    '<path class="sc-spark" d="M66 44l3.4 12.4L82 60l-12.6 3.6L66 76l-3.4-12.4L50 60l12.6-3.6Z" style="fill:' + C + '"/>' +
+    '<path class="sc-flash" d="M42 38l1.8 4.6 4.6 1.8-4.6 1.8-1.8 4.6-1.8-4.6-4.6-1.8 4.6-1.8Z" style="fill:#f5efe0"/>' +
+    '<path class="sc-flash f2" d="M92 32l1.5 4 4 1.5-4 1.5-1.5 4-1.5-4-4-1.5 4-1.5Z" style="fill:#f5efe0"/>' +
+    '<path class="sc-flash f3" d="M86 68l1.3 3.4 3.4 1.3-3.4 1.3-1.3 3.4-1.3-3.4-3.4-1.3 3.4-1.3Z" style="fill:' + C + '"/>' +
+    '<g class="sc-orbit"><circle cx="66" cy="38" r="1.8" style="fill:' + C + '"/></g>' +
+    '<g class="sc-orbit o2"><circle cx="66" cy="82" r="1.4" style="fill:#f5efe0;opacity:.85"/></g>' +
     '</svg>';
-  return '<svg viewBox="0 0 132 88">' + // default: golden ripples
+
+  return '<svg viewBox="0 0 132 88">' +
     ['', 'p2', 'p3'].map(cl => '<circle class="sc-rip ' + cl + '" cx="66" cy="74" r="26" style="fill:none;stroke:' + C + ';stroke-width:1.6"/>').join('') +
-    [[44, 58], [88, 54], [60, 42], [78, 66]].map(([x, y], i) =>
-      '<circle class="sc-spark' + (i % 3 ? ' s' + (i % 3 + 1) : '') + '" cx="' + x + '" cy="' + y + '" r="1.8" style="fill:' + C + '"/>').join('') +
+    '<g class="sc-orbit"><circle cx="66" cy="48" r="2" style="fill:' + C + '"/></g>' +
+    '<g class="sc-orbit o2"><circle cx="66" cy="96" r="1.5" style="fill:' + C + ';opacity:.8"/></g>' +
+    '<circle class="sc-spark" cx="46" cy="58" r="1.8" style="fill:' + C + '"/>' +
+    '<circle class="sc-spark s2" cx="88" cy="54" r="1.8" style="fill:' + C + '"/>' +
+    '<circle class="sc-spark s3" cx="62" cy="42" r="1.8" style="fill:' + C + '"/>' +
     '</svg>';
 }
 const sceneEls = new Map(); // ev.id -> el
@@ -753,9 +800,9 @@ function positionMarkers() {
     el.style.display = vis ? '' : 'none';
     el.style.transform = 'translate3d(' + sx + 'px,' + sy + 'px,0)';
     // ambient scene when close
-    const s = ppm ? clamp(46 * ppm / 132, 0.3, 2.4) : 0;
-    if (vis && s >= 0.42) {
-      const sc = ensureScene(mk.count > 1 ? { id: mk.id, cat: mk.cat, anim: mk.events[0].anim } : mk.events[0]);
+    const s = ppm ? clamp(54 * ppm / 132, 0.3, 2.6) : 0;
+    if (vis && s >= 0.4 && sx > -90 && sx < innerWidth + 90 && sy > 50 && sy < innerHeight + 150) {
+      const sc = ensureScene({ id: mk.id, cat: mk.cat, anim: mk.events[0].anim || '' });
       sc.style.display = '';
       sc.style.transform = 'translate3d(' + sx + 'px,' + (sy + 2) + 'px,0) translate(-50%,-100%) scale(' + s.toFixed(3) + ')';
     } else hideScene(mk.id);

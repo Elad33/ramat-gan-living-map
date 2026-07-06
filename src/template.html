@@ -232,40 +232,76 @@ input,select,textarea{font-family:inherit;font-size:inherit;color:var(--ink)}
 .wk-chip{display:inline-flex;align-items:center;gap:6px;margin-top:9px;font-size:12px;font-weight:700;color:var(--amber);
   background:color-mix(in srgb,var(--amber) 13%,transparent);border-radius:999px;padding:3px 11px}
 
-/* ---------- event scenes (ambient animations) ---------- */
+/* ---------- event scenes (game-feel invitations) ---------- */
 .scene{position:absolute;top:0;left:0;width:132px;height:88px;pointer-events:none;z-index:4;will-change:transform;
   transform-origin:50% 100%}
-.scene svg{display:block;width:100%;height:100%;overflow:visible}
-.sc-bob{animation:scBob 2.4s ease-in-out infinite}
-.sc-bob2{animation:scBob 2.4s ease-in-out .6s infinite}
-.sc-bob3{animation:scBob 2.4s ease-in-out 1.1s infinite}
-@keyframes scBob{0%,100%{transform:translateY(0)}50%{transform:translateY(-3.5px)}}
-.sc-note{animation:scNote 3s ease-out infinite;opacity:0}
-.sc-note.n2{animation-delay:1s}.sc-note.n3{animation-delay:2s}
-@keyframes scNote{0%{opacity:0;transform:translate(0,0) rotate(-6deg)}15%{opacity:.95}
-  100%{opacity:0;transform:translate(-9px,-34px) rotate(10deg)}}
-.sc-wave{animation:scWave 3.4s ease-in-out infinite;transform-origin:0 0}
-@keyframes scWave{0%,100%{transform:skewX(0deg)}50%{transform:skewX(-7deg)}}
-.sc-glow{animation:scGlow 2.2s ease-in-out infinite}
-@keyframes scGlow{0%,100%{opacity:.55}50%{opacity:1}}
-.sc-run{animation:scRun 3.6s linear infinite}
-.sc-run.r2{animation-delay:1.2s}.sc-run.r3{animation-delay:2.4s}
-@keyframes scRun{0%{transform:translateX(56px);opacity:0}10%{opacity:1}90%{opacity:1}100%{transform:translateX(-56px);opacity:0}}
-.sc-leg{animation:scLeg .4s ease-in-out infinite alternate;transform-origin:top center}
-@keyframes scLeg{from{transform:rotate(16deg)}to{transform:rotate(-16deg)}}
+.scene svg{display:block;width:100%;height:100%;overflow:visible;animation:sceneIn .5s cubic-bezier(.22,1,.36,1) backwards}
+@keyframes sceneIn{from{opacity:0;transform:translateY(12px) scale(.85)}to{opacity:1;transform:none}}
+.sc-bob{animation:scBob 2.1s ease-in-out infinite}
+.sc-bob.b2{animation-delay:.4s}.sc-bob.b3{animation-delay:.9s}.sc-bob.b4{animation-delay:1.4s}
+@keyframes scBob{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+.sc-sway{animation:scSway 2.6s ease-in-out infinite;transform-origin:50% 100%;transform-box:fill-box}
+@keyframes scSway{0%,100%{transform:rotate(-6deg)}50%{transform:rotate(6deg)}}
+.sc-note{animation:scNote 2.6s ease-out infinite;opacity:0}
+.sc-note.n2{animation-delay:.9s}.sc-note.n3{animation-delay:1.7s}
+@keyframes scNote{0%{opacity:0;transform:translate(0,0) rotate(-10deg) scale(.7)}12%{opacity:1}
+  100%{opacity:0;transform:translate(-13px,-42px) rotate(16deg) scale(1.2)}}
+.sc-beam{animation:scBeam 3.4s ease-in-out infinite alternate;transform-origin:50% 0;transform-box:fill-box}
+.sc-beam.bm2{animation-direction:alternate-reverse}
+@keyframes scBeam{from{transform:rotate(-13deg)}to{transform:rotate(13deg)}}
+.sc-ring{animation:scRing 2s ease-out infinite;transform-origin:center;transform-box:fill-box;opacity:0}
+.sc-ring.r2{animation-delay:1s}
+@keyframes scRing{0%{opacity:.85;transform:scale(.3)}100%{opacity:0;transform:scale(1.5)}}
+.sc-walk{animation:scWalk 5.2s linear infinite}
+.sc-walk.w2{animation-delay:2.6s}
+@keyframes scWalk{0%{transform:translateX(-46px) scaleX(1);opacity:0}6%{opacity:1}
+  46%{transform:translateX(40px) scaleX(1)}50%{transform:translateX(44px) scaleX(-1)}94%{opacity:1}
+  100%{transform:translateX(-46px) scaleX(-1);opacity:0}}
+.sc-steam{animation:scSteam 3s ease-out infinite;opacity:0}
+.sc-steam.s2{animation-delay:1s}.sc-steam.s3{animation-delay:2s}
+@keyframes scSteam{0%{opacity:0;transform:translateY(0) scale(.7)}18%{opacity:.65}
+  100%{opacity:0;transform:translateY(-24px) scale(1.35)}}
+.sc-flag{animation:scFlagW 1.5s ease-in-out infinite;transform-origin:0 100%;transform-box:fill-box}
+@keyframes scFlagW{0%,100%{transform:skewY(-5deg)}50%{transform:skewY(6deg)}}
+.sc-ball{animation:scBall 1s cubic-bezier(.36,0,.64,1) infinite alternate}
+@keyframes scBall{from{transform:translateY(0)}to{transform:translateY(-17px)}}
+.sc-conf{animation:scConf 2.9s linear infinite;opacity:0}
+.sc-conf.c2{animation-delay:.7s}.sc-conf.c3{animation-delay:1.5s}.sc-conf.c4{animation-delay:2.2s}
+@keyframes scConf{0%{opacity:0;transform:translateY(-8px) rotate(0deg)}14%{opacity:1}82%{opacity:1}
+  100%{opacity:0;transform:translateY(26px) rotate(210deg)}}
+.sc-flash{animation:scFlash 3.6s ease-out infinite;opacity:0;transform-origin:center;transform-box:fill-box}
+.sc-flash.f2{animation-delay:1.3s}.sc-flash.f3{animation-delay:2.4s}
+@keyframes scFlash{0%,76%{opacity:0;transform:scale(.4)}81%{opacity:1;transform:scale(1.25)}
+  90%{opacity:.35}100%{opacity:0;transform:scale(1.55)}}
+.sc-ray{animation:scRay 10s linear infinite;transform-origin:center;transform-box:fill-box}
+@keyframes scRay{to{transform:rotate(360deg)}}
+.sc-orbit{animation:scRay 6.5s linear infinite;transform-origin:center;transform-box:fill-box}
+.sc-orbit.o2{animation-duration:9s;animation-direction:reverse}
+.sc-run{animation:scRun 3.4s linear infinite}
+.sc-run.r2{animation-delay:1.15s}.sc-run.r3{animation-delay:2.3s}
+@keyframes scRun{0%{transform:translateX(56px);opacity:0}9%{opacity:1}91%{opacity:1}
+  100%{transform:translateX(-58px);opacity:0}}
+.sc-leg{animation:scLeg .34s ease-in-out infinite alternate;transform-origin:top center;transform-box:fill-box}
+@keyframes scLeg{from{transform:rotate(20deg)}to{transform:rotate(-20deg)}}
 .sc-leg.l2{animation-direction:alternate-reverse}
-.sc-bln{animation:scBln 4.5s ease-in-out infinite}
-.sc-bln.b2{animation-delay:1.6s}
-@keyframes scBln{0%,100%{transform:translate(0,0) rotate(-2deg)}50%{transform:translate(2px,-7px) rotate(3deg)}}
-.sc-spark{animation:scSpark 1.9s ease-in-out infinite;transform-origin:center}
-.sc-spark.s2{animation-delay:.5s}.sc-spark.s3{animation-delay:1.1s}
-@keyframes scSpark{0%,100%{opacity:.15;transform:scale(.6)}50%{opacity:1;transform:scale(1.15)}}
+.sc-arm{animation:scLeg .34s ease-in-out infinite alternate-reverse;transform-origin:top center;transform-box:fill-box}
+.sc-arm.a2{animation-direction:alternate}
+.sc-bln{animation:scBln 4.2s ease-in-out infinite}
+.sc-bln.b2{animation-delay:1.4s}.sc-bln.b3{animation-delay:2.8s}
+@keyframes scBln{0%,100%{transform:translate(0,0) rotate(-3deg)}50%{transform:translate(3px,-8px) rotate(4deg)}}
+.sc-spark{animation:scSpark 1.8s ease-in-out infinite;transform-origin:center;transform-box:fill-box}
+.sc-spark.s2{animation-delay:.5s}.sc-spark.s3{animation-delay:1.05s}
+@keyframes scSpark{0%,100%{opacity:.15;transform:scale(.6)}50%{opacity:1;transform:scale(1.18)}}
+.sc-glow{animation:scGlow 2s ease-in-out infinite}
+@keyframes scGlow{0%,100%{opacity:.5}50%{opacity:1}}
+.sc-wave{animation:scWave 2.6s ease-in-out infinite;transform-origin:0 0;transform-box:fill-box}
+@keyframes scWave{0%,100%{transform:skewX(0deg)}50%{transform:skewX(-9deg)}}
 .sc-rip{animation:scRip 2.8s ease-out infinite;transform-origin:center;transform-box:fill-box}
 .sc-rip.p2{animation-delay:.9s}.sc-rip.p3{animation-delay:1.8s}
 @keyframes scRip{0%{opacity:.8;transform:scale(.25)}100%{opacity:0;transform:scale(1.35)}}
 @media (prefers-reduced-motion:reduce){
-  .scene *{animation:none !important}
-  .sc-note,.sc-run{opacity:.6}
+  .scene *,.scene svg{animation:none !important}
+  .sc-note,.sc-run,.sc-walk,.sc-steam,.sc-conf,.sc-flash,.sc-ring{opacity:.5}
 }
 
 /* ---------- notices (מידע לתושב) ---------- */
