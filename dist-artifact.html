@@ -15,7 +15,7 @@
 <style>
 :root{
   --bg:#070b16; --panel:rgba(13,18,33,.78); --panel-solid:#0e1425; --hairline:rgba(227,194,126,.28);
-  --hairline-soft:rgba(227,194,126,.14); --ink:#f2ecdd; --ink-dim:#b9b2a0; --ink-faint:#7d7869;
+  --hairline-soft:rgba(227,194,126,.14); --ink:#f2ecdd; --ink-dim:#b9b2a0; --ink-faint:#8c8776;
   --gold:#e3c27e; --gold-strong:#f0d296; --gold-deep:#a8863d;
   --emerald:#46c08a; --rose:#e86a8a; --sky:#5ba8e8; --amber:#e8a44c;
   --danger:#e0596a;
@@ -27,8 +27,8 @@
 }
 :root[data-theme="light"]{
   --bg:#e9ecef; --panel:rgba(252,251,247,.85); --panel-solid:#fcfbf7; --hairline:rgba(122,96,42,.35);
-  --hairline-soft:rgba(122,96,42,.16); --ink:#1a2233; --ink-dim:#4d576b; --ink-faint:#8b93a3;
-  --gold:#a8863d; --gold-strong:#8a6d2c; --gold-deep:#c9a961;
+  --hairline-soft:rgba(122,96,42,.16); --ink:#1a2233; --ink-dim:#4d576b; --ink-faint:#667080;
+  --gold:#8a6d2c; --gold-strong:#6e5722; --gold-deep:#a8863d;
   --emerald:#1e8a5e; --rose:#c74e6e; --sky:#2f7fc4; --amber:#c07f2a;
   --danger:#c44557;
   --shadow:0 18px 45px rgba(26,34,51,.18),0 2px 8px rgba(26,34,51,.12);
@@ -136,10 +136,11 @@ input,select,textarea{font-family:inherit;font-size:inherit;color:var(--ink)}
   padding:12px;border:1px dashed var(--hairline);border-radius:var(--r-md);color:var(--gold);font-weight:600;transition:background .2s,border-color .2s}
 #evAddBtn:hover{background:rgba(227,194,126,.08);border-color:var(--gold)}
 #evList{flex:1;overflow-y:auto;padding:16px 26px 30px;display:flex;flex-direction:column;gap:12px}
-.ev-card{border:1px solid var(--hairline-soft);border-radius:var(--r-lg);padding:15px 16px;cursor:pointer;
-  transition:border-color .2s,transform .2s;background:rgba(255,255,255,.02)}
-:root[data-theme="light"] .ev-card{background:rgba(255,255,255,.6)}
-.ev-card:hover{border-color:var(--hairline);transform:translateY(-1px)}
+.ev-card{border-radius:var(--r-lg);padding:15px 16px;cursor:pointer;
+  transition:background .2s;background:rgba(255,255,255,.035)}
+:root[data-theme="light"] .ev-card{background:rgba(255,255,255,.66)}
+.ev-card:hover{background:rgba(227,194,126,.1)}
+:root[data-theme="light"] .ev-card:hover{background:rgba(168,134,61,.12)}
 .ev-card .row1{display:flex;align-items:center;gap:9px}
 .ev-chip{font-size:11.5px;font-weight:700;letter-spacing:.06em;padding:3px 10px;border-radius:999px}
 .ev-card .when{margin-right:auto;font-size:12.5px;color:var(--ink-faint);font-variant-numeric:tabular-nums}
@@ -161,14 +162,16 @@ input,select,textarea{font-family:inherit;font-size:inherit;color:var(--ink)}
   justify-content:center;padding:0 5px;border:1.5px solid rgba(255,255,255,.8);pointer-events:none}
 /* venue popup event rows */
 .ven-list{margin-top:10px;display:flex;flex-direction:column;gap:5px;max-height:250px;overflow-y:auto}
-.ven-row{display:flex;align-items:center;gap:9px;padding:7px 10px;border:1px solid var(--hairline-soft);
-  border-radius:10px;text-decoration:none;color:var(--ink);transition:border-color .15s,background .15s}
-.ven-row:hover{border-color:var(--hairline);background:rgba(227,194,126,.06)}
+.ven-row{display:flex;align-items:center;gap:9px;padding:8px 11px;border-radius:10px;text-decoration:none;
+  color:var(--ink);background:rgba(255,255,255,.035);transition:background .15s}
+:root[data-theme="light"] .ven-row{background:rgba(26,34,51,.045)}
+.ven-row:hover{background:rgba(227,194,126,.12)}
 .ven-row .vw{flex:none;font-size:11.5px;color:var(--gold);font-variant-numeric:tabular-nums;font-weight:700;
   min-width:64px;line-height:1.3}
 .ven-row .vt{flex:1;min-width:0;font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ven-row svg{flex:none;opacity:.6}
-.pop-img{width:calc(100% + 40px);margin:10px -20px -4px;max-height:120px;object-fit:cover;display:block}
+.pop-hero{width:calc(100% + 40px);margin:-18px -20px 13px;height:106px;object-fit:cover;display:block;
+  border-radius:calc(var(--r-lg) - 1px) calc(var(--r-lg) - 1px) 0 0}
 
 /* ---------- legend / filters ---------- */
 #legend{position:fixed;bottom:28px;left:50%;transform:translateX(-50%);z-index:20;display:flex;gap:8px;flex-wrap:wrap;justify-content:center;
@@ -210,20 +213,29 @@ input,select,textarea{font-family:inherit;font-size:inherit;color:var(--ink)}
 .lbl-bus:hover svg{transform:scale(1.22)}
 
 /* ---------- bus arrivals popup ---------- */
-.bus-head{display:flex;align-items:center;gap:9px}
+.bus-head{display:flex;align-items:center;gap:9px;padding-left:26px}
 .bus-sign{flex:none;width:26px;height:26px;border-radius:7px}
 .bus-head .nm{font-weight:700;font-size:15.5px;line-height:1.25}
 .bus-head .cd{font-size:11.5px;color:var(--ink-faint);font-variant-numeric:tabular-nums}
 .bus-list{margin-top:11px;display:flex;flex-direction:column;gap:6px;max-height:230px;overflow-y:auto}
-.bus-row{display:flex;align-items:center;gap:10px;padding:7px 10px;border:1px solid var(--hairline-soft);border-radius:10px}
+.bus-row{display:flex;align-items:center;gap:10px;padding:8px 11px;border-radius:10px;background:rgba(255,255,255,.035)}
+:root[data-theme="light"] .bus-row{background:rgba(26,34,51,.045)}
 .bus-line{flex:none;min-width:38px;text-align:center;font-weight:800;font-size:14.5px;padding:3px 8px;border-radius:8px;
   background:rgba(79,182,232,.16);color:#6cc4f0;font-variant-numeric:tabular-nums}
 :root[data-theme="light"] .bus-line{background:rgba(29,127,181,.12);color:#166a99}
 .bus-op{font-size:12px;color:var(--ink-faint);flex:1}
-.bus-eta{font-weight:700;font-size:14px;color:var(--emerald);font-variant-numeric:tabular-nums;white-space:nowrap}
+.bus-eta{font-weight:800;font-size:15px;color:var(--emerald);font-variant-numeric:tabular-nums;white-space:nowrap}
 .bus-eta small{font-weight:400;color:var(--ink-faint);margin-right:5px}
 .bus-note{margin-top:9px;font-size:11.5px;color:var(--ink-faint);line-height:1.5}
 .bus-wait{display:flex;align-items:center;gap:9px;padding:16px 4px;color:var(--ink-dim);font-size:13.5px}
+.sk-row{height:37px;border-radius:10px;margin-top:6px;background:linear-gradient(105deg,
+  rgba(255,255,255,.04) 40%,rgba(255,255,255,.09) 50%,rgba(255,255,255,.04) 60%) 0 0/300% 100%;
+  animation:skSweep 1.4s ease-in-out infinite}
+:root[data-theme="light"] .sk-row{background:linear-gradient(105deg,
+  rgba(26,34,51,.05) 40%,rgba(26,34,51,.1) 50%,rgba(26,34,51,.05) 60%) 0 0/300% 100%;
+  animation:skSweep 1.4s ease-in-out infinite}
+@keyframes skSweep{from{background-position:100% 0}to{background-position:0 0}}
+@media (prefers-reduced-motion:reduce){.sk-row{animation:none}}
 .spin{width:15px;height:15px;border:2px solid var(--hairline);border-top-color:var(--gold);border-radius:50%;
   animation:spin .8s linear infinite;flex:none}
 @keyframes spin{to{transform:rotate(360deg)}}
@@ -284,8 +296,6 @@ input,select,textarea{font-family:inherit;font-size:inherit;color:var(--ink)}
 /* ---------- plan popup bits ---------- */
 .pop-meta{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:9px;font-size:12.5px;color:var(--ink-faint)}
 .pop-meta b{color:var(--ink-dim);font-variant-numeric:tabular-nums}
-.pop-link{display:inline-flex;align-items:center;gap:6px;margin-top:11px;font-size:13px;font-weight:700;color:var(--gold);text-decoration:none}
-.pop-link:hover{text-decoration:underline;text-underline-offset:3px}
 
 /* ---------- map labels ---------- */
 .lbl{position:absolute;top:0;right:auto;left:0;transform-origin:center;white-space:nowrap;pointer-events:none;will-change:transform,opacity}
@@ -309,17 +319,30 @@ input,select,textarea{font-family:inherit;font-size:inherit;color:var(--ink)}
 @media (prefers-reduced-motion:reduce){.mk .pulse{animation:none;opacity:.25}.ldr-mark{animation:none}}
 
 /* ---------- popup card ---------- */
-#pop{position:absolute;z-index:8;width:min(320px,calc(100vw - 40px));background:var(--panel);backdrop-filter:blur(20px);
+#pop{position:absolute;z-index:8;width:min(324px,calc(100vw - 40px));--tail-x:50%;
+  background:color-mix(in srgb,var(--panel-solid) 88%,transparent);backdrop-filter:blur(20px);
   -webkit-backdrop-filter:blur(20px);border:1px solid var(--hairline);border-radius:var(--r-lg);box-shadow:var(--shadow);
   padding:18px 20px;pointer-events:auto;display:none}
-#pop.open{display:block;animation:popIn .25s cubic-bezier(.2,1.4,.4,1)}
+#pop.open{display:block;animation:popIn .22s cubic-bezier(.22,1,.36,1)}
 @keyframes popIn{from{opacity:0;transform:translateY(8px) scale(.97)}to{opacity:1;transform:none}}
-#pop .row1{display:flex;align-items:center;gap:9px}
+#pop::after{content:'';position:absolute;top:100%;left:var(--tail-x);width:14px;height:14px;margin:-7px 0 0 -7px;
+  background:inherit;border:inherit;border-top:none;border-left:none;transform:rotate(45deg);
+  border-radius:0 0 3px 0;box-shadow:none}
+#pop.no-tail::after{display:none}
+.pop-x{position:absolute;top:10px;left:10px;width:30px;height:30px;border-radius:9px;display:flex;
+  align-items:center;justify-content:center;color:var(--ink-faint);transition:color .15s,background .15s;z-index:2}
+.pop-x:hover{color:var(--ink);background:rgba(227,194,126,.1)}
+#pop .row1{display:flex;align-items:center;gap:9px;padding-left:26px}
 #pop .when{margin-right:auto;font-size:12.5px;color:var(--ink-faint);font-variant-numeric:tabular-nums}
 #pop h3{font-family:var(--font-display);font-size:20px;font-weight:800;margin-top:10px;line-height:1.25}
 #pop .where{margin-top:6px;font-size:13px;color:var(--ink-dim);display:flex;gap:6px;align-items:center}
 #pop .desc{margin-top:10px;font-size:14px;color:var(--ink-dim);line-height:1.55;max-height:130px;overflow-y:auto}
-#pop .acts{margin-top:14px;display:flex;gap:8px;border-top:1px solid var(--hairline-soft);padding-top:12px}
+.pop-primary{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;margin-top:14px;
+  padding:11px;border-radius:var(--r-md);background:linear-gradient(135deg,var(--gold),var(--gold-deep));
+  color:#14100a;font-weight:700;font-size:14.5px;text-decoration:none;transition:filter .15s}
+:root[data-theme="light"] .pop-primary{color:#fffdf6}
+.pop-primary:hover{filter:brightness(1.08)}
+#pop .acts{margin-top:10px;display:flex;gap:4px;justify-content:center}
 .pop-act{flex:1;padding:8px;border-radius:var(--r-sm);font-size:13.5px;font-weight:600;color:var(--ink-dim);
   display:flex;align-items:center;justify-content:center;gap:6px;transition:all .15s}
 .pop-act:hover{background:rgba(227,194,126,.12);color:var(--gold)}
@@ -422,6 +445,8 @@ textarea.f-in{resize:vertical;min-height:74px}
   #evList{padding:12px 20px 24px}
   /* popup card hugs the bottom on phones */
   #pop{width:calc(100vw - 24px);max-width:420px}
+  .pop-act{min-height:44px}
+  .pop-x{width:38px;height:38px}
   .modal{padding:22px 20px;border-radius:20px}
   #attrib{bottom:calc(2px + env(safe-area-inset-bottom))}
 }
@@ -3346,12 +3371,12 @@ function showBusPop(stop) {
   popFor = null;
   popAnchor = { x: stop.x, y: stop.y, lift: 20 };
   const pop = $('pop');
-  pop.innerHTML =
+  pop.innerHTML = POP_X +
     '<div class="bus-head"><span class="bus-sign">' + BUS_SIGN_SVG + '</span>' +
     '<div><div class="nm">' + escapeHtml(stop.name || 'תחנת אוטובוס') + '</div>' +
     '<div class="cd">תחנה ' + (stop.code || '—') + '</div></div></div>' +
-    '<div id="busBody"><div class="bus-wait"><span class="spin"></span>טוען זמני הגעה…</div></div>' +
-    '<div class="acts">' + navActsHtml(stop.x, stop.y) + '<button class="pop-act" data-act="close">סגירה</button></div>';
+    '<div id="busBody"><div class="sk-row"></div><div class="sk-row"></div><div class="sk-row"></div></div>' +
+    '<div class="acts">' + navActsHtml(stop.x, stop.y) + '</div>';
   pop.classList.add('open');
   placePop();
   refreshBusPop();
@@ -3923,6 +3948,7 @@ $('evList').addEventListener('click', e => {
 
 // popup (shared between events and plans)
 let popFor = null, popAnchor = null;
+const POP_X = '<button class="pop-x" data-act="close" aria-label="סגירה"><svg width="14" height="14" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>';
 function showPop(id) {
   const ev = allEvents().find(e => e.id === id);
   if (!ev) return;
@@ -3931,6 +3957,8 @@ function showPop(id) {
   popAnchor = { x: ev.x, y: ev.y, lift: 62 };
   const pop = $('pop');
   pop.innerHTML =
+    (ev.img ? '<img class="pop-hero" loading="lazy" src="' + escapeHtml(ev.img) + '" alt="" onerror="this.remove()"/>' : '') +
+    POP_X +
     '<div class="row1">' + chipHtml(ev.cat) + (ev.official ? '<span class="official-chip">עירייה</span>' : '') +
     '<span class="when">' + fmtWhen(ev) + '</span></div>' +
     '<h3>' + escapeHtml(ev.title) + '</h3>' +
@@ -3938,13 +3966,12 @@ function showPop(id) {
       (ev.audience && ev.audience.length ? ' · ' + escapeHtml(ev.audience.join(', ')) : '') + '</div>' : '') +
     '<div class="where"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="2" style="flex:none"><path d="M12 21s-7-5.8-7-11a7 7 0 0 1 14 0c0 5.2-7 11-7 11Z"/><circle cx="12" cy="10" r="2.6"/></svg>' + escapeHtml(ev.addr || 'רמת גן') + '</div>' +
     (ev.desc ? '<div class="desc">' + escapeHtml(ev.desc) + '</div>' : '') +
-    (ev.img ? '<img class="pop-img" loading="lazy" src="' + escapeHtml(ev.img) + '" alt="" onerror="this.remove()"/>' : '') +
-    (ev.link ? '<a class="pop-link" href="' + escapeHtml(ev.link) + '" target="_blank" rel="noopener">לפרטים והרשמה<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M7 17 17 7M8 7h9v9"/></svg></a>' : '') +
+    (ev.link ? '<a class="pop-primary" href="' + escapeHtml(ev.link) + '" target="_blank" rel="noopener">לפרטים והרשמה<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M7 17 17 7M8 7h9v9"/></svg></a>' : '') +
     '<div class="acts">' +
     navActsHtml(ev.x, ev.y) +
     '<button class="pop-act" data-act="fly"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>התקרבות</button>' +
     (ev.official ? '' : '<button class="pop-act del" data-act="del"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2m-8 0 1 13h8l1-13"/></svg>הסרה</button>') +
-    '<button class="pop-act" data-act="close">סגירה</button></div>';
+    '</div>';
   pop.classList.add('open');
   placePop();
 }
@@ -3959,7 +3986,7 @@ function showVenuePop(mk) {
   popAnchor = { x: mk.x, y: mk.y, lift: 62 };
   const evs = mk.events.slice().sort((a, b) => (a.date + a.time) < (b.date + b.time) ? -1 : 1).slice(0, 9);
   const pop = $('pop');
-  pop.innerHTML =
+  pop.innerHTML = POP_X +
     '<div class="row1"><span class="official-chip">עירייה</span><span class="when">' + mk.count + ' אירועים קרובים</span></div>' +
     '<h3>' + escapeHtml(mk.locName || evs[0].locName || 'מוקד אירועים עירוני') + '</h3>' +
     '<div class="where"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="2" style="flex:none"><path d="M12 21s-7-5.8-7-11a7 7 0 0 1 14 0c0 5.2-7 11-7 11Z"/><circle cx="12" cy="10" r="2.6"/></svg>' + escapeHtml(evs[0].addr || '') + '</div>' +
@@ -3969,8 +3996,8 @@ function showVenuePop(mk) {
       '<span class="vt">' + escapeHtml(ev.title) + '</span>' +
       '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M7 17 17 7M8 7h9v9"/></svg></a>').join('') +
     '</div>' +
-    (mk.count > 9 ? '<div class="bus-note">ועוד ' + (mk.count - 9) + ' אירועים במקום הזה — ראו ברשימה המלאה</div>' : '') +
-    '<div class="acts">' + navActsHtml(mk.x, mk.y) + '<button class="pop-act" data-act="close">סגירה</button></div>';
+    (mk.count > 9 ? '<div class="bus-note">ועוד ' + (mk.count - 9) + ' אירועים במקום הזה, ברשימה המלאה</div>' : '') +
+    '<div class="acts">' + navActsHtml(mk.x, mk.y) + '</div>';
   pop.classList.add('open');
   placePop();
 }
@@ -3980,8 +4007,16 @@ function placePop() {
   const [sx, sy, vis] = MAP.project(popAnchor.x, popAnchor.y, 0);
   if (!vis) { closePop(); return; }
   const w = pop.offsetWidth || 300, h = pop.offsetHeight || 180;
-  pop.style.left = clamp(sx - w / 2, 10, innerWidth - w - 10) + 'px';
-  pop.style.top = clamp(sy - h - (popAnchor.lift || 20), 10, innerHeight - h - 10) + 'px';
+  const left = clamp(sx - w / 2, 10, innerWidth - w - 10);
+  const top = clamp(sy - h - (popAnchor.lift || 20), 10, innerHeight - h - 10);
+  pop.style.left = left + 'px';
+  pop.style.top = top + 'px';
+  // the tail points at the anchor; hide it when clamping pushed the card off the point
+  const tailX = sx - left;
+  if (Math.abs(top + h - sy) < 96 && tailX > 22 && tailX < w - 22) {
+    pop.style.setProperty('--tail-x', tailX.toFixed(0) + 'px');
+    pop.classList.remove('no-tail');
+  } else pop.classList.add('no-tail');
 }
 // plan details popup
 const PLAN_KIND = {
@@ -4000,14 +4035,14 @@ function showPlanPop(plan, x, y) {
   if (plan.d) meta.push('<b>' + plan.d.toLocaleString('he-IL') + '</b> דונם');
   if (plan.u) meta.push('<b>' + (plan.u > 0 ? '+' : '') + plan.u.toLocaleString('he-IL') + '</b> יח״ד');
   const pop = $('pop');
-  pop.innerHTML =
+  pop.innerHTML = POP_X +
     '<div class="row1"><span class="ev-chip" style="background:color-mix(in srgb,' + k.color + ' 18%,transparent);color:' + k.color + '">' + k.label + '</span>' +
     '<span class="when">' + escapeHtml(plan.s) + '</span></div>' +
     '<h3>' + escapeHtml(plan.t || 'תוכנית ' + plan.n) + '</h3>' +
     '<div class="pop-meta">' + meta.join('<span>·</span>') + '</div>' +
     (plan.o ? '<div class="desc">' + escapeHtml(plan.o) + '</div>' : '') +
-    (plan.url ? '<a class="pop-link" href="' + escapeHtml(plan.url) + '" target="_blank" rel="noopener">לתיק התכנון הרשמי<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M7 17 17 7M8 7h9v9"/></svg></a>' : '') +
-    '<div class="acts">' + navActsHtml(x, y) + '<button class="pop-act" data-act="close">סגירה</button></div>';
+    (plan.url ? '<a class="pop-primary" href="' + escapeHtml(plan.url) + '" target="_blank" rel="noopener">לתיק התכנון הרשמי<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M7 17 17 7M8 7h9v9"/></svg></a>' : '') +
+    '<div class="acts">' + navActsHtml(x, y) + '</div>';
   pop.classList.add('open');
   placePop();
 }
@@ -4473,20 +4508,48 @@ function applyDeepLink(dl) {
     bearing: dl.cam.bearing || 0,
   });
   MAP.computeVP(); MAP.requestRender();
-  setTimeout(() => {
+  // move the camera onto the entity, then open its popup (popups close off-screen)
+  const goAndOpen = (x, y, open) => {
+    const dist = Math.min(MAP.cam.dist, 800);
+    if (MAP.QA_MODE) {
+      Object.assign(MAP.cam, { cx: x, cy: y, dist });
+      MAP.drawOnce();
+      open();
+      MAP.drawOnce();
+    } else MAP.flyTo({ cx: x, cy: y, dist, T: 700, done: open });
+  };
+  const tryEntity = () => {
     if (dl.stop) {
       const s = busStops.find(x => x.code === dl.stop);
-      if (s) { MAP.setLayer('transit', true); syncLayerButtons(); showBusPop(s); }
-    } else if (dl.ev) {
-      if (allEvents().some(e => e.id === dl.ev)) showPop(dl.ev);
-    } else if (dl.plan) {
-      const p = (CITY_D.plans || []).find(x => x.n === dl.plan);
-      if (p) {
-        MAP.setLayer('plans', true); syncLayerButtons();
-        const r = p.r[0];
-        showPlanPop(p, r[0] * UNIT, r[1] * UNIT);
-      }
+      if (!s) return false;
+      MAP.setLayer('transit', true); syncLayerButtons();
+      goAndOpen(s.x, s.y, () => showBusPop(s));
+      return true;
     }
+    if (dl.ev) {
+      const e = allEvents().find(x => x.id === dl.ev);
+      if (!e) return false;
+      if (typeof e.x === 'number') goAndOpen(e.x, e.y, () => showPop(e.id));
+      else if (e.link) window.open(e.link, '_blank', 'noopener');
+      return true;
+    }
+    if (dl.plan) {
+      const p = (CITY_D.plans || []).find(x => x.n === dl.plan);
+      if (!p) return false;
+      MAP.setLayer('plans', true); syncLayerButtons();
+      const r = p.r[0];
+      goAndOpen(r[0] * UNIT, r[1] * UNIT, () => showPlanPop(p, r[0] * UNIT, r[1] * UNIT));
+      return true;
+    }
+    return true;
+  };
+  // shared content loads async; retry until the entity exists
+  setTimeout(() => {
+    if (tryEntity()) return;
+    setTimeout(() => {
+      if (tryEntity()) return;
+      setTimeout(tryEntity, 3200);
+    }, 1900);
   }, 600);
 }
 

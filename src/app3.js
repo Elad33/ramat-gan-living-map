@@ -257,12 +257,12 @@ function showBusPop(stop) {
   popFor = null;
   popAnchor = { x: stop.x, y: stop.y, lift: 20 };
   const pop = $('pop');
-  pop.innerHTML =
+  pop.innerHTML = POP_X +
     '<div class="bus-head"><span class="bus-sign">' + BUS_SIGN_SVG + '</span>' +
     '<div><div class="nm">' + escapeHtml(stop.name || 'תחנת אוטובוס') + '</div>' +
     '<div class="cd">תחנה ' + (stop.code || '—') + '</div></div></div>' +
-    '<div id="busBody"><div class="bus-wait"><span class="spin"></span>טוען זמני הגעה…</div></div>' +
-    '<div class="acts">' + navActsHtml(stop.x, stop.y) + '<button class="pop-act" data-act="close">סגירה</button></div>';
+    '<div id="busBody"><div class="sk-row"></div><div class="sk-row"></div><div class="sk-row"></div></div>' +
+    '<div class="acts">' + navActsHtml(stop.x, stop.y) + '</div>';
   pop.classList.add('open');
   placePop();
   refreshBusPop();
@@ -834,6 +834,7 @@ $('evList').addEventListener('click', e => {
 
 // popup (shared between events and plans)
 let popFor = null, popAnchor = null;
+const POP_X = '<button class="pop-x" data-act="close" aria-label="סגירה"><svg width="14" height="14" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>';
 function showPop(id) {
   const ev = allEvents().find(e => e.id === id);
   if (!ev) return;
@@ -842,6 +843,8 @@ function showPop(id) {
   popAnchor = { x: ev.x, y: ev.y, lift: 62 };
   const pop = $('pop');
   pop.innerHTML =
+    (ev.img ? '<img class="pop-hero" loading="lazy" src="' + escapeHtml(ev.img) + '" alt="" onerror="this.remove()"/>' : '') +
+    POP_X +
     '<div class="row1">' + chipHtml(ev.cat) + (ev.official ? '<span class="official-chip">עירייה</span>' : '') +
     '<span class="when">' + fmtWhen(ev) + '</span></div>' +
     '<h3>' + escapeHtml(ev.title) + '</h3>' +
@@ -849,13 +852,12 @@ function showPop(id) {
       (ev.audience && ev.audience.length ? ' · ' + escapeHtml(ev.audience.join(', ')) : '') + '</div>' : '') +
     '<div class="where"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="2" style="flex:none"><path d="M12 21s-7-5.8-7-11a7 7 0 0 1 14 0c0 5.2-7 11-7 11Z"/><circle cx="12" cy="10" r="2.6"/></svg>' + escapeHtml(ev.addr || 'רמת גן') + '</div>' +
     (ev.desc ? '<div class="desc">' + escapeHtml(ev.desc) + '</div>' : '') +
-    (ev.img ? '<img class="pop-img" loading="lazy" src="' + escapeHtml(ev.img) + '" alt="" onerror="this.remove()"/>' : '') +
-    (ev.link ? '<a class="pop-link" href="' + escapeHtml(ev.link) + '" target="_blank" rel="noopener">לפרטים והרשמה<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M7 17 17 7M8 7h9v9"/></svg></a>' : '') +
+    (ev.link ? '<a class="pop-primary" href="' + escapeHtml(ev.link) + '" target="_blank" rel="noopener">לפרטים והרשמה<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M7 17 17 7M8 7h9v9"/></svg></a>' : '') +
     '<div class="acts">' +
     navActsHtml(ev.x, ev.y) +
     '<button class="pop-act" data-act="fly"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>התקרבות</button>' +
     (ev.official ? '' : '<button class="pop-act del" data-act="del"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2m-8 0 1 13h8l1-13"/></svg>הסרה</button>') +
-    '<button class="pop-act" data-act="close">סגירה</button></div>';
+    '</div>';
   pop.classList.add('open');
   placePop();
 }
@@ -870,7 +872,7 @@ function showVenuePop(mk) {
   popAnchor = { x: mk.x, y: mk.y, lift: 62 };
   const evs = mk.events.slice().sort((a, b) => (a.date + a.time) < (b.date + b.time) ? -1 : 1).slice(0, 9);
   const pop = $('pop');
-  pop.innerHTML =
+  pop.innerHTML = POP_X +
     '<div class="row1"><span class="official-chip">עירייה</span><span class="when">' + mk.count + ' אירועים קרובים</span></div>' +
     '<h3>' + escapeHtml(mk.locName || evs[0].locName || 'מוקד אירועים עירוני') + '</h3>' +
     '<div class="where"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="2" style="flex:none"><path d="M12 21s-7-5.8-7-11a7 7 0 0 1 14 0c0 5.2-7 11-7 11Z"/><circle cx="12" cy="10" r="2.6"/></svg>' + escapeHtml(evs[0].addr || '') + '</div>' +
@@ -880,8 +882,8 @@ function showVenuePop(mk) {
       '<span class="vt">' + escapeHtml(ev.title) + '</span>' +
       '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M7 17 17 7M8 7h9v9"/></svg></a>').join('') +
     '</div>' +
-    (mk.count > 9 ? '<div class="bus-note">ועוד ' + (mk.count - 9) + ' אירועים במקום הזה — ראו ברשימה המלאה</div>' : '') +
-    '<div class="acts">' + navActsHtml(mk.x, mk.y) + '<button class="pop-act" data-act="close">סגירה</button></div>';
+    (mk.count > 9 ? '<div class="bus-note">ועוד ' + (mk.count - 9) + ' אירועים במקום הזה, ברשימה המלאה</div>' : '') +
+    '<div class="acts">' + navActsHtml(mk.x, mk.y) + '</div>';
   pop.classList.add('open');
   placePop();
 }
@@ -891,8 +893,16 @@ function placePop() {
   const [sx, sy, vis] = MAP.project(popAnchor.x, popAnchor.y, 0);
   if (!vis) { closePop(); return; }
   const w = pop.offsetWidth || 300, h = pop.offsetHeight || 180;
-  pop.style.left = clamp(sx - w / 2, 10, innerWidth - w - 10) + 'px';
-  pop.style.top = clamp(sy - h - (popAnchor.lift || 20), 10, innerHeight - h - 10) + 'px';
+  const left = clamp(sx - w / 2, 10, innerWidth - w - 10);
+  const top = clamp(sy - h - (popAnchor.lift || 20), 10, innerHeight - h - 10);
+  pop.style.left = left + 'px';
+  pop.style.top = top + 'px';
+  // the tail points at the anchor; hide it when clamping pushed the card off the point
+  const tailX = sx - left;
+  if (Math.abs(top + h - sy) < 96 && tailX > 22 && tailX < w - 22) {
+    pop.style.setProperty('--tail-x', tailX.toFixed(0) + 'px');
+    pop.classList.remove('no-tail');
+  } else pop.classList.add('no-tail');
 }
 // plan details popup
 const PLAN_KIND = {
@@ -911,14 +921,14 @@ function showPlanPop(plan, x, y) {
   if (plan.d) meta.push('<b>' + plan.d.toLocaleString('he-IL') + '</b> דונם');
   if (plan.u) meta.push('<b>' + (plan.u > 0 ? '+' : '') + plan.u.toLocaleString('he-IL') + '</b> יח״ד');
   const pop = $('pop');
-  pop.innerHTML =
+  pop.innerHTML = POP_X +
     '<div class="row1"><span class="ev-chip" style="background:color-mix(in srgb,' + k.color + ' 18%,transparent);color:' + k.color + '">' + k.label + '</span>' +
     '<span class="when">' + escapeHtml(plan.s) + '</span></div>' +
     '<h3>' + escapeHtml(plan.t || 'תוכנית ' + plan.n) + '</h3>' +
     '<div class="pop-meta">' + meta.join('<span>·</span>') + '</div>' +
     (plan.o ? '<div class="desc">' + escapeHtml(plan.o) + '</div>' : '') +
-    (plan.url ? '<a class="pop-link" href="' + escapeHtml(plan.url) + '" target="_blank" rel="noopener">לתיק התכנון הרשמי<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M7 17 17 7M8 7h9v9"/></svg></a>' : '') +
-    '<div class="acts">' + navActsHtml(x, y) + '<button class="pop-act" data-act="close">סגירה</button></div>';
+    (plan.url ? '<a class="pop-primary" href="' + escapeHtml(plan.url) + '" target="_blank" rel="noopener">לתיק התכנון הרשמי<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M7 17 17 7M8 7h9v9"/></svg></a>' : '') +
+    '<div class="acts">' + navActsHtml(x, y) + '</div>';
   pop.classList.add('open');
   placePop();
 }
@@ -1384,20 +1394,48 @@ function applyDeepLink(dl) {
     bearing: dl.cam.bearing || 0,
   });
   MAP.computeVP(); MAP.requestRender();
-  setTimeout(() => {
+  // move the camera onto the entity, then open its popup (popups close off-screen)
+  const goAndOpen = (x, y, open) => {
+    const dist = Math.min(MAP.cam.dist, 800);
+    if (MAP.QA_MODE) {
+      Object.assign(MAP.cam, { cx: x, cy: y, dist });
+      MAP.drawOnce();
+      open();
+      MAP.drawOnce();
+    } else MAP.flyTo({ cx: x, cy: y, dist, T: 700, done: open });
+  };
+  const tryEntity = () => {
     if (dl.stop) {
       const s = busStops.find(x => x.code === dl.stop);
-      if (s) { MAP.setLayer('transit', true); syncLayerButtons(); showBusPop(s); }
-    } else if (dl.ev) {
-      if (allEvents().some(e => e.id === dl.ev)) showPop(dl.ev);
-    } else if (dl.plan) {
-      const p = (CITY_D.plans || []).find(x => x.n === dl.plan);
-      if (p) {
-        MAP.setLayer('plans', true); syncLayerButtons();
-        const r = p.r[0];
-        showPlanPop(p, r[0] * UNIT, r[1] * UNIT);
-      }
+      if (!s) return false;
+      MAP.setLayer('transit', true); syncLayerButtons();
+      goAndOpen(s.x, s.y, () => showBusPop(s));
+      return true;
     }
+    if (dl.ev) {
+      const e = allEvents().find(x => x.id === dl.ev);
+      if (!e) return false;
+      if (typeof e.x === 'number') goAndOpen(e.x, e.y, () => showPop(e.id));
+      else if (e.link) window.open(e.link, '_blank', 'noopener');
+      return true;
+    }
+    if (dl.plan) {
+      const p = (CITY_D.plans || []).find(x => x.n === dl.plan);
+      if (!p) return false;
+      MAP.setLayer('plans', true); syncLayerButtons();
+      const r = p.r[0];
+      goAndOpen(r[0] * UNIT, r[1] * UNIT, () => showPlanPop(p, r[0] * UNIT, r[1] * UNIT));
+      return true;
+    }
+    return true;
+  };
+  // shared content loads async; retry until the entity exists
+  setTimeout(() => {
+    if (tryEntity()) return;
+    setTimeout(() => {
+      if (tryEntity()) return;
+      setTimeout(tryEntity, 3200);
+    }, 1900);
   }, 600);
 }
 
