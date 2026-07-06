@@ -1289,7 +1289,7 @@ async function loadCityContent() {
   if (muniLive) {
     muniEvents = muniLive; // freshest: straight from the municipality, seconds old
   } else {
-    const muni = await fetchFirst(MUNI_EVENTS_URLS); // fallback: committed snapshot
+    const muni = await fetchFirst(MUNI_EVENTS_URLS) || window.MUNI_FALLBACK; // committed / embedded snapshot
     if (muni) muniEvents = (muni.events || []).map(normalizeMuniEvent).filter(Boolean)
       .filter(ev => ev.date >= today);
   }

@@ -4,7 +4,11 @@ import fs from 'fs';
 
 const tpl = fs.readFileSync('template.html', 'utf8');
 const fonts = fs.readFileSync('../data/fonts-embedded.css', 'utf8');
-const data = fs.readFileSync('../data/data.js', 'utf8') + '\n' + fs.readFileSync('../data/data2.js', 'utf8');
+// embedded snapshot of the muni events — last-resort fallback when all network paths are blocked
+const muniSnap = fs.existsSync('../data/muni-events.json')
+  ? '\nwindow.MUNI_FALLBACK=' + fs.readFileSync('../data/muni-events.json', 'utf8').trim() + ';'
+  : '';
+const data = fs.readFileSync('../data/data.js', 'utf8') + '\n' + fs.readFileSync('../data/data2.js', 'utf8') + muniSnap;
 const app = ['app1.js', 'app2.js', 'app3.js'].map(f => fs.readFileSync(f, 'utf8')).join('\n');
 
 let body = tpl.split('/*__FONTS__*/').join(fonts);
