@@ -103,8 +103,13 @@ function heHours(str) {
     .replace(/;/g, ' · ').replace(/\s+/g, ' ').trim();
 }
 
-// ---------- map markers (positioned every frame, like bus stops) ----------
-const BIZ_POOL_N = 150;
+// ---------- map markers ----------
+// Phones get a smaller pool, no ambient dust (redraw only on interaction) and
+// lighter MSAA — with 2,144 businesses the desktop budget flattens mobile GPUs.
+const IS_MOBILE = matchMedia('(pointer: coarse)').matches || Math.min(innerWidth, innerHeight) <= 640;
+window.IS_MOBILE = IS_MOBILE;
+if (IS_MOBILE) { THEMES.dark.dustAmt = 0; THEMES.dark.bloomK = 0.55; }
+const BIZ_POOL_N = IS_MOBILE ? 46 : 150;
 const bizPool = [];
 for (let i = 0; i < BIZ_POOL_N; i++) {
   const el = document.createElement('div');
@@ -126,76 +131,96 @@ function bizIconHtml(ci) {
   const c = bizCats[ci] || bizCats[0];
   return '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">' + c.icon.replace('<path ', '<path fill="none" ') + '</svg>';
 }
-function positionBiz() {
-  const d = MAP.cam.dist;
-  let used = 0;
-  const maxD = bizHi ? 7000 : bizFocus ? 3200 : 1500;
-  if (bizLayerOn && bizAll.length && d < maxD) {
-    const namesOn = d < 720;
-    const sc = d < 500 ? 1 : d < 900 ? 0.88 : 0.74;
-    const cand = [];
-    for (const b of bizAll) {
-      const hi = bizHi && bizHi.has(b.id);
-      if (bizHi && !hi && d >= 1500) continue;
-      if (bizFocus && !bizFocus.has(b.cat) && !hi && d >= 1500) continue;
-      if (!hi && d >= 1500 && !bizFocus) continue;
-      const [sx, sy, vis] = MAP.project(b.x, b.y, 0);
-      if (!vis || sx < -20 || sx > innerWidth + 20 || sy < 90 || sy > innerHeight + 20) continue;
-      const pr = hi ? 0 : (bizFocus && bizFocus.has(b.cat)) ? 1 : 2;
-      const dc = (sx - innerWidth / 2) ** 2 + (sy - innerHeight / 2) ** 2;
-      cand.push({ b, sx, sy, hi, pr, dc });
+// selection (scan all 2,144, sort, fan out) is throttled; per-frame work only
+// re-projects the few chosen ones — this is what keeps panning smooth on phones
+let bizSel = [];               // [{b, hi, nm, fx, fy}] fan offsets in screen px
+let bizSelV = -2, bizSelT = 0;
+function selectBiz(d) {
+  const namesOn = d < (IS_MOBILE ? 430 : 720);
+  const cand = [];
+  for (const b of bizAll) {
+    const hi = bizHi && bizHi.has(b.id);
+    if (bizHi && !hi && d >= 1500) continue;
+    if (bizFocus && !bizFocus.has(b.cat) && !hi && d >= 1500) continue;
+    if (!hi && d >= 1500 && !bizFocus) continue;
+    const [sx, sy, vis] = MAP.project(b.x, b.y, 0);
+    if (!vis || sx < -20 || sx > innerWidth + 20 || sy < 90 || sy > innerHeight + 20) continue;
+    const pr = hi ? 0 : (bizFocus && bizFocus.has(b.cat)) ? 1 : 2;
+    const dc = (sx - innerWidth / 2) ** 2 + (sy - innerHeight / 2) ** 2;
+    cand.push({ b, sx, sy, hi, pr, dc });
+  }
+  cand.sort((a, z) => a.pr - z.pr || a.dc - z.dc);
+  // stacked venues (malls, shared buildings): fan overlapping icons out in a stable ring
+  const cellUse = new Map();
+  const nmCells = new Set();
+  bizSel = [];
+  for (const c of cand) {
+    if (bizSel.length >= BIZ_POOL_N) break;
+    const ck = Math.round(c.sx / 26) + ':' + Math.round(c.sy / 26);
+    const n = cellUse.get(ck) || 0;
+    cellUse.set(ck, n + 1);
+    let fx = 0, fy = 0, fanned = false;
+    if (n > 0) {
+      let h = 0;
+      for (let i = 0; i < c.b.id.length; i++) h = (h * 31 + c.b.id.charCodeAt(i)) >>> 0;
+      const ang = (h % 628) / 100 + n * 2.4;
+      const rad = 22 + 13 * Math.floor((n - 1) / 6);
+      fx = Math.cos(ang) * rad; fy = Math.sin(ang) * rad;
+      fanned = true; // crowded spot: icon only, the name waits for the popup
     }
-    cand.sort((a, z) => a.pr - z.pr || a.dc - z.dc);
-    // stacked venues (malls, shared buildings): fan overlapping icons out in a stable ring
-    const cellUse = new Map();
-    const nmCells = new Set();
-    for (const c of cand) {
+    let nm = (namesOn && !fanned) || c.hi;
+    if (nm) { // one name per label cell
+      const gk = Math.round((c.sx + fx) / 95) + ':' + Math.round((c.sy + fy + 24) / 26);
+      if (nmCells.has(gk) && !c.hi) nm = false;
+      else nmCells.add(gk);
+    }
+    bizSel.push({ b: c.b, hi: c.hi, nm, fx, fy });
+  }
+}
+function positionBiz(force) {
+  const d = MAP.cam.dist;
+  const maxD = bizHi ? 7000 : bizFocus ? 3200 : 1500;
+  const active = bizLayerOn && bizAll.length && d < maxD;
+  let used = 0;
+  if (active) {
+    const t = nowMs();
+    if (force || (vpVersion !== bizSelV && t - bizSelT > (IS_MOBILE ? 160 : 90))) {
+      selectBiz(d);
+      bizSelV = vpVersion; bizSelT = t;
+    }
+    const sc = (d < 500 ? 1 : d < 900 ? 0.88 : 0.74) * (IS_MOBILE ? 1.12 : 1);
+    for (const s of bizSel) {
       if (used >= BIZ_POOL_N) break;
-      const ck = Math.round(c.sx / 26) + ':' + Math.round(c.sy / 26);
-      const n = cellUse.get(ck) || 0;
-      cellUse.set(ck, n + 1);
-      if (n > 0) {
-        let h = 0;
-        for (let i = 0; i < c.b.id.length; i++) h = (h * 31 + c.b.id.charCodeAt(i)) >>> 0;
-        const ang = (h % 628) / 100 + n * 2.4;
-        const rad = 22 + 13 * Math.floor((n - 1) / 6);
-        c.sx += Math.cos(ang) * rad;
-        c.sy += Math.sin(ang) * rad;
-        c.fanned = true; // crowded spot: icon only, the name waits for the popup
-      }
+      const [sx, sy, vis] = MAP.project(s.b.x, s.b.y, 0);
+      if (!vis || sx < -60 || sx > innerWidth + 60 || sy < 80 || sy > innerHeight + 60) continue;
       const el = bizPool[used++];
-      const b = c.b;
-      el.__biz = b;
+      const b = s.b;
+      if (el.__biz !== b) {
+        el.__biz = b;
+        el.title = b.name + (b.sub ? ' · ' + b.sub : '');
+      }
       if (el.__ci !== b.ci) {
         el.__ci = b.ci;
         el.firstChild.innerHTML = bizIconHtml(b.ci);
         el.style.setProperty('--c', (bizCats[b.ci] || bizCats[0]).color);
       }
-      const nm = el.lastChild;
-      let showNm = (namesOn && !c.fanned) || c.hi;
-      if (showNm) { // one name per label cell — icons stay, crowded names wait for the popup
-        const gk = Math.round(c.sx / 95) + ':' + Math.round((c.sy + 24) / 26);
-        if (nmCells.has(gk) && !c.hi) showNm = false;
-        else nmCells.add(gk);
-      }
-      const txt = showNm ? b.name : '';
-      if (el.__nm !== txt) { el.__nm = txt; nm.textContent = txt; }
-      el.classList.toggle('hi', !!c.hi);
+      const txt = s.nm ? b.name : '';
+      if (el.__nm !== txt) { el.__nm = txt; el.lastChild.textContent = txt; }
+      el.classList.toggle('hi', !!s.hi);
       el.style.display = '';
-      el.title = b.name + (b.sub ? ' · ' + b.sub : '');
-      el.style.transform = 'translate3d(' + c.sx + 'px,' + c.sy + 'px,0) translate(-50%,-50%) scale(' + (c.hi ? Math.max(sc, 1) : sc) + ')';
+      el.style.transform = 'translate3d(' + (sx + s.fx) + 'px,' + (sy + s.fy) + 'px,0) translate(-50%,-50%) scale(' + (s.hi ? Math.max(sc, 1) : sc) + ')';
     }
-  }
+  } else { bizSel = []; bizSelV = -2; }
   for (let i = used; i < BIZ_POOL_N; i++) {
     if (bizPool[i].style.display !== 'none') { bizPool[i].style.display = 'none'; bizPool[i].__biz = null; }
   }
 }
-window.__bizTick = positionBiz;
+window.__bizTick = () => positionBiz(false);
 $('bizBtn').addEventListener('click', () => {
   bizLayerOn = !bizLayerOn;
   store.setItem(BIZ_KEY, bizLayerOn ? 'on' : 'off');
   $('bizBtn').classList.toggle('on', bizLayerOn);
-  positionBiz();
+  positionBiz(true);
   if (bizLayerOn) showToast('עסקים מוצגים על המפה — התקרבו לרחוב כדי לראות אותם');
 });
 $('bizBtn').classList.toggle('on', bizLayerOn);
@@ -285,7 +310,7 @@ function renderBizChips() {
     bizFocus = bizChipSel === 'all' ? null : new Set([bizChipSel]);
     syncBizChips();
     renderBizList();
-    positionBiz();
+    positionBiz(true);
   });
   syncBizChips();
 }
@@ -487,7 +512,7 @@ function highlightResults(rows) {
   bizHi = bizIds.length ? new Set(bizIds) : null;
   // camera: frame the on-map results
   const pts = rows.filter(r => typeof r.ref.x === 'number').map(r => [r.ref.x, r.ref.y]);
-  positionBiz();
+  positionBiz(true);
   if (!pts.length) return;
   let mnx = 1e9, mny = 1e9, mxx = -1e9, mxy = -1e9;
   for (const [x, y] of pts.slice(0, 10)) { mnx = Math.min(mnx, x); mxx = Math.max(mxx, x); mny = Math.min(mny, y); mxy = Math.max(mxy, y); }
@@ -498,7 +523,7 @@ function clearAssist(rerender) {
   assistResults = null;
   bizHi = null;
   $('aiInput').value = '';
-  if (rerender !== false) { renderBizList(); positionBiz(); }
+  if (rerender !== false) { renderBizList(); positionBiz(true); }
 }
 async function runAssist(qRaw, opts = {}) {
   const q = String(qRaw || '').trim().slice(0, 140);
@@ -581,7 +606,7 @@ window.__qaExt = function (qs) {
     renderBizList();
     const bizIds = rows.filter(r => r.kind === 'biz').map(r => r.ref.id);
     bizHi = bizIds.length ? new Set(bizIds) : null;
-    positionBiz();
+    positionBiz(true);
     MAP.drawOnce();
   }
   if (/bizpop/.test(qs)) {
@@ -593,5 +618,5 @@ window.__qaExt = function (qs) {
       MAP.drawOnce();
     }
   }
-  if (/bizmk/.test(qs)) { positionBiz(); MAP.drawOnce(); }
+  if (/bizmk/.test(qs)) { positionBiz(true); MAP.drawOnce(); }
 };

@@ -220,7 +220,7 @@ function setupFBOs(w, h) {
   FB.w = w; FB.h = h;
   for (const k of ['msaaFbo', 'msaaColor', 'msaaDepth']) if (FB[k]) { /* recreated below */ }
   // MSAA render target
-  const samples = Math.min(4, gl.getParameter(gl.MAX_SAMPLES) || 0);
+  const samples = Math.min(window.IS_MOBILE ? 2 : 4, gl.getParameter(gl.MAX_SAMPLES) || 0);
   FB.samples = samples;
   if (FB.msaaFbo) { gl.deleteFramebuffer(FB.msaaFbo); gl.deleteRenderbuffer(FB.msaaColor); gl.deleteRenderbuffer(FB.msaaDepth); }
   if (FB.scene) { gl.deleteFramebuffer(FB.scene.fbo); gl.deleteTexture(FB.scene.tex); }
