@@ -30,6 +30,12 @@ const RINGS = boundRaw.map(r => {
   for (let i = 2; i < r.length; i += 2) pts.push([pts[pts.length - 1][0] + r[i], pts[pts.length - 1][1] + r[i + 1]]);
   return pts;
 });
+// source strings (FB pages…) sometimes carry U+FFFD / control chars — the artifact host rejects them
+const clean = s => String(s || '')
+  .replace(/[\uFFFD\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, '')
+  .replace(/[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?<![\uD800-\uDBFF])[\uDC00-\uDFFF]/g, '')
+  .replace(/\s+/g, ' ').trim();
+
 function inCity(x, y) {
   for (const ring of RINGS) {
     let ins = false;
@@ -153,7 +159,7 @@ function processOSM(raw) {
   const seen = new Set();
   for (const el of raw.elements || []) {
     const t = el.tags || {};
-    const name = t['name:he'] || t.name;
+    const name = clean(t['name:he'] || t.name);
     if (!name || t['disused:shop'] || t['disused:amenity']) continue;
     const lat = el.lat ?? el.center?.lat, lon = el.lon ?? el.center?.lon;
     if (lat == null) continue;
@@ -166,7 +172,7 @@ function processOSM(raw) {
     it.sub = subOfOSM(t);
     if (t.cuisine) it.cuisine = heCuisine(t.cuisine);
     const street = t['addr:street'], num = t['addr:housenumber'];
-    if (street) it.addr = street + (num ? ' ' + num : '');
+    if (street) it.addr = clean(street + (num ? ' ' + num : ''));
     it.phone = (t.phone || t['contact:phone'] || '').split(';')[0].trim();
     let web = t.website || t['contact:website'] || '';
     if (/^https?:\/\//.test(web)) it.web = web.slice(0, 160);
@@ -271,7 +277,7 @@ function loadOverture() {
   const items = [];
   for (const f of gj.features || []) {
     const p = f.properties || {};
-    const name = (p.names && p.names.primary || '').trim();
+    const name = clean(p.names && p.names.primary);
     if (name.length < 2) continue;
     const conf = p.confidence || 0;
     const leaf = (p.categories && p.categories.primary) || '';
@@ -296,7 +302,7 @@ function loadOverture() {
       if (fb && !it.fb) it.fb = fb[1].slice(0, 40);
     }
     const ad = (p.addresses || [])[0];
-    if (ad && ad.freeform) it.addr = String(ad.freeform).slice(0, 60);
+    if (ad && ad.freeform) it.addr = clean(ad.freeform).slice(0, 60);
     items.push(it);
   }
   console.log('✓ Overture', items.length, 'mapped places in-city (all confidence bands)');
