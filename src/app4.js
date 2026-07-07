@@ -23,7 +23,7 @@ const bizAll = BIZ_D.items.map(r => {
     id: r[0], name: r[1], ci: r[2], cat: (bizCats[r[2]] || bizCats[0] || { id: 'services' }).id,
     x: M2(r[3]), y: M2(r[4]),
     sub: e.s || '', cuisine: e.c || '', addr: e.a || '', phone: e.p || '', web: e.w || '',
-    hours: e.h || '', wa: !!e.wa,
+    ig: e.ig || '', fb: e.fb || '', hours: e.h || '', wa: !!e.wa,
     n: norm(r[1] + ' ' + (e.s || '') + ' ' + (e.c || '')),
   };
 });
@@ -224,7 +224,13 @@ function showBizPop(b) {
     '<div class="where"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="2" style="flex:none"><path d="M12 21s-7-5.8-7-11a7 7 0 0 1 14 0c0 5.2-7 11-7 11Z"/><circle cx="12" cy="10" r="2.6"/></svg>' +
     escapeHtml(b.addr || reverseGeocode(b.x, b.y)) + '</div>' +
     (b.hours ? '<div class="biz-hours"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex:none"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.2 1.8"/></svg>' + escapeHtml(heHours(b.hours)) + '</div>' : '') +
-    (b.web ? '<a class="pop-primary" href="' + escapeHtml(b.web) + '" target="_blank" rel="noopener">לאתר העסק<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M7 17 17 7M8 7h9v9"/></svg></a>' : '') +
+    (function () { // one primary link: site → instagram → facebook
+      const href = b.web || (b.ig ? 'https://www.instagram.com/' + b.ig : '') || (b.fb ? 'https://www.facebook.com/' + b.fb : '');
+      if (!href) return '';
+      const label = b.web ? 'לאתר העסק' : b.ig ? 'לאינסטגרם של העסק' : 'לעמוד הפייסבוק';
+      return '<a class="pop-primary" href="' + escapeHtml(href) + '" target="_blank" rel="noopener">' + label +
+        '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M7 17 17 7M8 7h9v9"/></svg></a>';
+    })() +
     '<div class="acts">' +
     navActsHtml(b.x, b.y) +
     (tel ? '<a class="pop-act" href="tel:' + tel + '"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 4h4l1.8 4.5-2.3 1.4a12 12 0 0 0 5.6 5.6l1.4-2.3L20 15v4a1.8 1.8 0 0 1-2 1.8A16.5 16.5 0 0 1 3.2 6 1.8 1.8 0 0 1 5 4Z"/></svg>חיוג</a>' : '') +
@@ -332,7 +338,7 @@ function renderBizList() {
     .sort((a, z) => a.d - z.d).slice(0, 80);
   host.innerHTML = rows.length
     ? rows.map(r => bizRowHtml(r.b, r.d)).join('') +
-      '<div class="bz-foot">מציג את ' + rows.length + ' הקרובים · נתוני הקהילה של OpenStreetMap</div>'
+      '<div class="bz-foot">מציג את ' + rows.length + ' הקרובים · OpenStreetMap · Overture Maps</div>'
     : '<div class="ev-none">אין עדיין עסקים בקטגוריה הזו במיפוי הפתוח.</div>';
 }
 $('bizList').addEventListener('click', e => {
@@ -527,6 +533,23 @@ $('aiInput').addEventListener('input', () => {
   if (!$('aiInput').value.trim() && assistResults) clearAssist(true);
   else if (!assistResults) renderBizList();
 });
+
+// ---------- main search knows businesses too ----------
+for (const b of bizAll) {
+  const it = { type: 'biz', name: b.name, sub: [b.sub || bizCatById[b.cat].label, b.cuisine].filter(Boolean).join(' · '), x: b.x, y: b.y, biz: b };
+  it.n = norm(it.name); it.nh = stripHe(it.n);
+  searchItems.push(it);
+}
+{
+  const goOrig = goToResult;
+  goToResult = function (r) {
+    if (r.type === 'biz') {
+      MAP.flyTo({ cx: r.x, cy: r.y, dist: 420, done: () => showBizPop(r.biz) });
+      return;
+    }
+    goOrig(r);
+  };
+}
 
 // ---------- deep-link + share support (biz=id) ----------
 window.BIZAPI = {

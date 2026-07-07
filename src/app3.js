@@ -457,6 +457,7 @@ const TYPE_META = {
   hood: { group: 'שכונות', icon: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M4 10 12 4l8 6v9a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1Z"/></svg>' },
   poi: { group: 'מקומות', icon: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 3l2.4 5.2L20 9l-4 4.1.9 5.9L12 16.6 7.1 19l.9-5.9L4 9l5.6-.8Z"/></svg>' },
   bld: { group: 'מבנים', icon: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M6 21V5l6-2v18M12 21h6V9l-6-2M9 8h.01M9 12h.01M9 16h.01M15 12h.01M15 16h.01"/></svg>' },
+  biz: { group: 'עסקים', icon: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"><path d="M4.5 9.5 6 4.5h12l1.5 5M4.5 9.5a2.3 2.3 0 0 0 4.6 0 2.3 2.3 0 0 0 4.6 0 2.3 2.3 0 0 0 4.6 0M5.5 12v7.5h13V12M9.5 19.5v-5h5v5"/></svg>' },
 };
 function runSearch(qRaw) {
   const { text, num } = parseQuery(qRaw);
@@ -477,7 +478,7 @@ function runSearch(qRaw) {
       if (loc) out.push({ type: 'addr', name: st.name + ' ' + num, sub: loc.approx ? 'כתובת · מיקום משוער' : 'כתובת', x: loc.x, y: loc.y, score: 120 + st.score });
     }
   }
-  const capPer = { street: 5, poi: 5, hood: 3, bld: 4 };
+  const capPer = { street: 5, poi: 5, hood: 3, bld: 4, biz: 6 };
   const counts = {};
   for (const r of res) {
     counts[r.type] = (counts[r.type] || 0) + 1;
@@ -1728,7 +1729,11 @@ async function boot() {
         const qs = location.search + location.hash;
         if (/panel/.test(qs)) { renderEvList(); openPanel(); }
         if (/modal/.test(qs)) { pendingLoc = { x: MAP.cam.cx, y: MAP.cam.cy }; openEvModal(); }
-        if (/results/.test(qs)) { sInput.value = 'ביאליק 12'; sBox.classList.add('hasText'); renderResults(runSearch('ביאליק 12')); }
+        const rm = qs.match(/results(?:=([^&]+))?/);
+        if (rm) {
+          const term = rm[1] ? decodeURIComponent(rm[1]) : 'ביאליק 12';
+          sInput.value = term; sBox.classList.add('hasText'); renderResults(runSearch(term));
+        }
         const dlq = parseDeepLink();
         if (dlq) {
           applyDeepLink(dlq);

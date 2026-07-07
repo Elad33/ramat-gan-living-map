@@ -19,6 +19,13 @@ jobs:
         with:
           node-version: 22
 
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: כלי Overture (שכבת העסקים)
+        run: pip install --quiet overturemaps || echo "::warning::התקנת overturemaps נכשלה — העסקים יתרעננו מ-OSM בלבד"
+
       - name: משיכה ועיבוד (כישלון רך — נשארים עם הנתונים הקיימים)
         run: |
           mkdir -p raw && cd raw
