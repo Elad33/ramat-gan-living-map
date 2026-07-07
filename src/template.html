@@ -106,12 +106,10 @@ input,select,textarea{font-family:inherit;font-size:inherit;color:var(--ink)}
 .ctrl.active{color:var(--gold)}
 
 /* ---------- events panel ---------- */
-#evToggle{position:fixed;bottom:28px;right:24px;z-index:30;display:flex;align-items:center;gap:10px;
-  background:linear-gradient(135deg,var(--gold),var(--gold-deep));color:#14100a;font-weight:700;font-size:15px;
-  padding:13px 22px;border-radius:999px;box-shadow:0 10px 30px rgba(227,194,126,.35),var(--shadow);
-  transition:transform .2s,box-shadow .2s;animation:fadeSlide .8s .65s ease backwards}
-:root[data-theme="light"] #evToggle{color:#fffdf6;box-shadow:0 10px 26px rgba(138,109,44,.4)}
-#evToggle:hover{transform:translateY(-2px)}
+#evToggle{display:flex;align-items:center;gap:9px;background:var(--panel);backdrop-filter:blur(14px);
+  -webkit-backdrop-filter:blur(14px);border:1px solid var(--hairline);color:var(--ink);font-weight:700;font-size:14px;
+  padding:11px 18px;border-radius:999px;box-shadow:var(--shadow);transition:transform .2s,border-color .2s}
+#evToggle:hover{transform:translateY(-2px);border-color:var(--gold)}
 #evPanel{position:fixed;top:0;bottom:0;right:0;z-index:40;width:min(400px,100vw);background:var(--panel-solid);
   border-left:1px solid var(--hairline-soft);box-shadow:var(--shadow);transform:translateX(105%);transition:transform .45s cubic-bezier(.22,1,.3,1);
   display:flex;flex-direction:column}
@@ -165,7 +163,7 @@ input,select,textarea{font-family:inherit;font-size:inherit;color:var(--ink)}
 
 /* ---------- legend / filters ---------- */
 #legend{position:fixed;bottom:28px;left:50%;transform:translateX(-50%);z-index:20;display:flex;gap:8px;flex-wrap:wrap;justify-content:center;
-  max-width:min(720px,calc(100vw - 260px));animation:fadeSlide .8s .8s ease backwards}
+  max-width:min(700px,calc(100vw - 450px));animation:fadeSlide .8s .8s ease backwards}
 .lg-chip{display:flex;align-items:center;gap:7px;padding:8px 14px;border-radius:999px;background:var(--panel);
   backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid var(--hairline-soft);
   font-size:13px;font-weight:600;color:var(--ink-dim);box-shadow:var(--shadow);transition:all .2s;white-space:nowrap}
@@ -457,6 +455,89 @@ textarea.f-in{resize:vertical;min-height:74px}
   #subGo{justify-content:center;min-height:44px}
 }
 
+/* ---------- businesses on the map ---------- */
+.bz{position:absolute;top:0;left:0;width:23px;height:23px;pointer-events:auto;cursor:pointer;will-change:transform;z-index:3}
+.bz .bz-ic{width:23px;height:23px;border-radius:8px;background:var(--c,#8592a8);display:flex;align-items:center;justify-content:center;
+  border:1.6px solid rgba(255,255,255,.88);box-shadow:0 2px 7px rgba(0,0,0,.38);transition:transform .15s}
+.bz .bz-ic svg{width:14px;height:14px;display:block}
+.bz:hover .bz-ic{transform:scale(1.18)}
+.bz .bz-nm{position:absolute;top:calc(100% + 2px);left:50%;transform:translateX(-50%);font-size:11px;font-weight:700;
+  color:var(--ink);white-space:nowrap;max-width:130px;overflow:hidden;text-overflow:ellipsis;
+  text-shadow:0 0 8px var(--marker-halo),0 0 3px var(--marker-halo);pointer-events:none}
+.bz .bz-nm:empty{display:none}
+.bz.hi{z-index:6}
+.bz.hi .bz-ic{box-shadow:0 0 0 3px color-mix(in srgb,var(--c) 40%,transparent),0 0 18px var(--c);border-color:#fff}
+.bz.hi::before{content:'';position:absolute;inset:-9px;border-radius:50%;border:2px solid var(--c);
+  animation:ringPulse 1.7s ease-out infinite;pointer-events:none}
+.open-chip{font-size:11px;font-weight:800;letter-spacing:.02em;padding:2.5px 9px;border-radius:999px;white-space:nowrap}
+.open-chip.open{background:color-mix(in srgb,var(--emerald) 16%,transparent);color:var(--emerald)}
+.open-chip.closed{background:color-mix(in srgb,var(--danger) 13%,transparent);color:var(--danger)}
+.wa-chip{font-size:12.5px;opacity:.85}
+.biz-hours{margin-top:7px;font-size:12.5px;color:var(--ink-faint);display:flex;gap:6px;align-items:flex-start;line-height:1.45}
+.biz-hours svg{margin-top:2px;flex:none}
+
+/* ---------- bottom dock (assistant + events) ---------- */
+#dock{position:fixed;bottom:28px;right:24px;z-index:30;display:flex;flex-direction:column;align-items:flex-end;gap:10px;
+  animation:fadeSlide .8s .65s ease backwards}
+#aiToggle{display:flex;align-items:center;gap:10px;background:linear-gradient(135deg,var(--gold),var(--gold-deep));
+  color:#14100a;font-weight:700;font-size:15px;padding:13px 22px;border-radius:999px;
+  box-shadow:0 10px 30px rgba(227,194,126,.35),var(--shadow);transition:transform .2s}
+:root[data-theme="light"] #aiToggle{color:#fffdf6;box-shadow:0 10px 26px rgba(138,109,44,.4)}
+#aiToggle:hover{transform:translateY(-2px)}
+
+/* ---------- "מה בא לך היום?" panel ---------- */
+#aiPanel{position:fixed;top:0;bottom:0;right:0;z-index:40;width:min(400px,100vw);background:var(--panel-solid);
+  border-left:1px solid var(--hairline-soft);box-shadow:var(--shadow);transform:translateX(105%);
+  transition:transform .45s cubic-bezier(.22,1,.3,1);display:flex;flex-direction:column}
+#aiPanel.open{transform:none}
+.ai-form{display:flex;gap:8px;margin:14px 26px 0}
+#aiInput{flex:1;min-width:0;background:rgba(255,255,255,.05);border:1px solid var(--hairline-soft);
+  border-radius:999px;padding:11px 16px;outline:none;font-size:15px;transition:border-color .2s}
+:root[data-theme="light"] #aiInput{background:rgba(255,255,255,.75)}
+#aiInput:focus{border-color:var(--gold)}
+#aiGo{flex:none;width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(135deg,var(--gold),var(--gold-deep));color:#14100a;transition:filter .15s}
+:root[data-theme="light"] #aiGo{color:#fffdf6}
+#aiGo:hover{filter:brightness(1.08)}
+#aiGo.busy svg{animation:spin .9s linear infinite}
+.ai-sugg{display:flex;gap:7px;flex-wrap:wrap;margin:10px 26px 0}
+.sug{font-size:12.5px;font-weight:600;padding:6px 12px;border:1px solid var(--hairline-soft);border-radius:999px;
+  color:var(--ink-dim);transition:all .15s;white-space:nowrap}
+.sug:hover{color:var(--gold);border-color:var(--hairline)}
+#bizChips{display:flex;gap:7px;overflow-x:auto;margin-top:14px;padding:2px 26px 10px;scrollbar-width:none;
+  border-bottom:1px solid var(--hairline-soft)}
+#bizChips::-webkit-scrollbar{display:none}
+.bz-chip{flex:none;display:flex;align-items:center;gap:6px;padding:7px 13px;border-radius:999px;
+  border:1px solid var(--hairline-soft);font-size:13px;font-weight:600;color:var(--ink-dim);transition:all .15s}
+.bz-chip i{width:8px;height:8px;border-radius:50%;background:var(--c)}
+.bz-chip.on{color:var(--ink);border-color:var(--c);background:color-mix(in srgb,var(--c) 12%,transparent)}
+#bizList{flex:1;overflow-y:auto;padding:12px 26px 30px;display:flex;flex-direction:column;gap:7px}
+.bz-row{display:flex;align-items:center;gap:11px;width:100%;text-align:right;padding:9px 11px;border-radius:14px;
+  transition:background .15s;background:rgba(255,255,255,.03)}
+:root[data-theme="light"] .bz-row{background:rgba(255,255,255,.6)}
+.bz-row:hover{background:rgba(227,194,126,.1)}
+.bz-badge{flex:none;width:32px;height:32px;border-radius:10px;background:var(--c,#8592a8);display:flex;
+  align-items:center;justify-content:center}
+.bz-badge svg{width:17px;height:17px}
+.bz-tx{flex:1;min-width:0}
+.bz-name{display:block;font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bz-sub{display:block;font-size:12px;color:var(--ink-faint);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bz-sub .op{color:var(--emerald)}.bz-sub .cl{color:var(--danger)}
+.bz-dist{flex:none;font-size:12px;font-weight:700;color:var(--gold);font-variant-numeric:tabular-nums;white-space:nowrap}
+.bz-foot{margin-top:10px;text-align:center;font-size:11.5px;color:var(--ink-faint)}
+.ai-reply{display:flex;gap:11px;align-items:flex-start;background:color-mix(in srgb,var(--gold) 9%,transparent);
+  border:1px solid var(--hairline-soft);border-radius:16px;padding:13px 14px;margin-bottom:7px}
+.ai-face{flex:none;font-size:17px;line-height:1}
+.ai-face.think{animation:scGlow 1.2s ease-in-out infinite}
+.ai-msg{font-size:14px;line-height:1.55;font-weight:600}
+.ai-src{display:inline-block;margin-right:8px;font-size:10px;font-weight:800;letter-spacing:.08em;color:var(--ink-faint);
+  border:1px solid var(--hairline-soft);border-radius:6px;padding:0 6px;vertical-align:1px}
+.ai-clear{margin-top:8px;align-self:center;font-size:12.5px;font-weight:600;color:var(--ink-faint);padding:7px 14px;
+  border:1px solid var(--hairline-soft);border-radius:999px;transition:all .15s}
+.ai-clear:hover{color:var(--ink);border-color:var(--hairline)}
+.ai-ref{font-size:12px;color:var(--ink-faint);margin-top:4px}
+.ai-ref a{color:var(--gold);font-weight:600}
+
 /* ---------- attribution & info ---------- */
 #attrib{position:fixed;bottom:8px;left:10px;z-index:15;font-size:10.5px;color:var(--ink-faint);letter-spacing:.02em;direction:ltr}
 #attrib a{color:inherit}
@@ -492,14 +573,21 @@ textarea.f-in{resize:vertical;min-height:74px}
   #results{max-height:42vh}
   #ctrls{bottom:calc(128px + env(safe-area-inset-bottom));left:10px;gap:8px}
   .ctrl{width:42px;height:42px}
-  #evToggle{bottom:calc(16px + env(safe-area-inset-bottom));right:14px;padding:12px 18px}
-  /* events panel becomes a bottom sheet */
-  #evPanel{top:auto;left:0;right:0;width:100%;height:min(74vh,620px);border-left:none;
+  #dock{bottom:calc(16px + env(safe-area-inset-bottom));right:14px;left:14px;flex-direction:row-reverse;
+    justify-content:flex-start;align-items:center;gap:8px}
+  #aiToggle{padding:12px 18px;font-size:14px}
+  #evToggle{padding:11px 15px;font-size:13.5px}
+  /* panels become bottom sheets */
+  #evPanel,#aiPanel{top:auto;left:0;right:0;width:100%;height:min(74vh,620px);border-left:none;
     border-top:1px solid var(--hairline);border-radius:24px 24px 0 0;
     transform:translateY(108%);padding-bottom:env(safe-area-inset-bottom)}
-  #evPanel.open{transform:none}
-  #evPanel::before{content:'';position:absolute;top:9px;left:50%;transform:translateX(-50%);
+  #evPanel.open,#aiPanel.open{transform:none}
+  #evPanel::before,#aiPanel::before{content:'';position:absolute;top:9px;left:50%;transform:translateX(-50%);
     width:42px;height:4px;border-radius:2px;background:var(--hairline)}
+  .ai-form{margin:12px 20px 0}
+  .ai-sugg{margin:9px 20px 0}
+  #bizChips{padding:2px 20px 9px}
+  #bizList{padding:10px 20px 24px}
   .ev-head{padding:24px 20px 14px}
   #evAddBtn{margin:12px 20px 0;width:calc(100% - 40px)}
   .ev-tools{margin:10px 20px 0}
@@ -586,6 +674,9 @@ textarea.f-in{resize:vertical;min-height:74px}
     <button class="ctrl" id="transitBtn" aria-label="שכבת תחבורה ציבורית" title="תחבורה ציבורית — רכבת קלה ותחנות">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round" stroke-linecap="round"><rect x="5.5" y="3.5" width="13" height="13.5" rx="3"/><path d="M5.5 10.5h13M9 20.5l-1.5-3M15 20.5l1.5-3M9.2 14h.01M14.8 14h.01"/></svg>
     </button>
+    <button class="ctrl" id="bizBtn" aria-label="שכבת עסקים" title="עסקים — חנויות, מסעדות ושירותים">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round" stroke-linecap="round"><path d="M4.5 9.5 6 4.5h12l1.5 5M4.5 9.5a2.3 2.3 0 0 0 4.6 0 2.3 2.3 0 0 0 4.6 0 2.3 2.3 0 0 0 4.6 0M5.5 12v7.5h13V12M9.5 19.5v-5h5v5"/></svg>
+    </button>
   </div>
   <button class="ctrl" id="geoBtn" aria-label="מצא אותי על המפה" title="המיקום שלי">
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3.2"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3"/><circle cx="12" cy="12" r="7.5"/></svg>
@@ -615,11 +706,17 @@ textarea.f-in{resize:vertical;min-height:74px}
 
 <div id="legend" aria-label="סינון קטגוריות אירועים"></div>
 
-<button id="evToggle">
-  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round"><rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M8 3v4M16 3v4M3.5 10h17"/></svg>
-  אירועים בעיר
-  <span id="evCount" style="background:rgba(0,0,0,.18);border-radius:999px;padding:1px 9px;font-size:13px;font-variant-numeric:tabular-nums"></span>
-</button>
+<div id="dock">
+  <button id="aiToggle">
+    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5l1.8 4.9 4.9 1.8-4.9 1.8L12 16.9l-1.8-4.9-4.9-1.8 4.9-1.8Z"/><path d="M19 15.5l.9 2.4 2.4.9-2.4.9-.9 2.4-.9-2.4-2.4-.9 2.4-.9Z"/></svg>
+    מה בא לך היום?
+  </button>
+  <button id="evToggle">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round"><rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M8 3v4M16 3v4M3.5 10h17"/></svg>
+    אירועים
+    <span id="evCount" style="background:rgba(227,194,126,.16);border-radius:999px;padding:1px 9px;font-size:12.5px;font-variant-numeric:tabular-nums;color:var(--gold)"></span>
+  </button>
+</div>
 
 <aside id="evPanel" aria-label="אירועים בעיר">
   <div class="ev-head">
@@ -645,6 +742,31 @@ textarea.f-in{resize:vertical;min-height:74px}
     <input type="file" id="evImportFile" accept=".json,application/json" style="display:none"/>
   </div>
   <div id="evList"></div>
+</aside>
+
+<aside id="aiPanel" aria-label="מה בא לך היום — עסקים ואירועים סביבך">
+  <div class="ev-head">
+    <div class="ev-head-row">
+      <h2>מה בא לך היום?</h2>
+      <button class="x-btn" id="aiClose" aria-label="סגירה"><svg width="16" height="16" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    </div>
+    <div class="ai-ref" id="aiRefLine"></div>
+  </div>
+  <form class="ai-form" id="aiForm" novalidate>
+    <input id="aiInput" type="text" maxlength="140" placeholder="קפה שקט? פיצה? משהו עם הילדים?" autocomplete="off" aria-label="ספרו מה אתם מחפשים"/>
+    <button id="aiGo" type="submit" aria-label="חיפוש חכם">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5l1.8 4.9 4.9 1.8-4.9 1.8L12 16.9l-1.8-4.9-4.9-1.8 4.9-1.8Z"/><path d="M19 15.5l.9 2.4 2.4.9-2.4.9-.9 2.4-.9-2.4-2.4-.9 2.4-.9Z"/></svg>
+    </button>
+  </form>
+  <div class="ai-sugg" id="aiSugg">
+    <button class="sug" type="button" data-q="קפה טוב לידי">☕ קפה טוב לידי</button>
+    <button class="sug" type="button" data-q="בא לי פיצה">🍕 בא לי פיצה</button>
+    <button class="sug" type="button" data-q="מה קורה בסופ״ש?">🎭 מה קורה בסופ״ש?</button>
+    <button class="sug" type="button" data-q="בא לי להתאמן">💪 להתאמן</button>
+    <button class="sug" type="button" data-q="תספורת">✂️ תספורת</button>
+  </div>
+  <div id="bizChips" aria-label="סינון לפי קטגוריה"></div>
+  <div id="bizList"></div>
 </aside>
 
 <div class="modal-bg" id="evModalBg">
@@ -687,7 +809,8 @@ textarea.f-in{resize:vertical;min-height:74px}
       מפה תלת־ממדית חיה של העיר — <b>כל רחוב, כל בניין וכל כתובת</b> מנתוני המיפוי הפתוח, ברינדור זוהר בהשראת Gaussian Splatting.
       <hr class="about-hr"/>
       <b>חיפוש</b> — הקלידו כתובת מדויקת («ביאליק 12»), רחוב, שכונה או מוסד עירוני.<br/>
-      <b>אירועים</b> — לחצו «אירועים בעיר» והוסיפו אירוע בכל נקודה על המפה. אפשר לייצא קובץ ולשתף עם שכנים.<br/>
+      <b>מה בא לך היום?</b> — ספרו לעוזר החכם מה מתחשק («קפה שקט», «מה קורה הערב?») והוא ימצא עסקים ואירועים סביבכם. העסקים מסומנים על המפה כשמתקרבים לגובה רחוב.<br/>
+      <b>אירועים</b> — לחצו «אירועים» והוסיפו אירוע בכל נקודה על המפה. אפשר לייצא קובץ ולשתף עם שכנים.<br/>
       <b>תכנון ובנייה</b> — הפעילו את שכבת התכנון ולחצו על שטח מסומן כדי לראות מה מתוכנן שם: שם התוכנית, סטטוס, יח״ד וקישור לתיק הרשמי.<br/>
       <b>תחבורה</b> — הקו האדום, תחנותיו ותחנות האוטובוס — לחיצה על תחנה מציגה זמני הגעה בזמן אמת, כולל קווי הסופ״ש.<br/>
       <b>מידע לתושב</b> — הודעות רשמיות מהעירייה בפעמון שמשמאל, ואירועים עירוניים עם סימון «עירייה».<br/>

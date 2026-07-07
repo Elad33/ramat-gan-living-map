@@ -811,6 +811,7 @@ function positionMarkers() {
   for (const [id, el] of evMarkers) if (!markerList.some(m => m.id === id)) { el.remove(); evMarkers.delete(id); hideScene(id, true); }
   if (popAnchor) placePop();
   positionTransit();
+  if (window.__bizTick) window.__bizTick();
   if (typeof positionGeoDot === 'function') positionGeoDot();
 }
 function hideScene(id, remove) {
@@ -980,7 +981,7 @@ function showPlanPop(plan, x, y) {
   placePop();
 }
 $('pop').addEventListener('click', e => {
-  const btn = e.target.closest('.pop-act');
+  const btn = e.target.closest('.pop-act,.pop-x');
   if (!btn) return;
   const ev = allEvents().find(x => x.id === popFor);
   if (btn.dataset.act === 'close') { closePop(); }
@@ -998,6 +999,7 @@ function closePop() {
   popFor = null; popAnchor = null;
   busPopStop = null;
   curPlanNum = null;
+  window.__curBiz = null;
   clearInterval(busTimer);
 }
 window.addEventListener('mapclick', e => {
@@ -1176,8 +1178,9 @@ window.addEventListener('keydown', e => {
     if ($('evModalBg').classList.contains('open')) closeEvModal();
     else if ($('aboutBg').classList.contains('open')) $('aboutBg').classList.remove('open');
     else if (placing) setPlacing(false);
-    else if (popFor) closePop();
+    else if (popFor || window.__curBiz || busPopStop) closePop();
     else if ($('evPanel').classList.contains('open')) closePanel();
+    else if ($('aiPanel') && $('aiPanel').classList.contains('open')) $('aiPanel').classList.remove('open');
     else closeResults();
   }
 });
@@ -1412,8 +1415,9 @@ function parseDeepLink() {
   if (p.get('ev')) out.ev = p.get('ev');
   if (p.get('stop')) out.stop = +p.get('stop');
   if (p.get('plan')) out.plan = p.get('plan');
+  if (p.get('biz')) out.biz = p.get('biz');
   if (p.get('layers')) out.layers = p.get('layers');
-  return (out.cam || out.ev || out.stop || out.plan) ? out : null;
+  return (out.cam || out.ev || out.stop || out.plan || out.biz) ? out : null;
 }
 let curPlanNum = null; // tracked for sharing
 function buildShareUrl() {
@@ -1423,6 +1427,7 @@ function buildShareUrl() {
   if (lay) h += '&layers=' + lay;
   if (busPopStop) h += '&stop=' + busPopStop.code;
   else if (popFor) h += '&ev=' + encodeURIComponent(popFor);
+  else if (window.__curBiz) h += '&biz=' + encodeURIComponent(window.__curBiz);
   else if (curPlanNum) h += '&plan=' + encodeURIComponent(curPlanNum);
   return 'https://ramat-gan-living-map.vercel.app/' + h;
 }
@@ -1474,6 +1479,13 @@ function applyDeepLink(dl) {
       if (!e) return false;
       if (typeof e.x === 'number') goAndOpen(e.x, e.y, () => showPop(e.id));
       else if (e.link) window.open(e.link, '_blank', 'noopener');
+      return true;
+    }
+    if (dl.biz) {
+      if (!window.BIZAPI) return false;
+      const b = BIZAPI.byId(dl.biz);
+      if (!b) return true; // unknown id — nothing to open
+      goAndOpen(b.x, b.y, () => BIZAPI.open(b));
       return true;
     }
     if (dl.plan) {
@@ -1735,6 +1747,7 @@ async function boot() {
           }
         }
         if (/subpop/.test(qs)) maybeOfferSubscription();
+        if (window.__qaExt) window.__qaExt(qs);
         if (/plans/.test(qs)) { MAP.setLayer('plans', true); syncLayerButtons(); MAP.drawOnce(); }
         if (/transit/.test(qs)) { MAP.setLayer('transit', true); syncLayerButtons(); positionTransit(); MAP.drawOnce(); }
         if (/planpop/.test(qs)) {

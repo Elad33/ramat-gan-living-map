@@ -1,0 +1,11 @@
+[out:json][timeout:180];
+area["boundary"="administrative"]["admin_level"="8"]["name"="רמת גן"]->.a;
+(
+  nwr["shop"]["shop"!~"^(vacant|no)$"]["name"](area.a);
+  nwr["amenity"~"^(restaurant|cafe|fast_food|food_court|ice_cream|bar|pub|nightclub|biergarten|pharmacy|clinic|dentist|doctors|veterinary|bank|post_office|fuel|car_wash|driving_school|cinema|marketplace|internet_cafe|studio|events_venue|childcare|language_school|music_school|coworking_space)$"]["name"](area.a);
+  nwr["leisure"~"^(fitness_centre|sports_centre|bowling_alley|escape_game|amusement_arcade|dance|trampoline_park)$"]["name"](area.a);
+  nwr["craft"]["name"](area.a);
+  nwr["healthcare"]["name"](area.a);
+  nwr["office"~"^(insurance|lawyer|estate_agent|travel_agent|accountant|architect|it|coworking|employment_agency|financial|notary)$"]["name"](area.a);
+);
+out tags center qt;

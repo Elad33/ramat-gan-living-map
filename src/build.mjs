@@ -8,8 +8,9 @@ const fonts = fs.readFileSync('../data/fonts-embedded.css', 'utf8');
 const muniSnap = fs.existsSync('../data/muni-events.json')
   ? '\nwindow.MUNI_FALLBACK=' + fs.readFileSync('../data/muni-events.json', 'utf8').trim() + ';'
   : '';
-const data = fs.readFileSync('../data/data.js', 'utf8') + '\n' + fs.readFileSync('../data/data2.js', 'utf8') + muniSnap;
-const app = ['app1.js', 'app2.js', 'app3.js'].map(f => fs.readFileSync(f, 'utf8')).join('\n');
+const biz = fs.existsSync('../data/biz.js') ? '\n' + fs.readFileSync('../data/biz.js', 'utf8') : '';
+const data = fs.readFileSync('../data/data.js', 'utf8') + '\n' + fs.readFileSync('../data/data2.js', 'utf8') + biz + muniSnap;
+const app = ['app1.js', 'app2.js', 'app3.js', 'app4.js'].map(f => fs.readFileSync(f, 'utf8')).join('\n');
 
 let body = tpl.split('/*__FONTS__*/').join(fonts);
 body = body.split('/*__DATA__*/').join(data);

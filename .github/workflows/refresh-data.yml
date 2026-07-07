@@ -30,6 +30,8 @@ jobs:
           else
             echo "::warning::שליפת הנתונים נכשלה הלילה — האתר נשאר עם הנתונים הקיימים"
           fi
+          cd ..
+          node scripts/fetch-businesses.mjs || echo "::warning::רענון העסקים נכשל — נשארים עם הרשימה הקיימת"
 
       - name: בניית האתר
         run: |
@@ -41,7 +43,7 @@ jobs:
           git config user.name "map-refresh-bot"
           git config user.email "actions@github.com"
           if ! git diff --quiet -- data/ index.html dist-artifact.html admin.html; then
-            git add data/data.js data/data2.js index.html dist-artifact.html admin.html
+            git add data/data.js data/data2.js data/biz.js index.html dist-artifact.html admin.html
             git commit -m "🔄 רענון נתונים יומי ($(date -u +%Y-%m-%d))"
             git push
           else
