@@ -85,6 +85,27 @@ function showToast(html) {
   toastT = setTimeout(() => el.classList.remove('show'), 2800);
 }
 
+// ---------- mobile back button closes UI surfaces (history sentinels) ----------
+const UI_BACK = { stack: [], silent: 0 };
+function uiOpened(key, closeFn) {
+  if (/[?&#]pick\b/.test(location.search + location.hash)) return; // CMS iframe
+  if (UI_BACK.stack.some(s => s.key === key)) return;
+  UI_BACK.stack.push({ key, closeFn });
+  try { history.pushState({ rgui: key }, ''); } catch (e) {}
+}
+function uiClosed(key) {
+  const i = UI_BACK.stack.findIndex(s => s.key === key);
+  if (i < 0) return;
+  UI_BACK.stack.splice(i, 1);
+  UI_BACK.silent++;
+  try { history.back(); } catch (e) { UI_BACK.silent--; }
+}
+window.addEventListener('popstate', () => {
+  if (UI_BACK.silent > 0) { UI_BACK.silent--; return; }
+  const top = UI_BACK.stack.pop();
+  if (top) top.closeFn(); // the closer got fromBack=true baked in
+});
+
 // ---------- overlay: labels, markers, highlight ring ----------
 const M2 = v => v * UNIT; // dm int -> meters
 const labelsRoot = $('labels');
@@ -187,7 +208,7 @@ function positionTransit() {
   }
   let used = 0;
   if (on && d < 1500) {
-    const sc = d < 500 ? 1 : d < 900 ? 0.85 : 0.7;
+    const sc = clamp(1.12 - d * 0.0004, 0.7, 1); // continuous — no size steps while zooming
     for (const s of busStops) {
       if (used >= BUS_POOL) break;
       const [sx, sy, vis] = MAP.project(s.x, s.y, 0);
@@ -264,6 +285,7 @@ function showBusPop(stop) {
     '<div id="busBody"><div class="sk-row"></div><div class="sk-row"></div><div class="sk-row"></div></div>' +
     '<div class="acts">' + navActsHtml(stop.x, stop.y) + '</div>';
   pop.classList.add('open');
+  popOpened();
   placePop();
   refreshBusPop();
   clearInterval(busTimer);
@@ -298,6 +320,7 @@ function overlayTick(animating, force) {
   layoutLabels();
   // compass + tilt button state
   $('compassN').style.transform = 'rotate(' + (-MAP.cam.bearing * 180 / Math.PI) + 'deg)';
+  $('compassBtn').classList.toggle('hide', Math.abs(MAP.cam.bearing) < 0.02); // only shown off-north
   $('tiltTxt').textContent = MAP.cam.tilt > 0.22 ? '2D' : '3D';
 }
 function layoutLabels() {
@@ -853,6 +876,7 @@ function renderEvList() {
   const vis = allEvents().filter(e => !hiddenCats.has(e.cat))
     .sort((a, b) => ((a.date || '9999') + (a.time || '')) < ((b.date || '9999') + (b.time || '')) ? -1 : 1);
   $('evCount').textContent = allEvents().length || '';
+  $('evCount').classList.toggle('on', allEvents().length > 0);
   if (!vis.length) {
     list.innerHTML = '<div class="ev-none">אין עדיין אירועים על המפה.<br/>לחצו על «הוספת אירוע» וסמנו נקודה בעיר.</div>';
     return;
@@ -908,6 +932,7 @@ function showPop(id) {
     (ev.official ? '' : '<button class="pop-act del" data-act="del"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2m-8 0 1 13h8l1-13"/></svg>הסרה</button>') +
     '</div>';
   pop.classList.add('open');
+  popOpened();
   placePop();
 }
 const DOW = ['א׳', 'ב׳', 'ג׳', 'ד׳', 'ה׳', 'ו׳', 'ש׳'];
@@ -934,6 +959,7 @@ function showVenuePop(mk) {
     (mk.count > 9 ? '<div class="bus-note">ועוד ' + (mk.count - 9) + ' אירועים במקום הזה, ברשימה המלאה</div>' : '') +
     '<div class="acts">' + navActsHtml(mk.x, mk.y) + '</div>';
   pop.classList.add('open');
+  popOpened();
   placePop();
 }
 function placePop() {
@@ -979,6 +1005,7 @@ function showPlanPop(plan, x, y) {
     (plan.url ? '<a class="pop-primary" href="' + escapeHtml(plan.url) + '" target="_blank" rel="noopener">לתיק התכנון הרשמי<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M7 17 17 7M8 7h9v9"/></svg></a>' : '') +
     '<div class="acts">' + navActsHtml(x, y) + '</div>';
   pop.classList.add('open');
+  popOpened();
   placePop();
 }
 $('pop').addEventListener('click', e => {
@@ -995,14 +1022,17 @@ $('pop').addEventListener('click', e => {
     showToast('האירוע הוסר מהמפה');
   }
 });
-function closePop() {
+function closePop(fromBack) {
   $('pop').classList.remove('open');
   popFor = null; popAnchor = null;
   busPopStop = null;
   curPlanNum = null;
   window.__curBiz = null;
   clearInterval(busTimer);
+  if (fromBack !== true) uiClosed('pop');
 }
+function popOpened() { uiOpened('pop', () => closePop(true)); }
+window.popOpened = popOpened;
 window.addEventListener('mapclick', e => {
   if (placing) return;
   closePop();
@@ -1014,10 +1044,13 @@ window.addEventListener('mapclick', e => {
 });
 
 // panel open/close
-function openPanel() { $('evPanel').classList.add('open'); }
-function closePanel() { $('evPanel').classList.remove('open'); }
+function openPanel() { $('evPanel').classList.add('open'); uiOpened('evPanel', () => closePanel(true)); }
+function closePanel(fromBack) {
+  $('evPanel').classList.remove('open');
+  if (fromBack !== true) uiClosed('evPanel');
+}
 $('evToggle').addEventListener('click', () => { renderEvList(); openPanel(); });
-$('evClose').addEventListener('click', closePanel);
+$('evClose').addEventListener('click', () => closePanel());
 
 // legend chips
 {
@@ -1068,10 +1101,14 @@ function openEvModal() {
   $('fDate').value = ''; $('fDate').min = today;
   $('fLoc').innerHTML = '<b>' + escapeHtml(reverseGeocode(pendingLoc.x, pendingLoc.y)) + '</b>';
   $('evModalBg').classList.add('open');
+  uiOpened('evModal', () => closeEvModal(true));
   setTimeout(() => $('fTitle').focus(), 60);
 }
-function closeEvModal() { $('evModalBg').classList.remove('open'); }
-$('fCancel').addEventListener('click', closeEvModal);
+function closeEvModal(fromBack) {
+  $('evModalBg').classList.remove('open');
+  if (fromBack !== true) uiClosed('evModal');
+}
+$('fCancel').addEventListener('click', () => closeEvModal());
 $('evModalBg').addEventListener('pointerdown', e => { if (e.target === e.currentTarget) closeEvModal(); });
 $('fSave').addEventListener('click', () => {
   const title = $('fTitle').value.trim();
@@ -1101,7 +1138,23 @@ let layerToastShown = { plans: false, transit: false };
 function syncLayerButtons() {
   $('plansBtn').classList.toggle('on', MAP.LAYERS.plans);
   $('transitBtn').classList.toggle('on', MAP.LAYERS.transit);
+  $('layersDot').classList.toggle('on', MAP.LAYERS.plans || MAP.LAYERS.transit || !!window.__bizOn);
 }
+window.syncLayerButtons = syncLayerButtons;
+// layers popover (anchored beside the rail button)
+function closeLayersPop() { $('layersPop').classList.remove('show'); }
+$('layersBtn').addEventListener('click', () => {
+  const pop = $('layersPop');
+  if (pop.classList.contains('show')) { closeLayersPop(); return; }
+  const r = $('layersBtn').getBoundingClientRect();
+  pop.style.left = Math.round(r.right + 12) + 'px';
+  pop.classList.add('show');
+  const h = pop.offsetHeight || 220;
+  pop.style.top = Math.round(clamp(r.top + r.height / 2 - h / 2, 12, innerHeight - h - 12)) + 'px';
+});
+document.addEventListener('pointerdown', e => {
+  if (!e.target.closest('#layersPop') && !e.target.closest('#layersBtn')) closeLayersPop();
+});
 function toggleLayer(name) {
   MAP.setLayer(name, !MAP.LAYERS[name]);
   syncLayerButtons();
@@ -1171,17 +1224,23 @@ $('tiltBtn').addEventListener('click', () => {
   MAP.flyTo({ tilt: flat ? 0.02 : 0.82, T: 700 });
 });
 $('themeBtn').addEventListener('click', () => applyTheme(themeName === 'light' ? 'dark' : 'light', true));
-$('aboutBtn').addEventListener('click', () => $('aboutBg').classList.add('open'));
-$('aboutClose').addEventListener('click', () => $('aboutBg').classList.remove('open'));
-$('aboutBg').addEventListener('pointerdown', e => { if (e.target === e.currentTarget) e.currentTarget.classList.remove('open'); });
+function closeAbout(fromBack) {
+  $('aboutBg').classList.remove('open');
+  if (fromBack !== true) uiClosed('about');
+}
+$('aboutBtn').addEventListener('click', () => { $('aboutBg').classList.add('open'); uiOpened('about', () => closeAbout(true)); });
+$('aboutClose').addEventListener('click', () => closeAbout());
+$('aboutBg').addEventListener('pointerdown', e => { if (e.target === e.currentTarget) closeAbout(); });
 window.addEventListener('keydown', e => {
   if (e.key === 'Escape') {
-    if ($('evModalBg').classList.contains('open')) closeEvModal();
-    else if ($('aboutBg').classList.contains('open')) $('aboutBg').classList.remove('open');
+    if ($('layersPop').classList.contains('show')) closeLayersPop();
+    else if ($('evModalBg').classList.contains('open')) closeEvModal();
+    else if ($('aboutBg').classList.contains('open')) closeAbout();
+    else if ($('noticesBg').classList.contains('open')) closeNotices();
     else if (placing) setPlacing(false);
     else if (popFor || window.__curBiz || busPopStop) closePop();
     else if ($('evPanel').classList.contains('open')) closePanel();
-    else if ($('aiPanel') && $('aiPanel').classList.contains('open')) $('aiPanel').classList.remove('open');
+    else if (window.closeAiPanel && $('aiPanel').classList.contains('open')) window.closeAiPanel();
     else closeResults();
   }
 });
@@ -1385,9 +1444,13 @@ function renderNotices() {
     showSubCard();
   });
 }
-$('bellBtn').addEventListener('click', () => $('noticesBg').classList.add('open'));
-$('noticesClose').addEventListener('click', () => $('noticesBg').classList.remove('open'));
-$('noticesBg').addEventListener('pointerdown', e => { if (e.target === e.currentTarget) e.currentTarget.classList.remove('open'); });
+function closeNotices(fromBack) {
+  $('noticesBg').classList.remove('open');
+  if (fromBack !== true) uiClosed('notices');
+}
+$('bellBtn').addEventListener('click', () => { $('noticesBg').classList.add('open'); uiOpened('notices', () => closeNotices(true)); });
+$('noticesClose').addEventListener('click', () => closeNotices());
+$('noticesBg').addEventListener('pointerdown', e => { if (e.target === e.currentTarget) closeNotices(); });
 
 // ---------- geo helpers, deep links, share, locate, navigation ----------
 const GEO = CITY_D.meta;
@@ -1547,12 +1610,16 @@ $('geoBtn').addEventListener('click', () => {
   }, { enableHighAccuracy: true, maximumAge: 5000 });
 });
 
-// PWA install
+// PWA install — the button lives in the About dialog so the rail never reflows
 let installPrompt = null;
 window.addEventListener('beforeinstallprompt', e => {
   e.preventDefault();
   installPrompt = e;
   $('installBtn').style.display = '';
+  if (!store.getItem('rg.installHint') && !MAP.QA_MODE) {
+    store.setItem('rg.installHint', '1');
+    setTimeout(() => showToast('📲 אפשר להתקין את המפה כאפליקציה — דרך כפתור המידע ⓘ'), 22000);
+  }
 });
 $('installBtn').addEventListener('click', async () => {
   if (!installPrompt) return;

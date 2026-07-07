@@ -188,7 +188,7 @@ function positionBiz(force) {
       selectBiz(d);
       bizSelV = vpVersion; bizSelT = t;
     }
-    const sc = (d < 500 ? 1 : d < 900 ? 0.88 : 0.74) * (IS_MOBILE ? 1.12 : 1);
+    const sc = clamp(1.14 - d * 0.00042, 0.74, 1.06) * (IS_MOBILE ? 1.1 : 1); // continuous — no zoom steps
     for (const s of bizSel) {
       if (used >= BIZ_POOL_N) break;
       const [sx, sy, vis] = MAP.project(s.b.x, s.b.y, 0);
@@ -218,12 +218,15 @@ function positionBiz(force) {
 window.__bizTick = () => positionBiz(false);
 $('bizBtn').addEventListener('click', () => {
   bizLayerOn = !bizLayerOn;
+  window.__bizOn = bizLayerOn;
   store.setItem(BIZ_KEY, bizLayerOn ? 'on' : 'off');
   $('bizBtn').classList.toggle('on', bizLayerOn);
+  if (window.syncLayerButtons) syncLayerButtons();
   positionBiz(true);
   if (bizLayerOn) showToast('עסקים מוצגים על המפה — התקרבו לרחוב כדי לראות אותם');
 });
 $('bizBtn').classList.toggle('on', bizLayerOn);
+window.__bizOn = bizLayerOn;
 
 // ---------- business popup ----------
 function bizChipHtml(b) {
@@ -262,6 +265,7 @@ function showBizPop(b) {
     '<button class="pop-act" data-act="fly"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>התקרבות</button>' +
     '</div>';
   pop.classList.add('open');
+  popOpened();
   placePop();
 }
 $('pop').addEventListener('click', e => {
@@ -279,11 +283,16 @@ function openAiPanel() {
   renderBizChips();
   renderBizList();
   aiPanel.classList.add('open');
+  uiOpened('aiPanel', () => closeAiPanel(true));
   updateAiRefLine();
 }
-function closeAiPanel() { aiPanel.classList.remove('open'); }
+function closeAiPanel(fromBack) {
+  aiPanel.classList.remove('open');
+  if (fromBack !== true) uiClosed('aiPanel');
+}
+window.closeAiPanel = () => closeAiPanel();
 $('aiToggle').addEventListener('click', openAiPanel);
-$('aiClose').addEventListener('click', closeAiPanel);
+$('aiClose').addEventListener('click', () => closeAiPanel());
 
 const fmtDist = m => m < 950 ? Math.max(10, Math.round(m / 10) * 10) + ' מ׳' : (m / 1000).toFixed(1) + ' ק״מ';
 function refPoint() { return (typeof geoPos !== 'undefined' && geoPos) ? geoPos : [MAP.cam.cx, MAP.cam.cy]; }
@@ -619,4 +628,5 @@ window.__qaExt = function (qs) {
     }
   }
   if (/bizmk/.test(qs)) { positionBiz(true); MAP.drawOnce(); }
+  if (/laypop/.test(qs)) { $('layersBtn').click(); MAP.drawOnce(); }
 };
