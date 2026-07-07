@@ -59,9 +59,19 @@ module.exports = async function handler(req, res) {
     return;
   }
 
-  const models = [process.env.GEMINI_MODEL, 'gemini-2.5-flash-lite', 'gemini-2.0-flash'].filter(Boolean);
-  for (const model of models) {
+  // free-tier reality (verified): the 2.0 family has no quota on new keys (429),
+  // and flash-lite occasionally 503s under demand spikes — so: lite → flash, with one retry on 503.
+  const models = [process.env.GEMINI_MODEL, 'gemini-2.5-flash-lite', 'gemini-2.5-flash'].filter(Boolean);
+  const attempts = [];
+  for (const model of models) { attempts.push(model, model); } // each model gets one retry
+  let lastWas503 = false;
+  for (let i = 0; i < attempts.length; i++) {
+    const model = attempts[i];
+    const isRetry = i % 2 === 1;
+    if (isRetry && !lastWas503) continue; // retry only makes sense after a demand spike
     try {
+      if (isRetry) await new Promise(r => setTimeout(r, 700));
+      lastWas503 = false;
       const r = await fetch(
         'https://generativelanguage.googleapis.com/v1beta/models/' + model + ':generateContent?key=' + key,
         {
@@ -77,11 +87,10 @@ module.exports = async function handler(req, res) {
               maxOutputTokens: 1000,
             },
           }),
-          signal: AbortSignal.timeout(9000),
+          signal: AbortSignal.timeout(6500),
         }
       );
-      if (r.status === 404) continue; // model name not available on this key
-      if (!r.ok) throw new Error('gemini ' + r.status);
+      if (!r.ok) { lastWas503 = r.status === 503; throw new Error('gemini ' + r.status); }
       const data = await r.json();
       const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
       const intent = JSON.parse(text);
@@ -92,7 +101,7 @@ module.exports = async function handler(req, res) {
         evCats: (intent.evCats || []).filter(c => EV_CATS.includes(c)).slice(0, 4),
         keywords: (intent.keywords || []).map(s => String(s).slice(0, 30)).slice(0, 6),
         when: ['today', 'tomorrow', 'weekend', 'week'].includes(intent.when) ? intent.when : 'any',
-        openNow: !!intent.openNow,
+        openNow: !!intent.openNow || /פתוח/.test(q),
         reply: String(intent.reply || '').slice(0, 220),
       };
       if (!out.kinds.length) out.kinds = ['biz', 'event'];
@@ -100,7 +109,8 @@ module.exports = async function handler(req, res) {
       res.setHeader('Cache-Control', 'public, s-maxage=21600, stale-while-revalidate=86400');
       res.status(200).json({ ok: true, source: 'ai', intent: out });
       return;
-    } catch (e) { /* try next model, then fall through */ }
+    } catch (e) { /* try next attempt/model, then fall through */ }
   }
+  res.setHeader('Cache-Control', 'no-store'); // never pin a bad moment to the CDN
   res.status(200).json({ ok: false, error: 'ai_unavailable' });
 };
