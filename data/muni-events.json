@@ -1,5 +1,5 @@
 {
- "updated": "2026-07-08T16:48:45.289Z",
+ "updated": "2026-07-08T19:54:36.021Z",
  "source": "https://www.ramat-gan.muni.il/event-lobby",
  "events": [
   {
@@ -87,25 +87,6 @@
    "link": "https://www.ramat-gan.muni.il/events/summer-cinema-2026/",
    "img": "https://www.ramat-gan.muni.il/media/avfb5l0g/התאמות-לאתר-סינמה-קיץ-2026_342-220.jpg",
    "featured": false,
-   "free": true
-  },
-  {
-   "id": "muni-eventssummer-ramat-gani-2026",
-   "title": "קיץ רמת גני",
-   "cat": "community",
-   "anim": "community",
-   "muniCat": "",
-   "audience": [],
-   "date": "2026-07-08",
-   "time": "20:30",
-   "locName": "בית הצנחן",
-   "address": "",
-   "x": -976.2,
-   "y": 2884.3,
-   "approx": false,
-   "link": "https://www.ramat-gan.muni.il/events/summer-ramat-gani-2026/",
-   "img": "https://www.ramat-gan.muni.il/media/1wpgegrx/קיץ-2026_התאמות-לאתר_342-220.jpg",
-   "featured": true,
    "free": true
   },
   {
@@ -347,6 +328,23 @@
    "img": "https://www.ramat-gan.muni.il/media/wlykjlvg/גריד-לקהילה-הגאה_התאמה-לאתר_342-2203.jpg",
    "featured": false,
    "free": true
+  },
+  {
+   "id": "muni-eventssummer-ramat-gani-2026",
+   "title": "קיץ רמת גני",
+   "cat": "community",
+   "anim": "community",
+   "muniCat": "",
+   "audience": [],
+   "date": "2026-07-09",
+   "time": "20:30",
+   "locName": "בית רוזן",
+   "address": "",
+   "x": null,
+   "y": null,
+   "link": "https://www.ramat-gan.muni.il/events/summer-ramat-gani-2026/",
+   "img": "https://www.ramat-gan.muni.il/media/1wpgegrx/קיץ-2026_התאמות-לאתר_342-220.jpg",
+   "featured": true
   },
   {
    "id": "muni-eventsstand-up-after-dark-at-the-ramat-gan-theater",
