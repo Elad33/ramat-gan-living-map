@@ -1,5 +1,5 @@
 {
- "updated": "2026-07-08T03:42:24.934Z",
+ "updated": "2026-07-08T08:43:15.362Z",
  "source": "https://www.ramat-gan.muni.il/event-lobby",
  "events": [
   {
@@ -13,37 +13,14 @@
    ],
    "date": "2026-07-08",
    "time": "",
-   "locName": "מרכז חברתי תמיר",
-   "address": "רחוב רמז 5",
-   "x": -703.6,
-   "y": -164.1,
+   "locName": "מועדון בסר",
+   "address": "רחוב בן גוריון 2 - בנין בסר 1, קומה ב'",
+   "x": -507.1,
+   "y": 2701.8,
    "approx": false,
    "link": "https://www.ramat-gan.muni.il/events/lectures-for-age-60-and-over/",
    "img": "https://www.ramat-gan.muni.il/media/gycpvo0p/עמוד-הרצאות_1540-8032.jpg",
    "featured": false
-  },
-  {
-   "id": "muni-eventsweb-site-event-329",
-   "title": "הסדנאות הפתוחות שלנו במסגרייה",
-   "cat": "community",
-   "anim": "community",
-   "muniCat": "מייקרס יצירה עירונית",
-   "audience": [
-    "צעירים (18-35)",
-    "מבוגרים (60- 35)",
-    "הגיל השלישי (60+)"
-   ],
-   "date": "2026-07-08",
-   "time": "09:00",
-   "locName": "מייקרס",
-   "address": "רחוב מסובים 2",
-   "x": 1714.2,
-   "y": -3740.9,
-   "approx": true,
-   "link": "https://www.ramat-gan.muni.il/events/web-site-event-329/",
-   "img": null,
-   "featured": false,
-   "free": true
   },
   {
    "id": "muni-eventssoundhealing-workshop",
@@ -132,29 +109,6 @@
    "featured": false
   },
   {
-   "id": "muni-eventsrg-eventsweb-site-event-1103",
-   "title": "קרמיקה - אובניים",
-   "cat": "community",
-   "anim": "community",
-   "muniCat": "מייקרס יצירה עירונית",
-   "audience": [
-    "צעירים (18-35)",
-    "מבוגרים (60- 35)",
-    "הגיל השלישי (60+)"
-   ],
-   "date": "2026-07-08",
-   "time": "17:00",
-   "locName": "מייקרס",
-   "address": "רחוב מסובים 2",
-   "x": 1714.2,
-   "y": -3740.9,
-   "approx": true,
-   "link": "https://www.ramat-gan.muni.il/events/rg-events/web-site-event-1103/",
-   "img": null,
-   "featured": false,
-   "free": true
-  },
-  {
    "id": "muni-eventssummer-cinema-2026",
    "title": "סינמה קיץ",
    "cat": "community",
@@ -238,29 +192,6 @@
    "link": "https://www.ramat-gan.muni.il/events/summer-ramat-gani-2026/",
    "img": "https://www.ramat-gan.muni.il/media/1wpgegrx/קיץ-2026_התאמות-לאתר_342-220.jpg",
    "featured": true
-  },
-  {
-   "id": "muni-eventsbeit-zvi-rg-eventsweb-site-event-1177",
-   "title": "פליישר",
-   "cat": "sport",
-   "anim": "sport",
-   "muniCat": "תיאטרון אמנות מוזיקה וספורט",
-   "audience": [
-    "צעירים (18-35)",
-    "הגיל השלישי (60+)",
-    "מבוגרים (60- 35)"
-   ],
-   "date": "2026-07-08",
-   "time": "21:00",
-   "locName": "תיאטרון בית צבי",
-   "address": "רחוב שועלי שמשון 2",
-   "x": -471.1,
-   "y": 866.7,
-   "approx": true,
-   "link": "https://www.ramat-gan.muni.il/events/beit-zvi-rg-events/web-site-event-1177/",
-   "img": "https://www.ramat-gan.muni.il/media/jdqbpv1a/flaisher220-342.jpg",
-   "featured": false,
-   "free": true
   },
   {
    "id": "muni-eventsrg-eventsweb-site-event-3814",
@@ -502,6 +433,29 @@
    "free": true
   },
   {
+   "id": "muni-eventsbeit-zvi-rg-eventsweb-site-event-1177",
+   "title": "פליישר",
+   "cat": "sport",
+   "anim": "sport",
+   "muniCat": "תיאטרון אמנות מוזיקה וספורט",
+   "audience": [
+    "צעירים (18-35)",
+    "הגיל השלישי (60+)",
+    "מבוגרים (60- 35)"
+   ],
+   "date": "2026-07-10",
+   "time": "21:00",
+   "locName": "תיאטרון בית צבי",
+   "address": "רחוב שועלי שמשון 2",
+   "x": -471.1,
+   "y": 866.7,
+   "approx": true,
+   "link": "https://www.ramat-gan.muni.il/events/beit-zvi-rg-events/web-site-event-1177/",
+   "img": "https://www.ramat-gan.muni.il/media/jdqbpv1a/flaisher220-342.jpg",
+   "featured": false,
+   "free": true
+  },
+  {
    "id": "muni-eventsinstincts",
    "title": "ההצגה \"יצרים\"",
    "cat": "sport",
@@ -543,6 +497,27 @@
    "approx": true,
    "link": "https://www.ramat-gan.muni.il/events/summer-workshops-for-children-at-the-makers/",
    "img": "https://www.ramat-gan.muni.il/media/xdvlpvwf/220_342מובייל.jpg",
+   "featured": false,
+   "free": true
+  },
+  {
+   "id": "muni-sworkshops-for-early-childhood-harmony-center-shikun-vatikim",
+   "title": "סדנאות להורים ולגיל הרך במרכז הרמוניה שיכון ותיקים",
+   "cat": "community",
+   "anim": "community",
+   "muniCat": "פעילויות לילדים ולגיל הרך",
+   "audience": [
+    "הגיל הרך (0-3)"
+   ],
+   "date": "2026-07-12",
+   "time": "10:30",
+   "locName": "הרמוניה",
+   "address": "רחוב המרגנית 10",
+   "x": -1278.5,
+   "y": 2553.9,
+   "approx": false,
+   "link": "https://www.ramat-gan.muni.il/events/workshops-for-early-childhood-harmony-center-shikun-vatikim/",
+   "img": "https://www.ramat-gan.muni.il/media/yxuo0gau/לאתר-סדנאות-להורים-ולגיל-הרך_יולי-2026_342-220.jpg",
    "featured": false,
    "free": true
   },
@@ -983,6 +958,29 @@
    "featured": false
   },
   {
+   "id": "muni-eventsweb-site-event-329",
+   "title": "הסדנאות הפתוחות שלנו במסגרייה",
+   "cat": "community",
+   "anim": "community",
+   "muniCat": "מייקרס יצירה עירונית",
+   "audience": [
+    "צעירים (18-35)",
+    "מבוגרים (60- 35)",
+    "הגיל השלישי (60+)"
+   ],
+   "date": "2026-07-15",
+   "time": "09:00",
+   "locName": "מייקרס",
+   "address": "רחוב מסובים 2",
+   "x": 1714.2,
+   "y": -3740.9,
+   "approx": true,
+   "link": "https://www.ramat-gan.muni.il/events/web-site-event-329/",
+   "img": null,
+   "featured": false,
+   "free": true
+  },
+  {
    "id": "muni-eventsnight-lamp-making-workshop",
    "title": "סדנה להכנת מנורת לילה ממתכת",
    "cat": "community",
@@ -1026,7 +1024,7 @@
   },
   {
    "id": "muni-eventsweb-site-event-206",
-   "title": "המסלול המכוון - ייעוץ אישי לקריירה והשכלה",
+   "title": "המסלול המכוון - ייעוץ אישי לקריירה והשכלה.",
    "cat": "community",
    "anim": "community",
    "muniCat": "הקומה השנייה: מרכז צעירים",
