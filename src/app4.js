@@ -629,4 +629,5 @@ window.__qaExt = function (qs) {
   }
   if (/bizmk/.test(qs)) { positionBiz(true); MAP.drawOnce(); }
   if (/laypop/.test(qs)) { $('layersBtn').click(); MAP.drawOnce(); }
+  if (/about/.test(qs)) { $('aboutBtn').click(); if ($('installBtn')) $('installBtn').style.display = ''; MAP.drawOnce(); }
 };

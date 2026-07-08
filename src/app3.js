@@ -58,8 +58,14 @@ function applyTheme(name, persist) {
   if (root.getAttribute('data-theme') !== (name === 'light' ? 'light' : 'dark'))
     root.setAttribute('data-theme', name === 'light' ? 'light' : 'dark');
   MAP.setPalette(THEMES[name]);
-  $('icMoon').style.display = name === 'light' ? '' : 'none';
-  $('icSun').style.display = name === 'light' ? 'none' : '';
+  const light = name === 'light';
+  $('icMoon').style.display = light ? '' : 'none';
+  $('icSun').style.display = light ? 'none' : '';
+  // the About row shows the CURRENT mode (state, not action): sun+יום / moon+דמדומים
+  const mMoon = $('icMoonM'), mSun = $('icSunM'), mName = $('themeName');
+  if (mMoon) mMoon.style.display = light ? 'none' : '';
+  if (mSun) mSun.style.display = light ? '' : 'none';
+  if (mName) mName.textContent = light ? 'יום' : 'דמדומים';
   if (persist) store.setItem('rg.theme', name);
 }
 // host theme toggle sync (artifact viewer stamps data-theme on root)
@@ -434,11 +440,13 @@ function parseQuery(q) {
   else { m = q.match(/^(\d+[א-ת]?)\s+(.+)$/); if (m) { num = m[1]; q = m[2]; } }
   return { text: q, num };
 }
+// word-aware relevance: whole match > name prefix > any-word prefix > mid-substring.
+// mid-substring is deliberately weak (and gated on length) so it stops surfacing noise.
 function scoreItem(n, nh, q, qh) {
   if (n === q || nh === qh) return 100;
-  if (n.startsWith(q) || nh.startsWith(qh)) return 80;
-  if (n.includes(' ' + q) || nh.includes(' ' + qh)) return 62;
-  if (n.includes(q)) return 40;
+  if (n.startsWith(q) || nh.startsWith(qh)) return 84;
+  if ((' ' + n).includes(' ' + q) || (' ' + nh).includes(' ' + qh)) return 66; // a word starts with q
+  if (q.length >= 3 && (n.includes(q) || nh.includes(qh))) return 30;           // buried substring
   return 0;
 }
 const numVal = s => parseInt(String(s).match(/\d+/)?.[0] ?? 'NaN', 10);
@@ -481,17 +489,37 @@ const TYPE_META = {
   poi: { group: 'מקומות', icon: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 3l2.4 5.2L20 9l-4 4.1.9 5.9L12 16.6 7.1 19l.9-5.9L4 9l5.6-.8Z"/></svg>' },
   bld: { group: 'מבנים', icon: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M6 21V5l6-2v18M12 21h6V9l-6-2M9 8h.01M9 12h.01M9 16h.01M15 12h.01M15 16h.01"/></svg>' },
   biz: { group: 'עסקים', icon: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"><path d="M4.5 9.5 6 4.5h12l1.5 5M4.5 9.5a2.3 2.3 0 0 0 4.6 0 2.3 2.3 0 0 0 4.6 0 2.3 2.3 0 0 0 4.6 0M5.5 12v7.5h13V12M9.5 19.5v-5h5v5"/></svg>' },
+  event: { group: 'אירועים', icon: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M8 3v4M16 3v4M3.5 10h17"/></svg>' },
 };
+// events are dynamic (loaded async, user-added) — kept in their own list, rebuilt on change
+let evSearchItems = [];
+function syncEventSearch() {
+  evSearchItems = allEvents().map(ev => {
+    const it = { type: 'event', name: ev.title, ev,
+      sub: [fmtWhen(ev), ev.locName || (typeof ev.x === 'number' ? '' : 'אונליין')].filter(Boolean).join(' · '),
+      x: ev.x, y: ev.y };
+    it.n = norm(it.name); it.nh = stripHe(it.n);
+    return it;
+  });
+}
+window.syncEventSearch = syncEventSearch;
+// per-type nudges: what a searcher most likely means, and the floor each must clear.
+// businesses & buildings must clear a word-boundary match (66) — no buried-substring noise.
+const TYPE_BONUS = { street: 8, addr: 0, event: 7, poi: 5, hood: 4, biz: 3, bld: -8 };
+const TYPE_FLOOR = { biz: 60, bld: 60, event: 40 };
 function runSearch(qRaw) {
   const { text, num } = parseQuery(qRaw);
   if (!text && !num) return [];
   const q = text, qh = stripHe(text);
   const res = [];
+  const consider = it => {
+    const s = scoreItem(it.n, it.nh, q, qh);
+    if (s < (TYPE_FLOOR[it.type] || 1)) return;
+    res.push({ ...it, score: s + (TYPE_BONUS[it.type] || 0) });
+  };
   if (q) {
-    for (const it of searchItems) {
-      const s = scoreItem(it.n, it.nh, q, qh);
-      if (s > 0) res.push({ ...it, score: s + (it.type === 'street' ? 6 : it.type === 'poi' ? 3 : 0) });
-    }
+    for (const it of searchItems) consider(it);
+    for (const it of evSearchItems) consider(it);
   }
   res.sort((a, b) => b.score - a.score || a.name.length - b.name.length);
   const out = [];
@@ -501,7 +529,7 @@ function runSearch(qRaw) {
       if (loc) out.push({ type: 'addr', name: st.name + ' ' + num, sub: loc.approx ? 'כתובת · מיקום משוער' : 'כתובת', x: loc.x, y: loc.y, score: 120 + st.score });
     }
   }
-  const capPer = { street: 5, poi: 5, hood: 3, bld: 4, biz: 6 };
+  const capPer = { street: 5, poi: 5, hood: 3, bld: 3, biz: 6, event: 6 };
   const counts = {};
   for (const r of res) {
     counts[r.type] = (counts[r.type] || 0) + 1;
@@ -511,6 +539,13 @@ function runSearch(qRaw) {
   return out;
 }
 function goToResult(r) {
+  if (r.type === 'event') {
+    const ev = r.ev;
+    if (ev && typeof ev.x === 'number') { MAP.flyTo({ cx: ev.x, cy: ev.y, dist: 620, done: () => showPop(ev.id) }); return; }
+    if (ev && ev.link) window.open(ev.link, '_blank', 'noopener'); // online event
+    else { renderEvList(); openPanel(); }
+    return;
+  }
   let dist = 480;
   if (r.type === 'street') {
     dist = clamp(r.entry.ext * 1.35, 480, 3200);
@@ -672,6 +707,7 @@ function rebuildMarkerList() {
   }
   out.push(...venues.values());
   markerList = out;
+  syncEventSearch(); // keep the search index in step with the events on the map
 }
 function ensureMarker(mk) {
   if (evMarkers.has(mk.id)) return evMarkers.get(mk.id);
@@ -1223,7 +1259,9 @@ $('tiltBtn').addEventListener('click', () => {
   const flat = MAP.cam.tilt > 0.22;
   MAP.flyTo({ tilt: flat ? 0.02 : 0.82, T: 700 });
 });
-$('themeBtn').addEventListener('click', () => applyTheme(themeName === 'light' ? 'dark' : 'light', true));
+const toggleTheme = () => applyTheme(themeName === 'light' ? 'dark' : 'light', true);
+$('themeBtn').addEventListener('click', toggleTheme);
+$('themeBtnM').addEventListener('click', toggleTheme);
 function closeAbout(fromBack) {
   $('aboutBg').classList.remove('open');
   if (fromBack !== true) uiClosed('about');
@@ -1800,6 +1838,7 @@ async function boot() {
         if (rm) {
           const term = rm[1] ? decodeURIComponent(rm[1]) : 'ביאליק 12';
           sInput.value = term; sBox.classList.add('hasText'); renderResults(runSearch(term));
+          setTimeout(() => { renderResults(runSearch(term)); MAP.drawOnce(); }, 1600); // catch async-loaded events
         }
         const dlq = parseDeepLink();
         if (dlq) {
