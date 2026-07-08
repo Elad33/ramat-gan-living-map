@@ -1,67 +1,7 @@
 {
- "updated": "2026-07-07T17:26:15.409Z",
+ "updated": "2026-07-08T03:42:24.934Z",
  "source": "https://www.ramat-gan.muni.il/event-lobby",
  "events": [
-  {
-   "id": "muni-eventsthe-secret-of-long-life",
-   "title": "סוד החיים הארוכים \"האזורים הכחולים\"",
-   "cat": "community",
-   "anim": "community",
-   "muniCat": "אזרחים ותיקים",
-   "audience": [
-    "הגיל השלישי (60+)"
-   ],
-   "date": "2026-07-07",
-   "time": "18:00",
-   "locName": "מרכז פסג\"ה",
-   "address": "רחוב חיים לנדאו 5",
-   "x": 149.2,
-   "y": 29,
-   "approx": true,
-   "link": "https://www.ramat-gan.muni.il/events/the-secret-of-long-life/",
-   "img": "https://www.ramat-gan.muni.il/media/sd0f1iru/התאמות-הרצאה-סוד-החיים-הארוכים_342-220.jpg",
-   "featured": false,
-   "free": true
-  },
-  {
-   "id": "muni-eventssummer-ramat-gani-2026",
-   "title": "קיץ רמת גני",
-   "cat": "community",
-   "anim": "community",
-   "muniCat": "",
-   "audience": [],
-   "date": "2026-07-07",
-   "time": "20:30",
-   "locName": "מרכז מסחרי מרום נווה",
-   "address": "",
-   "x": 191.8,
-   "y": 196.4,
-   "approx": true,
-   "link": "https://www.ramat-gan.muni.il/events/summer-ramat-gani-2026/",
-   "img": "https://www.ramat-gan.muni.il/media/1wpgegrx/קיץ-2026_התאמות-לאתר_342-220.jpg",
-   "featured": true
-  },
-  {
-   "id": "muni-eventspublic-singing",
-   "title": "שירה בציבור ברחבי העיר",
-   "cat": "sport",
-   "anim": "sport",
-   "muniCat": "תיאטרון אמנות מוזיקה וספורט",
-   "audience": [
-    "מבוגרים (60- 35)",
-    "הגיל השלישי (60+)"
-   ],
-   "date": "2026-07-07",
-   "time": "20:30",
-   "locName": "מרכז מסחרי מרום נווה",
-   "address": "רחוב חיים לנדאו 7",
-   "x": 149.2,
-   "y": 89.6,
-   "approx": false,
-   "link": "https://www.ramat-gan.muni.il/events/public-singing/",
-   "img": "https://www.ramat-gan.muni.il/media/ftdgeygy/לאתר-שירה-בציבור_342-220.jpg",
-   "featured": false
-  },
   {
    "id": "muni-eventslectures-for-age-60-and-over",
    "title": "הרצאות במועדונים לוותיקים",
@@ -281,6 +221,23 @@
    "img": "https://www.ramat-gan.muni.il/media/vhbpmdkv/yakish220-342.jpg",
    "featured": false,
    "free": true
+  },
+  {
+   "id": "muni-eventssummer-ramat-gani-2026",
+   "title": "קיץ רמת גני",
+   "cat": "community",
+   "anim": "community",
+   "muniCat": "",
+   "audience": [],
+   "date": "2026-07-08",
+   "time": "20:30",
+   "locName": "בית ספר גבעולים",
+   "address": "",
+   "x": null,
+   "y": null,
+   "link": "https://www.ramat-gan.muni.il/events/summer-ramat-gani-2026/",
+   "img": "https://www.ramat-gan.muni.il/media/1wpgegrx/קיץ-2026_התאמות-לאתר_342-220.jpg",
+   "featured": true
   },
   {
    "id": "muni-eventsbeit-zvi-rg-eventsweb-site-event-1177",
@@ -1003,6 +960,27 @@
    "link": "https://www.ramat-gan.muni.il/events/world-cup-2026/",
    "img": "https://www.ramat-gan.muni.il/media/znlbzvnx/התאמות-לאתר_-שידורי-מונדיאל-20206-בפארק-הלאומי_342-220.jpg",
    "featured": true
+  },
+  {
+   "id": "muni-eventspublic-singing",
+   "title": "שירה בציבור ברחבי העיר",
+   "cat": "sport",
+   "anim": "sport",
+   "muniCat": "תיאטרון אמנות מוזיקה וספורט",
+   "audience": [
+    "מבוגרים (60- 35)",
+    "הגיל השלישי (60+)"
+   ],
+   "date": "2026-07-14",
+   "time": "20:30",
+   "locName": "הפארק הלאומי",
+   "address": "רחוב אחד העם 3",
+   "x": -359.3,
+   "y": -2368,
+   "approx": false,
+   "link": "https://www.ramat-gan.muni.il/events/public-singing/",
+   "img": "https://www.ramat-gan.muni.il/media/ftdgeygy/לאתר-שירה-בציבור_342-220.jpg",
+   "featured": false
   },
   {
    "id": "muni-eventsnight-lamp-making-workshop",
