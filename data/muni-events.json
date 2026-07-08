@@ -1,27 +1,7 @@
 {
- "updated": "2026-07-08T14:39:19.797Z",
+ "updated": "2026-07-08T16:48:45.289Z",
  "source": "https://www.ramat-gan.muni.il/event-lobby",
  "events": [
-  {
-   "id": "muni-eventslectures-for-age-60-and-over",
-   "title": "הרצאות במועדונים לוותיקים",
-   "cat": "community",
-   "anim": "community",
-   "muniCat": "אזרחים ותיקים",
-   "audience": [
-    "הגיל השלישי (60+)"
-   ],
-   "date": "2026-07-08",
-   "time": "",
-   "locName": "מועדון ותיקי רמת חן",
-   "address": "רחוב אלוף דוד 142",
-   "x": -952.6,
-   "y": -1949,
-   "approx": false,
-   "link": "https://www.ramat-gan.muni.il/events/lectures-for-age-60-and-over/",
-   "img": "https://www.ramat-gan.muni.il/media/gycpvo0p/עמוד-הרצאות_1540-8032.jpg",
-   "featured": false
-  },
   {
    "id": "muni-eventssoundhealing-workshop",
    "title": "סדנת סאונדהילינג",
@@ -110,51 +90,6 @@
    "free": true
   },
   {
-   "id": "muni-eventsrg-eventsweb-site-event-1174",
-   "title": "ספינינג",
-   "cat": "community",
-   "anim": "community",
-   "muniCat": "הקהילה הגאה",
-   "audience": [
-    "צעירים (18-35)",
-    "מבוגרים (60- 35)"
-   ],
-   "date": "2026-07-08",
-   "time": "19:30",
-   "locName": "המרכז הגאה",
-   "address": "רחוב ביאליק 42",
-   "x": -1144.8,
-   "y": 1361.2,
-   "approx": false,
-   "link": "https://www.ramat-gan.muni.il/events/rg-events/web-site-event-1174/",
-   "img": null,
-   "featured": false,
-   "free": true
-  },
-  {
-   "id": "muni-eventsbeit-zvi-rg-eventsweb-site-event-1178",
-   "title": "יאקיש ופופצ'ה",
-   "cat": "sport",
-   "anim": "sport",
-   "muniCat": "תיאטרון אמנות מוזיקה וספורט",
-   "audience": [
-    "צעירים (18-35)",
-    "מבוגרים (60- 35)",
-    "הגיל השלישי (60+)"
-   ],
-   "date": "2026-07-08",
-   "time": "19:30",
-   "locName": "תיאטרון בית צבי",
-   "address": "רחוב שועלי שמשון 2",
-   "x": -471.1,
-   "y": 866.7,
-   "approx": true,
-   "link": "https://www.ramat-gan.muni.il/events/beit-zvi-rg-events/web-site-event-1178/",
-   "img": "https://www.ramat-gan.muni.il/media/vhbpmdkv/yakish220-342.jpg",
-   "featured": false,
-   "free": true
-  },
-  {
    "id": "muni-eventssummer-ramat-gani-2026",
    "title": "קיץ רמת גני",
    "cat": "community",
@@ -172,6 +107,26 @@
    "img": "https://www.ramat-gan.muni.il/media/1wpgegrx/קיץ-2026_התאמות-לאתר_342-220.jpg",
    "featured": true,
    "free": true
+  },
+  {
+   "id": "muni-eventslectures-for-age-60-and-over",
+   "title": "הרצאות במועדונים לוותיקים",
+   "cat": "community",
+   "anim": "community",
+   "muniCat": "אזרחים ותיקים",
+   "audience": [
+    "הגיל השלישי (60+)"
+   ],
+   "date": "2026-07-09",
+   "time": "",
+   "locName": "מועדון יחדיו",
+   "address": "שדרות הילד 8",
+   "x": -1318.7,
+   "y": 1631.6,
+   "approx": false,
+   "link": "https://www.ramat-gan.muni.il/events/lectures-for-age-60-and-over/",
+   "img": "https://www.ramat-gan.muni.il/media/gycpvo0p/עמוד-הרצאות_1540-8032.jpg",
+   "featured": false
   },
   {
    "id": "muni-eventsrg-eventsweb-site-event-3814",
@@ -323,6 +278,29 @@
    "approx": false,
    "link": "https://www.ramat-gan.muni.il/events/rg-events/web-site-event-121/",
    "img": "https://www.ramat-gan.muni.il/media/osodp41k/גריד-לקהילה-הגאה_התאמה-לאתר_342-22010.jpg",
+   "featured": false,
+   "free": true
+  },
+  {
+   "id": "muni-eventsbeit-zvi-rg-eventsweb-site-event-1178",
+   "title": "יאקיש ופופצ'ה",
+   "cat": "sport",
+   "anim": "sport",
+   "muniCat": "תיאטרון אמנות מוזיקה וספורט",
+   "audience": [
+    "צעירים (18-35)",
+    "מבוגרים (60- 35)",
+    "הגיל השלישי (60+)"
+   ],
+   "date": "2026-07-09",
+   "time": "19:30",
+   "locName": "תיאטרון בית צבי",
+   "address": "רחוב שועלי שמשון 2",
+   "x": -471.1,
+   "y": 866.7,
+   "approx": true,
+   "link": "https://www.ramat-gan.muni.il/events/beit-zvi-rg-events/web-site-event-1178/",
+   "img": "https://www.ramat-gan.muni.il/media/vhbpmdkv/yakish220-342.jpg",
    "featured": false,
    "free": true
   },
@@ -1106,6 +1084,28 @@
    "approx": false,
    "link": "https://www.ramat-gan.muni.il/events/together-with-you-in-menopause/",
    "img": "https://www.ramat-gan.muni.il/media/uy3ht1k1/לאתר_יחד-איתך-בגיל-המעבר_342-220.jpg",
+   "featured": false,
+   "free": true
+  },
+  {
+   "id": "muni-eventsrg-eventsweb-site-event-1174",
+   "title": "ספינינג",
+   "cat": "community",
+   "anim": "community",
+   "muniCat": "הקהילה הגאה",
+   "audience": [
+    "צעירים (18-35)",
+    "מבוגרים (60- 35)"
+   ],
+   "date": "2026-07-15",
+   "time": "19:30",
+   "locName": "המרכז הגאה",
+   "address": "רחוב ביאליק 42",
+   "x": -1144.8,
+   "y": 1361.2,
+   "approx": false,
+   "link": "https://www.ramat-gan.muni.il/events/rg-events/web-site-event-1174/",
+   "img": null,
    "featured": false,
    "free": true
   },
