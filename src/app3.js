@@ -2,6 +2,13 @@
    Part 3 — themes, overlay labels, search, events, boot
    ============================================================ */
 
+// per-city runtime config, injected by build.mjs from cities/<slug>.json
+const CFG = window.CITY_CFG || {
+  slug: 'ramat-gan', nameHe: 'רמת גן', title: 'רמת גן · המפה החיה',
+  deployUrl: 'https://ramat-gan-living-map.vercel.app',
+  muni: null, contentRawBase: null, venueAliases: {}, features: {},
+};
+
 // ---------- theme palettes ----------
 const THEMES = {
   dark: {
@@ -231,7 +238,7 @@ function positionTransit() {
 
 // ---------- real-time bus arrivals ----------
 const BUS_API_LOCAL = '/api/bus?stop=';
-const BUS_API_REMOTE = 'https://ramat-gan-living-map.vercel.app/api/bus?stop=';
+const BUS_API_REMOTE = CFG.deployUrl + '/api/bus?stop=';
 const OPERATORS = { 2: 'רכבת ישראל', 3: 'אגד', 5: 'דן', 6: 'דן בדרום', 7: 'דן באר שבע', 15: 'מטרופולין', 16: 'סופרבוס', 18: 'קווים', 25: 'אלקטרה אפיקים', 34: 'תנופה' };
 let busTimer = 0, busPopStop = null;
 async function fetchArrivals(code) {
@@ -647,7 +654,7 @@ function reverseGeocode(x, y) {
     if (d < bd) { bd = d; br = r; }
   }
   if (br && bd < 400 * 400) return 'באזור רחוב ' + br.name;
-  return 'רמת גן';
+  return CFG.nameHe;
 }
 
 // ---------- events ----------
@@ -669,31 +676,6 @@ function loadEvents() {
   if (events.length !== before) saveEvents();
 }
 function saveEvents() { store.setItem(EV_KEY, JSON.stringify(events)); }
-function findPoi(substr) {
-  const p = CITY_D.pois.find(p => p[2].includes(substr));
-  return p ? [M2(p[3]), M2(p[4])] : null;
-}
-function seedEvents() {
-  const day = 86400e3;
-  const d = off => new Date(Date.now() + off * day).toISOString().slice(0, 10);
-  const cents = MAP.buildingCentroids(), hs = MAP.buildingHeights();
-  let tallest = 0;
-  for (let i = 1; i < hs.length; i++) if (cents[i] && hs[i] > hs[tallest]) tallest = i;
-  const bursa = cents[tallest] || MAP.center0;
-  const park = findPoi('הפארק הלאומי') || findPoi('פארק לאומי') || MAP.center0;
-  const stad = findPoi('אצטדיון') || findPoi('ספורט') || MAP.center0;
-  const safari = findPoi('ספארי') || park;
-  const museum = findPoi('מוזיאון') || bursa;
-  const mk = (title, cat, date, time, xy, desc) =>
-    ({ id: 'smp-' + Math.random().toString(36).slice(2, 9), title, cat, date, time, desc, x: xy[0], y: xy[1], addr: reverseGeocode(xy[0], xy[1]), sample: true });
-  events = [
-    mk('ערב אורות בפארק הלאומי', 'culture', d(6), '20:30', park, 'מופע אור־קולי בין העצים סביב האגם. הכניסה חופשית לתושבי העיר.'),
-    mk('שוק אומנים במתחם הבורסה', 'city', d(4), '18:00', bursa, 'דוכני יוצרים, מוזיקה חיה ואוכל רחוב בין המגדלים.'),
-    mk('בוקר קהילתי בספארי', 'community', d(9), '10:00', safari, 'כניסה מוזלת לתושבי רמת גן, סיורים מודרכים למשפחות.'),
-    mk('מרוץ רמת גן', 'sport', d(13), '07:00', stad, 'מקצי 5 ו־10 ק״מ. הזינוק והסיום באצטדיון. ההרשמה באתר העירייה.'),
-    mk('סיור מוזיאון פתוח', 'poi', d(11), '17:00', museum, 'סיור מודרך חינם באוספי הקבע. מספר המקומות מוגבל.'),
-  ];
-}
 const hiddenCats = new Set();
 let cityEvents = [];   // official content from the CMS file
 let muniEvents = [];   // scraped from the municipality event lobby
@@ -926,7 +908,7 @@ function evCardHtml(ev) {
     (ev.muniCat ? '<div class="muni-cat">' + escapeHtml(ev.muniCat) + '</div>' : '') +
     '<div class="where">' + (ev.online
       ? '<span class="ev-online">🌐 אונליין / ללא מיקום — לפרטים באתר העירייה</span>'
-      : '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex:none"><path d="M12 21s-7-5.8-7-11a7 7 0 0 1 14 0c0 5.2-7 11-7 11Z"/></svg>' + escapeHtml(ev.addr || 'רמת גן')) + '</div>' +
+      : '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex:none"><path d="M12 21s-7-5.8-7-11a7 7 0 0 1 14 0c0 5.2-7 11-7 11Z"/></svg>' + escapeHtml(ev.addr || CFG.nameHe)) + '</div>' +
     (ev.desc ? '<div class="desc">' + escapeHtml(ev.desc) + '</div>' : '') +
     '</div></div>';
 }
@@ -982,7 +964,7 @@ function showPop(id) {
     '<h3>' + escapeHtml(ev.title) + '</h3>' +
     (ev.muniCat ? '<div class="muni-cat" style="margin-top:4px">' + escapeHtml(ev.muniCat) +
       (ev.audience && ev.audience.length ? ' · ' + escapeHtml(ev.audience.join(', ')) : '') + '</div>' : '') +
-    '<div class="where"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="2" style="flex:none"><path d="M12 21s-7-5.8-7-11a7 7 0 0 1 14 0c0 5.2-7 11-7 11Z"/><circle cx="12" cy="10" r="2.6"/></svg>' + escapeHtml(ev.addr || 'רמת גן') + '</div>' +
+    '<div class="where"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="2" style="flex:none"><path d="M12 21s-7-5.8-7-11a7 7 0 0 1 14 0c0 5.2-7 11-7 11Z"/><circle cx="12" cy="10" r="2.6"/></svg>' + escapeHtml(ev.addr || CFG.nameHe) + '</div>' +
     (ev.desc ? '<div class="desc">' + escapeHtml(ev.desc) + '</div>' : '') +
     (ev.link ? '<a class="pop-primary" href="' + escapeHtml(ev.link) + '" target="_blank" rel="noopener">לפרטים והרשמה<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M7 17 17 7M8 7h9v9"/></svg></a>' : '') +
     '<div class="acts">' +
@@ -1232,11 +1214,11 @@ $('transitBtn').addEventListener('click', () => toggleLayer('transit'));
 
 // events export / import
 $('evExport').addEventListener('click', () => {
-  const payload = { app: 'ramat-gan-living-map', version: 1, exported: new Date().toISOString(), events: events.filter(e => !hiddenCats.has(e.cat)) };
+  const payload = { app: CFG.slug + '-living-map', version: 1, exported: new Date().toISOString(), events: events.filter(e => !hiddenCats.has(e.cat)) };
   const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = 'אירועים-רמת-גן.json';
+  a.download = 'אירועים-' + CFG.nameHe.replace(/ /g, '-') + '.json';
   a.click();
   setTimeout(() => URL.revokeObjectURL(a.href), 5000);
   showToast('קובץ האירועים ירד — שתפו אותו עם השכנים');
@@ -1308,7 +1290,7 @@ window.addEventListener('keydown', e => {
 
 // ---------- official city content (published from the CMS) ----------
 const CITY_CONTENT_URLS = [
-  'https://raw.githubusercontent.com/Elad33/ramat-gan-living-map/main/data/city-events.json',
+  ...(CFG.contentRawBase ? [CFG.contentRawBase + '/data/city-events.json'] : []),
   'data/city-events.json',
 ];
 function normalizeCityEvent(ev, i) {
@@ -1327,7 +1309,7 @@ function normalizeCityEvent(ev, i) {
   };
 }
 const MUNI_EVENTS_URLS = [
-  'https://raw.githubusercontent.com/Elad33/ramat-gan-living-map/main/data/muni-events.json',
+  ...(CFG.contentRawBase ? [CFG.contentRawBase + '/data/muni-events.json'] : []),
   'data/muni-events.json',
 ];
 async function fetchFirst(urls) {
@@ -1358,8 +1340,8 @@ function normalizeMuniEvent(ev) {
   };
 }
 // ---- live fetch straight from the municipality API (CORS-open; users browse from local IPs) ----
-const MUNI_API = 'https://api-m.ramat-gan.muni.il/api/EventLobby/he/event-lobby';
-const MUNI_SITE = 'https://www.ramat-gan.muni.il';
+const MUNI_API = CFG.muni ? CFG.muni.api : null;
+const MUNI_SITE = CFG.muni ? CFG.muni.site : '';
 const canonName = s => norm(s).replace(/^(רחוב|שדרות|דרך|שד)\s+/, '')
   .split(' ').map(w => w.replace(/י+/g, 'י')).sort().join(' ').replace(/י/g, '');
 const MUNI_STOPWORDS = new Set(['בית', 'מרכז', 'רחוב', 'תיאטרון', 'מועדון', 'ספריית', 'ספריה', 'הספריה', 'אולם', 'מתחם', 'גן', 'פארק', 'תרבות', 'קהילתי', 'עירוני', 'העירוני', 'שם', 'על']);
@@ -1399,8 +1381,9 @@ function muniGeocode(address, locName) {
   }
   const q = norm(locName || '');
   if (q.length >= 3) {
-    if (q.includes('מייקרס')) { const rc = roadCentroid('משטרת מסובים'); if (rc) return rc; }
-    if (q.includes('בית קריניצי')) { const rc = roadCentroid('קריניצי'); if (rc) return rc; }
+    for (const alias in CFG.venueAliases) {
+      if (q.includes(alias)) { const rc = roadCentroid(CFG.venueAliases[alias]); if (rc) return rc; }
+    }
     const qh = stripHe(q);
     const poisIdx = searchItems.filter(it => it.type === 'poi');
     for (const p of poisIdx) if (p.n === q || p.n === qh) return { x: p.x, y: p.y, approx: false };
@@ -1419,6 +1402,7 @@ function muniCatMap(muniCat, title) {
   return ['community', 'community'];
 }
 async function fetchMuniLive() {
+  if (!MUNI_API) return null; // city without a municipal events feed
   try {
     const r = await fetch(MUNI_API, { signal: AbortSignal.timeout(9000) });
     if (!r.ok) return null;
@@ -1494,7 +1478,7 @@ function renderNotices() {
       (n.to ? '<div class="nd">בתוקף עד ' + escapeHtml(n.to) + '</div>' : '') +
       '</div>').join('')
     : '<div class="ev-none">אין הודעות חדשות מהעירייה.</div>') +
-    (store.getItem(SUB_KEY) === 'subscribed' ? '' :
+    (store.getItem(SUB_KEY) === 'subscribed' || (CFG.features && CFG.features.subscribe === false) ? '' :
       '<div class="notice"><h4>📬 עדכוני אירועים במייל</h4>' +
       '<div class="nb">רוצים לדעת כשמשהו חדש קורה בעיר?</div>' +
       '<div class="nd"><a href="#" id="subFromBell">להרשמה ←</a></div></div>');
@@ -1554,11 +1538,11 @@ function buildShareUrl() {
   else if (popFor) h += '&ev=' + encodeURIComponent(popFor);
   else if (window.__curBiz) h += '&biz=' + encodeURIComponent(window.__curBiz);
   else if (curPlanNum) h += '&plan=' + encodeURIComponent(curPlanNum);
-  return 'https://ramat-gan-living-map.vercel.app/' + h;
+  return CFG.deployUrl + '/' + h;
 }
 $('shareBtn').addEventListener('click', async () => {
   const url = buildShareUrl();
-  const title = 'רמת גן · המפה החיה';
+  const title = CFG.title;
   try {
     if (navigator.share) { await navigator.share({ title, url }); return; }
   } catch (e) { if (e.name === 'AbortError') return; }
@@ -1657,7 +1641,7 @@ $('geoBtn').addEventListener('click', () => {
     const [x, y] = fromGeo(pos.coords.latitude, pos.coords.longitude);
     const B = MAP.bbox;
     if (x < B.minX - 4000 || x > B.maxX + 4000 || y < B.minY - 4000 || y > B.maxY + 4000) {
-      showToast('נראה שאתם מחוץ לרמת גן — המפה מכסה את העיר בלבד');
+      showToast('נראה שאתם מחוץ ל' + CFG.nameHe + ' — המפה מכסה את העיר בלבד');
       navigator.geolocation.clearWatch(geoWatch); geoWatch = null;
       return;
     }
@@ -1696,7 +1680,7 @@ if ('serviceWorker' in navigator && location.protocol === 'https:' && !location.
 // ---------- email updates signup ----------
 const SUB_KEY = 'rg.sub.v1';
 const SUB_API_LOCAL = '/api/subscribe';
-const SUB_API_REMOTE = 'https://ramat-gan-living-map.vercel.app/api/subscribe';
+const SUB_API_REMOTE = CFG.deployUrl + '/api/subscribe';
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 function showSubCard() { $('subCard').classList.add('show'); setTimeout(() => $('subEmail').focus({ preventScroll: true }), 480); }
 function hideSubCard() { $('subCard').classList.remove('show'); }
@@ -1752,6 +1736,7 @@ $('subForm').addEventListener('submit', async e => {
   setTimeout(hideSubCard, 3600);
 });
 function maybeOfferSubscription() {
+  if (CFG.features && CFG.features.subscribe === false) return; // demo cities: no mailing list
   if (typeof PICK_MODE !== 'undefined' && PICK_MODE) return;
   if (MAP.QA_MODE && !/subpop/.test(location.search + location.hash)) return;
   if (location.hostname.includes('claude')) return; // artifact host blocks network

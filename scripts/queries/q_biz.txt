@@ -1,5 +1,5 @@
 [out:json][timeout:180];
-area["boundary"="administrative"]["admin_level"="8"]["name"="רמת גן"]->.a;
+area["boundary"="administrative"]["admin_level"="8"]["name"="{{CITY}}"]->.a;
 (
   nwr["shop"]["shop"!~"^(vacant|no)$"]["name"](area.a);
   nwr["amenity"~"^(restaurant|cafe|fast_food|food_court|ice_cream|bar|pub|nightclub|biergarten|pharmacy|clinic|dentist|doctors|veterinary|bank|post_office|fuel|car_wash|driving_school|cinema|marketplace|internet_cafe|studio|events_venue|childcare|language_school|music_school|coworking_space)$"]["name"](area.a);

@@ -407,7 +407,7 @@ $('bizList').addEventListener('click', e => {
 
 // ---------- assistant ----------
 const AI_API_LOCAL = '/api/assist?q=';
-const AI_API_REMOTE = 'https://ramat-gan-living-map.vercel.app/api/assist?q=';
+const AI_API_REMOTE = (window.CITY_CFG ? CITY_CFG.deployUrl : 'https://ramat-gan-living-map.vercel.app') + '/api/assist?q=';
 let aiBusy = false, aiLastQ = '', aiLastIntent = null;
 async function fetchIntent(q) {
   if (q === aiLastQ && aiLastIntent) return aiLastIntent;
@@ -449,7 +449,8 @@ const AI_SYN = [
   [/סיור|טיול|מורשת/, { ev: ['poi'] }],
   [/אירוע|מה קורה|מה יש|לצאת|פסטיבל|יריד|שוק איכרים/, { ev: [] }],
 ];
-const AI_STOP = new Set(['אני', 'רוצה', 'בא', 'לי', 'לנו', 'איפה', 'אפשר', 'יש', 'מה', 'משהו', 'מקום', 'טוב', 'טובה', 'הכי', 'קרוב', 'קרובה', 'לידי', 'ליד', 'באזור', 'בסביבה', 'סביבי', 'עם', 'של', 'על', 'את', 'עכשיו', 'היום', 'הערב', 'מחר', 'כיף', 'לעשות', 'ללכת', 'היי', 'שלום', 'בעיר', 'ברמת', 'גן']);
+const AI_STOP = new Set([...(window.CITY_CFG ? CITY_CFG.nameHe.split(' ').flatMap(w => [w, 'ב' + w]) : []),
+  'אני', 'רוצה', 'בא', 'לי', 'לנו', 'איפה', 'אפשר', 'יש', 'מה', 'משהו', 'מקום', 'טוב', 'טובה', 'הכי', 'קרוב', 'קרובה', 'לידי', 'ליד', 'באזור', 'בסביבה', 'סביבי', 'עם', 'של', 'על', 'את', 'עכשיו', 'היום', 'הערב', 'מחר', 'כיף', 'לעשות', 'ללכת', 'היי', 'שלום', 'בעיר', 'ברמת', 'גן']);
 function localIntent(qRaw) {
   const q = norm(qRaw);
   const out = { kinds: [], bizCats: [], evCats: [], keywords: [], when: 'any', openNow: false, reply: '', src: 'local' };

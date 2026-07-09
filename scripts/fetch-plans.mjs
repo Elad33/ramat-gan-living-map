@@ -1,9 +1,11 @@
 // Fetch statutory plans from the Israel Planning Administration (iplan) ArcGIS.
-// Run inside a work dir: node ../scripts/fetch-plans.mjs
+// The service is national — works for any city bbox. Run inside a work dir.
 import fs from 'fs';
+import { loadCity, bboxString } from './lib-city.mjs';
 
+const cfg = loadCity();
 const BASE = 'https://ags.iplan.gov.il/arcgisiplan/rest/services/PlanningPublic/Xplan/MapServer/1/query';
-const BBOX = '34.7991,32.0361,34.8546,32.1056'; // Ramat Gan municipal bbox
+const BBOX = bboxString(cfg);
 const FIELDS = 'pl_number,pl_name,plan_county_name,jurstiction_area_name,internet_short_status,station_desc,last_update_date,pl_date_8,pl_area_dunam,quantity_delta_120,pq_authorised_quantity_120,entity_subtype_desc,pl_url,pl_objectives';
 
 async function page(offset) {
@@ -19,7 +21,7 @@ async function page(offset) {
         method: 'POST',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
-          'User-Agent': 'ramat-gan-living-map/1.0 (+https://github.com/Elad33/ramat-gan-living-map)',
+          'User-Agent': cfg.ua,
         },
         body: params.toString(),
         signal: AbortSignal.timeout(120000),

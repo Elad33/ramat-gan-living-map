@@ -1,5 +1,5 @@
 [out:json][timeout:180];
-area["boundary"="administrative"]["admin_level"="8"]["name"="רמת גן"]->.a;
+area["boundary"="administrative"]["admin_level"="8"]["name"="{{CITY}}"]->.a;
 (
   node["place"~"^(suburb|neighbourhood|quarter)$"](area.a);
   nwr["tourism"~"^(museum|zoo|attraction|theme_park)$"]["name"](area.a);

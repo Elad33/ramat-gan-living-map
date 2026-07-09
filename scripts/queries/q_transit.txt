@@ -1,8 +1,8 @@
 [out:json][timeout:120];
 (
-  way["railway"~"^(light_rail|subway|tram)$"](32.036093,34.7991223,32.1055761,34.8545946);
-  node["railway"~"^(station|halt|tram_stop)$"](32.036093,34.7991223,32.1055761,34.8545946);
-  node["station"="light_rail"](32.036093,34.7991223,32.1055761,34.8545946);
-  node["highway"="bus_stop"](32.036093,34.7991223,32.1055761,34.8545946);
+  way["railway"~"^(light_rail|subway|tram)$"]({{S}},{{W}},{{N}},{{E}});
+  node["railway"~"^(station|halt|tram_stop)$"]({{S}},{{W}},{{N}},{{E}});
+  node["station"="light_rail"]({{S}},{{W}},{{N}},{{E}});
+  node["highway"="bus_stop"]({{S}},{{W}},{{N}},{{E}});
 );
 out geom qt;

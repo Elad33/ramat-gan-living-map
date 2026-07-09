@@ -8,17 +8,17 @@
 import fs from 'fs';
 import path from 'path';
 import { spawnSync } from 'child_process';
-import { fileURLToPath } from 'url';
+import { loadCity, renderQuery, bboxString } from './lib-city.mjs';
 
-const ROOT = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
-const UA = 'ramat-gan-living-map/1.0 (+https://github.com/Elad33/ramat-gan-living-map; business layer refresh)';
+const cfg = loadCity();
+const UA = cfg.ua;
 const sleep = ms => new Promise(r => setTimeout(r, ms));
-const BBOX = '34.799,32.036,34.855,32.106';
+const BBOX = bboxString(cfg);
 const MIN_CONFIDENCE = 0.55;  // Overture: likelihood the place still exists
 const CLOSED_CONFIDENCE = 0.30; // matched OSM+Overture below this → treat as closed
 
 // ---- projection + city boundary (from the baked city data) ----
-const dataJs = fs.readFileSync(path.join(ROOT, 'data', 'data.js'), 'utf8');
+const dataJs = fs.readFileSync(path.join(cfg.dataDir, 'data.js'), 'utf8');
 const lat0 = +/"lat0":([\d.]+)/.exec(dataJs)[1];
 const lon0 = +/"lon0":([\d.]+)/.exec(dataJs)[1];
 const kx = Math.cos(lat0 * Math.PI / 180) * 111320, ky = 110540;
@@ -63,7 +63,7 @@ const CATS = [
 const CI = Object.fromEntries(CATS.map((c, i) => [c.id, i]));
 
 /* ============================ OSM side ============================ */
-const QUERY = fs.readFileSync(path.join(ROOT, 'scripts', 'queries', 'q_biz.txt'), 'utf8');
+const QUERY = renderQuery(cfg, 'q_biz.txt');
 const MIRRORS = [
   'https://overpass-api.de/api/interpreter',
   'https://overpass.kumi.systems/api/interpreter',
@@ -313,7 +313,8 @@ function loadOverture() {
 
 /* ============================ merge ============================ */
 const heb = s => /[א-ת]/.test(s);
-const STOP = new Set(['בעמ', 'בע"מ', 'בע״מ', 'סניף', 'רמת', 'גן', 'ramat', 'gan', 'israel', 'ישראל', 'the', 'ltd', 'סטודיו', 'studio', 'מסעדת', 'חנות']);
+const STOP = new Set(['בעמ', 'בע"מ', 'בע״מ', 'סניף', 'israel', 'ישראל', 'the', 'ltd', 'סטודיו', 'studio', 'מסעדת', 'חנות',
+  ...cfg.nameHe.split(' '), ...cfg.nameEn.toLowerCase().split(' ')]);
 function tokens(name) {
   return new Set(String(name).toLowerCase()
     .replace(/["'`’׳״().,\-–־&|]/g, ' ').split(/\s+/)
@@ -409,7 +410,7 @@ async function main() {
   for (const it of items) byCat[CATS[it[2]].id] = (byCat[CATS[it[2]].id] || 0) + 1;
   console.log(Object.entries(byCat).map(([k, v]) => k + ':' + v).join('  '));
   const outJs = 'window.BIZ=' + JSON.stringify({ cats: CATS, items }) + ';';
-  fs.writeFileSync(path.join(ROOT, 'data', 'biz.js'), outJs);
+  fs.writeFileSync(path.join(cfg.dataDir, 'biz.js'), outJs);
   console.log('data/biz.js:', (outJs.length / 1024).toFixed(0), 'KB ·', items.length, 'businesses');
 }
 await main();

@@ -1,0 +1,17 @@
+{
+  "slug": "ramat-gan",
+  "nameHe": "רמת גן",
+  "nameEn": "Ramat Gan",
+  "osmAreaName": "רמת גן",
+  "bbox": { "s": 32.036093, "w": 34.7991223, "n": 32.1055761, "e": 34.8545946 },
+  "brand": { "title": "רמת גן · המפה החיה", "subtitle": "המפה החיה" },
+  "muni": {
+    "eventsApi": "https://api-m.ramat-gan.muni.il/api/EventLobby/he/event-lobby",
+    "site": "https://www.ramat-gan.muni.il"
+  },
+  "venueAliases": { "מייקרס": "משטרת מסובים", "בית קריניצי": "קריניצי" },
+  "deployUrl": "https://ramat-gan-living-map.vercel.app",
+  "contentRawBase": "https://raw.githubusercontent.com/Elad33/ramat-gan-living-map/main",
+  "features": { "subscribe": true, "admin": true },
+  "themeColor": "#070b16"
+}

@@ -1,5 +1,8 @@
 // Process iplan planning polygons + OSM transit into data2.js (appended to CITY)
 import fs from 'fs';
+import { loadCity } from './lib-city.mjs';
+
+const CITY_CFG = loadCity();
 
 const meta = JSON.parse(fs.readFileSync('data.js', 'utf8').replace(/^window\.CITY=/, '').replace(/;$/, '')).meta;
 const lat0 = meta.lat0, lon0 = meta.lon0;
@@ -65,8 +68,8 @@ for (const f of feats) {
   const a = f.attributes;
   const county = a.plan_county_name || '';
   const jur = a.jurstiction_area_name || '';
-  const isRG = county.includes('רמת גן') || ((county === '' || county === '-') && jur.includes('רמת גן'));
-  if (!isRG) { statSkip++; continue; }
+  const inCity = county.includes(CITY_CFG.nameHe) || ((county === '' || county === '-') && jur.includes(CITY_CFG.nameHe));
+  if (!inCity) { statSkip++; continue; }
   const st = (a.internet_short_status || '').trim();
   const isRenewal = RENEWAL_RE.test(a.pl_name || '');
   const dt = a.pl_date_8 || a.last_update_date || 0;

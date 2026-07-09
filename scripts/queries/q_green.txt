@@ -1,5 +1,5 @@
 [out:json][timeout:300];
-area["boundary"="administrative"]["admin_level"="8"]["name"="רמת גן"]->.a;
+area["boundary"="administrative"]["admin_level"="8"]["name"="{{CITY}}"]->.a;
 (
   way["leisure"~"^(park|garden|pitch|playground|sports_centre|stadium)$"](area.a);
   way["landuse"~"^(grass|forest|recreation_ground|cemetery|meadow|orchard)$"](area.a);

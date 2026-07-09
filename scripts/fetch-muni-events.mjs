@@ -3,15 +3,19 @@
 // Run from repo root: node scripts/fetch-muni-events.mjs
 import fs from 'fs';
 import path from 'path';
-import { fileURLToPath } from 'url';
+import { loadCity } from './lib-city.mjs';
 
-const ROOT = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
-const API = 'https://api-m.ramat-gan.muni.il/api/EventLobby/he/event-lobby';
-const SITE = 'https://www.ramat-gan.muni.il';
-const UA = 'ramat-gan-living-map/1.0 (+https://github.com/Elad33/ramat-gan-living-map)';
+const cfg = loadCity();
+if (!cfg.muni) {
+  console.log('city "' + cfg.slug + '" has no municipal events feed configured — skipping (layer stays off)');
+  process.exit(0);
+}
+const API = cfg.muni.eventsApi;
+const SITE = cfg.muni.site;
+const UA = cfg.ua;
 
 // ---------- geocoder over our processed city data ----------
-const CITY = JSON.parse(fs.readFileSync(path.join(ROOT, 'data', 'data.js'), 'utf8')
+const CITY = JSON.parse(fs.readFileSync(path.join(cfg.dataDir, 'data.js'), 'utf8')
   .replace(/^window\.CITY=/, '').replace(/;$/, ''));
 const U = CITY.meta.unit; // dm -> m
 const norm = s => String(s || '').replace(/["'`’׳״]/g, '').replace(/[־–\-]/g, ' ')
@@ -92,8 +96,9 @@ function geocodeAddress(addr) {
   return { x: sx / list.length, y: sy / list.length, approx: true };
 }
 const VENUE_STOPWORDS = new Set(['בית', 'מרכז', 'רחוב', 'תיאטרון', 'מועדון', 'ספריית', 'ספריה', 'הספריה', 'אולם', 'מתחם', 'גן', 'פארק', 'תרבות', 'קהילתי', 'עירוני', 'העירוני', 'שם', 'על']);
-// venues the feed names differently than the map data (resolved from our own data at runtime)
-const KNOWN_VENUES = { 'מייקרס': () => findRoadCentroid('משטרת מסובים'), 'בית קריניצי': () => findRoadCentroid('קריניצי') };
+// venues the feed names differently than the map data — per-city aliases from cities/<slug>.json
+const KNOWN_VENUES = Object.fromEntries(
+  Object.entries(cfg.venueAliases || {}).map(([alias, target]) => [alias, () => findRoadCentroid(target)]));
 function geocodeVenueName(name) {
   const q = norm(name);
   if (!q || q.length < 3) return null;
@@ -173,7 +178,7 @@ async function main() {
   }
   events.sort((a, b) => (a.date + (a.time || '')) < (b.date + (b.time || '')) ? -1 : 1);
   const out = { updated: new Date().toISOString(), source: SITE + '/event-lobby', events };
-  const file = path.join(ROOT, 'data', 'muni-events.json');
+  const file = path.join(cfg.dataDir, 'muni-events.json');
   const prev = fs.existsSync(file) ? fs.readFileSync(file, 'utf8') : '';
   const next = JSON.stringify(out, null, 1);
   // avoid churn commits when only the timestamp moved

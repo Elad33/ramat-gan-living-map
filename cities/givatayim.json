@@ -1,0 +1,25 @@
+{
+  "slug": "givatayim",
+  "nameHe": "גבעתיים",
+  "nameEn": "Givatayim",
+  "osmAreaName": "גבעתיים",
+  "bbox": {
+    "s": 32.054428,
+    "w": 34.792859,
+    "n": 32.085876,
+    "e": 34.825737
+  },
+  "brand": {
+    "title": "גבעתיים · המפה החיה",
+    "subtitle": "המפה החיה"
+  },
+  "muni": null,
+  "venueAliases": {},
+  "deployUrl": "https://livemap-givatayim.vercel.app",
+  "contentRawBase": null,
+  "features": {
+    "subscribe": false,
+    "admin": false
+  },
+  "themeColor": "#070b16"
+}

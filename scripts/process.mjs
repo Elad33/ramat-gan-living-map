@@ -1,6 +1,9 @@
 // Process raw Overpass JSON into a compact embedded-data JS file for the map.
 // Units: decimeters (0.1 m) relative to city center. Rings/lines delta-encoded.
 import fs from 'fs';
+import { loadCity } from './lib-city.mjs';
+
+const CITY_CFG = loadCity();
 
 const read = f => JSON.parse(fs.readFileSync(f, 'utf8'));
 const boundary = read('boundary.json');
@@ -292,7 +295,7 @@ for (const [, n] of rdNames) streetSet.add(n);
 console.log('unique street names:', streetSet.size);
 
 const data = {
-  meta: { name: 'רמת גן', lat0: +lat0.toFixed(7), lon0: +lon0.toFixed(7), unit: 0.1 },
+  meta: { name: CITY_CFG.nameHe, lat0: +lat0.toFixed(7), lon0: +lon0.toFixed(7), unit: 0.1 },
   boundary: rings.map(r => delta(r)),
   bld, bldNames, rd, rdNames, grn,
   addr: addrMap, pois, hoods,

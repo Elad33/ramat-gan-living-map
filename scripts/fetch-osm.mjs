@@ -1,10 +1,9 @@
-// Fetch all OSM raw data for the daily refresh. Run inside a work dir (e.g. raw/):
-//   node ../scripts/fetch-osm.mjs
+// Fetch all OSM raw data for a city (CITY env, default ramat-gan).
+// Run inside a work dir (e.g. raw/):  node ../scripts/fetch-osm.mjs
 import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
+import { loadCity, renderQuery } from './lib-city.mjs';
 
-const QDIR = path.join(path.dirname(fileURLToPath(import.meta.url)), 'queries');
+const cfg = loadCity();
 const MIRRORS = [
   'https://overpass-api.de/api/interpreter',
   'https://overpass.kumi.systems/api/interpreter',
@@ -12,11 +11,11 @@ const MIRRORS = [
   'https://overpass.osm.jp/api/interpreter',
 ];
 // Overpass policy: identify yourself. Anonymous UAs get 406, shared-CI IPs get 429.
-const UA = 'ramat-gan-living-map/1.0 (+https://github.com/Elad33/ramat-gan-living-map; daily data refresh)';
+const UA = cfg.ua;
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 
 async function overpass(queryFile, outFile) {
-  const q = fs.readFileSync(path.join(QDIR, queryFile), 'utf8');
+  const q = renderQuery(cfg, queryFile);
   for (let attempt = 0; attempt < 10; attempt++) {
     const url = MIRRORS[attempt % MIRRORS.length];
     try {

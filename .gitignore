@@ -4,3 +4,6 @@ node_modules/
 
 .vercel
 raw/
+cities/*/raw/
+cities/*/overture-places.geojson
+cities/*/.vercel/

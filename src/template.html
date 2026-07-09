@@ -1,4 +1,4 @@
-<title>רמת גן · המפה החיה</title>
+<title>{{TITLE}}</title>
 <style>
 /*__FONTS__*/
 </style>
@@ -661,7 +661,7 @@ textarea.f-in{resize:vertical;min-height:74px}
     <path d="M14 22 L24 10 H40 L50 22 L32 54 Z" stroke="#e3c27e" stroke-width="2.2" stroke-linejoin="round"/>
     <path d="M14 22 H50 M24 10 L28 22 L32 54 M40 10 L36 22 L32 54" stroke="#e3c27e" stroke-width="1.1" opacity=".65"/>
   </svg>
-  <div class="ldr-city">רמת גן</div>
+  <div class="ldr-city">{{NAME_HE}}</div>
   <div class="ldr-sub">המפה החיה</div>
   <div class="ldr-bar"><i id="ldrFill"></i></div>
   <div class="ldr-step" id="ldrStep">טוען נתוני עיר…</div>
@@ -683,7 +683,7 @@ textarea.f-in{resize:vertical;min-height:74px}
     <path d="M14 22 L24 10 H40 L50 22 L32 54 Z" stroke="var(--gold)" stroke-width="2.4" stroke-linejoin="round" fill="rgba(227,194,126,.09)"/>
     <path d="M14 22 H50 M24 10 L28 22 L32 54 M40 10 L36 22 L32 54" stroke="var(--gold)" stroke-width="1.2" opacity=".6"/>
   </svg>
-  <div><div class="t1">רמת גן</div><div class="t2">המפה החיה</div></div>
+  <div><div class="t1">{{NAME_HE}}</div><div class="t2">{{SUBTITLE}}</div></div>
 </div>
 
 <div id="searchWrap">
@@ -713,7 +713,7 @@ textarea.f-in{resize:vertical;min-height:74px}
       <h2 id="noticesTitle">מידע לתושב</h2>
       <button class="x-btn" id="noticesClose" aria-label="סגירה"><svg width="16" height="16" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
     </div>
-    <div class="m-sub">עדכונים רשמיים מעיריית רמת גן</div>
+    <div class="m-sub">עדכונים רשמיים מעיריית {{NAME_HE}}</div>
     <div id="noticesList"></div>
   </div>
 </div>
@@ -783,7 +783,7 @@ textarea.f-in{resize:vertical;min-height:74px}
       <h2>אירועים בעיר</h2>
       <button class="x-btn" id="evClose" aria-label="סגירת רשימת אירועים"><svg width="16" height="16" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
     </div>
-    <div class="sub">מה קורה ברמת גן — הוסיפו אירוע והוא יופיע על המפה</div>
+    <div class="sub">מה קורה ב{{NAME_HE}} — הוסיפו אירוע והוא יופיע על המפה</div>
   </div>
   <div id="legend" aria-label="סינון קטגוריות אירועים"></div>
   <button id="evAddBtn">
@@ -864,7 +864,7 @@ textarea.f-in{resize:vertical;min-height:74px}
 
 <div class="modal-bg" id="aboutBg">
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="aboutTitle">
-    <h2 id="aboutTitle">המפה החיה של רמת גן</h2>
+    <h2 id="aboutTitle">המפה החיה של {{NAME_HE}}</h2>
     <div class="about-body">
       מפה תלת־ממדית חיה של העיר — <b>כל רחוב, כל בניין וכל כתובת</b> מנתוני המיפוי הפתוח, ברינדור זוהר בהשראת Gaussian Splatting.
       <hr class="about-hr"/>
@@ -901,7 +901,7 @@ textarea.f-in{resize:vertical;min-height:74px}
 
 <aside id="subCard" role="dialog" aria-label="הרשמה לעדכוני אירועים">
   <div class="eyebrow">עדכוני אירועים</div>
-  <h3>מה קורה ברמת גן, ישר למייל</h3>
+  <h3>מה קורה ב{{NAME_HE}}, ישר למייל</h3>
   <div class="sub-line">עדכון קצר כשנוספים אירועים חדשים בעיר. בלי ספאם, אפשר לבטל בכל רגע.</div>
   <form class="sub-form" id="subForm" novalidate>
     <input id="subEmail" type="email" inputmode="email" autocomplete="email" placeholder="you@email.com" aria-label="כתובת מייל"/>
