@@ -1,5 +1,5 @@
 {
- "updated": "2026-07-09T15:32:37.676Z",
+ "updated": "2026-07-09T20:03:02.165Z",
  "source": "https://www.ramat-gan.muni.il/event-lobby",
  "events": [
   {
@@ -92,51 +92,6 @@
    "free": true
   },
   {
-   "id": "muni-eventsrg-eventsweb-site-event-121",
-   "title": "משחקי קופסא",
-   "cat": "community",
-   "anim": "community",
-   "muniCat": "הקהילה הגאה",
-   "audience": [
-    "צעירים (18-35)",
-    "מבוגרים (60- 35)"
-   ],
-   "date": "2026-07-09",
-   "time": "19:30",
-   "locName": "המרכז הגאה",
-   "address": "רחוב ביאליק 42",
-   "x": -1144.8,
-   "y": 1361.2,
-   "approx": false,
-   "link": "https://www.ramat-gan.muni.il/events/rg-events/web-site-event-121/",
-   "img": "https://www.ramat-gan.muni.il/media/osodp41k/גריד-לקהילה-הגאה_התאמה-לאתר_342-22010.jpg",
-   "featured": false,
-   "free": true
-  },
-  {
-   "id": "muni-eventsbeit-zvi-rg-eventsweb-site-event-1178",
-   "title": "יאקיש ופופצ'ה",
-   "cat": "sport",
-   "anim": "sport",
-   "muniCat": "תיאטרון אמנות מוזיקה וספורט",
-   "audience": [
-    "צעירים (18-35)",
-    "מבוגרים (60- 35)",
-    "הגיל השלישי (60+)"
-   ],
-   "date": "2026-07-09",
-   "time": "19:30",
-   "locName": "תיאטרון בית צבי",
-   "address": "רחוב שועלי שמשון 2",
-   "x": -471.1,
-   "y": 866.7,
-   "approx": true,
-   "link": "https://www.ramat-gan.muni.il/events/beit-zvi-rg-events/web-site-event-1178/",
-   "img": "https://www.ramat-gan.muni.il/media/vhbpmdkv/yakish220-342.jpg",
-   "featured": false,
-   "free": true
-  },
-  {
    "id": "muni-eventsrg-eventsweb-site-event-1137",
    "title": "נשים* יוצרות",
    "cat": "community",
@@ -155,68 +110,6 @@
    "approx": false,
    "link": "https://www.ramat-gan.muni.il/events/rg-events/web-site-event-1137/",
    "img": "https://www.ramat-gan.muni.il/media/zy4flykm/התאמות-אירועי-יולי-משתנים_2026_342-220.jpg",
-   "featured": false,
-   "free": true
-  },
-  {
-   "id": "muni-eventsrg-eventsweb-site-event-695",
-   "title": "קבוצת שחייה",
-   "cat": "community",
-   "anim": "community",
-   "muniCat": "הקהילה הגאה",
-   "audience": [
-    "צעירים (18-35)",
-    "מבוגרים (60- 35)"
-   ],
-   "date": "2026-07-09",
-   "time": "20:00",
-   "locName": "קאנטרי רמת גן",
-   "address": "רחוב מנדל מתיתיהו 12",
-   "x": 608.5,
-   "y": -243.5,
-   "approx": true,
-   "link": "https://www.ramat-gan.muni.il/events/rg-events/web-site-event-695/",
-   "img": "https://www.ramat-gan.muni.il/media/wlykjlvg/גריד-לקהילה-הגאה_התאמה-לאתר_342-2203.jpg",
-   "featured": false,
-   "free": true
-  },
-  {
-   "id": "muni-eventssummer-ramat-gani-2026",
-   "title": "קיץ רמת גני",
-   "cat": "community",
-   "anim": "community",
-   "muniCat": "",
-   "audience": [],
-   "date": "2026-07-09",
-   "time": "20:30",
-   "locName": "תיאטרון רמת גן",
-   "address": "",
-   "x": null,
-   "y": null,
-   "link": "https://www.ramat-gan.muni.il/events/summer-ramat-gani-2026/",
-   "img": "https://www.ramat-gan.muni.il/media/1wpgegrx/קיץ-2026_התאמות-לאתר_342-220.jpg",
-   "featured": true,
-   "free": true
-  },
-  {
-   "id": "muni-eventsstand-up-after-dark-at-the-ramat-gan-theater",
-   "title": "After Dark - סטנדאפ בתיאטרון רמת גן",
-   "cat": "sport",
-   "anim": "sport",
-   "muniCat": "תיאטרון אמנות מוזיקה וספורט",
-   "audience": [
-    "מבוגרים (60- 35)",
-    "צעירים (18-35)"
-   ],
-   "date": "2026-07-09",
-   "time": "21:30",
-   "locName": "תיאטרון רמת גן",
-   "address": "רחוב חיבת ציון 16",
-   "x": -447.9,
-   "y": 944.7,
-   "approx": true,
-   "link": "https://www.ramat-gan.muni.il/events/stand-up-after-dark-at-the-ramat-gan-theater/",
-   "img": "https://www.ramat-gan.muni.il/media/0r0jvajw/התאמות-לאתר_קומדיה-בשישי_03_342-220.jpg",
    "featured": false,
    "free": true
   },
@@ -304,6 +197,29 @@
    "free": true
   },
   {
+   "id": "muni-eventsbeit-zvi-rg-eventsweb-site-event-1178",
+   "title": "יאקיש ופופצ'ה",
+   "cat": "sport",
+   "anim": "sport",
+   "muniCat": "תיאטרון אמנות מוזיקה וספורט",
+   "audience": [
+    "צעירים (18-35)",
+    "מבוגרים (60- 35)",
+    "הגיל השלישי (60+)"
+   ],
+   "date": "2026-07-10",
+   "time": "19:30",
+   "locName": "תיאטרון בית צבי",
+   "address": "רחוב שועלי שמשון 2",
+   "x": -471.1,
+   "y": 866.7,
+   "approx": true,
+   "link": "https://www.ramat-gan.muni.il/events/beit-zvi-rg-events/web-site-event-1178/",
+   "img": "https://www.ramat-gan.muni.il/media/vhbpmdkv/yakish220-342.jpg",
+   "featured": false,
+   "free": true
+  },
+  {
    "id": "muni-eventsfirst-aid-course-babies-and-kids-2026",
    "title": "קורסי החייאה ועזרה ראשונה לתינוקות וילדים",
    "cat": "community",
@@ -323,6 +239,24 @@
    "link": "https://www.ramat-gan.muni.il/events/first-aid-course-babies-and-kids-2026/",
    "img": null,
    "featured": false,
+   "free": true
+  },
+  {
+   "id": "muni-eventssummer-ramat-gani-2026",
+   "title": "קיץ רמת גני",
+   "cat": "community",
+   "anim": "community",
+   "muniCat": "",
+   "audience": [],
+   "date": "2026-07-10",
+   "time": "20:30",
+   "locName": "פארק מחזור חיריה",
+   "address": "",
+   "x": null,
+   "y": null,
+   "link": "https://www.ramat-gan.muni.il/events/summer-ramat-gani-2026/",
+   "img": "https://www.ramat-gan.muni.il/media/1wpgegrx/קיץ-2026_התאמות-לאתר_342-220.jpg",
+   "featured": true,
    "free": true
   },
   {
@@ -896,6 +830,28 @@
    "free": true
   },
   {
+   "id": "muni-eventsrg-eventsweb-site-event-695",
+   "title": "קבוצת שחייה",
+   "cat": "community",
+   "anim": "community",
+   "muniCat": "הקהילה הגאה",
+   "audience": [
+    "צעירים (18-35)",
+    "מבוגרים (60- 35)"
+   ],
+   "date": "2026-07-14",
+   "time": "20:00",
+   "locName": "קאנטרי רמת גן",
+   "address": "רחוב מנדל מתיתיהו 12",
+   "x": 608.5,
+   "y": -243.5,
+   "approx": true,
+   "link": "https://www.ramat-gan.muni.il/events/rg-events/web-site-event-695/",
+   "img": "https://www.ramat-gan.muni.il/media/wlykjlvg/גריד-לקהילה-הגאה_התאמה-לאתר_342-2203.jpg",
+   "featured": false,
+   "free": true
+  },
+  {
    "id": "muni-eventsworld-cup-2026",
    "title": "מונדיאל LIVE",
    "cat": "sport",
@@ -1091,6 +1047,28 @@
    "free": true
   },
   {
+   "id": "muni-eventsstand-up-after-dark-at-the-ramat-gan-theater",
+   "title": "After Dark - סטנדאפ בתיאטרון רמת גן",
+   "cat": "sport",
+   "anim": "sport",
+   "muniCat": "תיאטרון אמנות מוזיקה וספורט",
+   "audience": [
+    "מבוגרים (60- 35)",
+    "צעירים (18-35)"
+   ],
+   "date": "2026-07-17",
+   "time": "21:30",
+   "locName": "תיאטרון רמת גן",
+   "address": "רחוב חיבת ציון 16",
+   "x": -447.9,
+   "y": 944.7,
+   "approx": true,
+   "link": "https://www.ramat-gan.muni.il/events/stand-up-after-dark-at-the-ramat-gan-theater/",
+   "img": "https://www.ramat-gan.muni.il/media/0r0jvajw/התאמות-לאתר_קומדיה-בשישי_03_342-220.jpg",
+   "featured": false,
+   "free": true
+  },
+  {
    "id": "muni-eventsrg-eventsweb-site-event-328",
    "title": "סדנת נגרות ספסל/שולחן/בוצ'ר",
    "cat": "community",
@@ -1238,6 +1216,28 @@
    "approx": false,
    "link": "https://www.ramat-gan.muni.il/events/mbe-rg-events/web-site-event-23455/",
    "img": "https://www.ramat-gan.muni.il/media/ke4nclb3/התאמות-טורניר-יום-השחמט-227_342-220.jpg",
+   "featured": false,
+   "free": true
+  },
+  {
+   "id": "muni-eventsrg-eventsweb-site-event-121",
+   "title": "משחקי קופסא",
+   "cat": "community",
+   "anim": "community",
+   "muniCat": "הקהילה הגאה",
+   "audience": [
+    "צעירים (18-35)",
+    "מבוגרים (60- 35)"
+   ],
+   "date": "2026-07-23",
+   "time": "19:30",
+   "locName": "המרכז הגאה",
+   "address": "רחוב ביאליק 42",
+   "x": -1144.8,
+   "y": 1361.2,
+   "approx": false,
+   "link": "https://www.ramat-gan.muni.il/events/rg-events/web-site-event-121/",
+   "img": "https://www.ramat-gan.muni.il/media/osodp41k/גריד-לקהילה-הגאה_התאמה-לאתר_342-22010.jpg",
    "featured": false,
    "free": true
   },
