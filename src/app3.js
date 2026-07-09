@@ -562,8 +562,27 @@ function goToResult(r) {
 // search UI
 const sInput = $('searchInput'), sResults = $('results'), sBox = $('searchBox');
 let sItems = [], sActive = -1, sDebounce = 0;
+// the dropdown lists the top few businesses, but the MAP highlights EVERY business
+// whose name matches the query — so a search paints the whole relevant set as pins.
+function bizMatchesForQuery(qRaw) {
+  if (!qRaw || !qRaw.trim()) return null;
+  const { text } = parseQuery(qRaw);
+  if (!text) return null;
+  const q = text, qh = stripHe(text);
+  const ids = [];
+  for (const it of searchItems) {
+    if (it.type !== 'biz' || !it.biz) continue;
+    if (scoreItem(it.n, it.nh, q, qh) >= (TYPE_FLOOR.biz || 60)) ids.push(it.biz.id);
+    if (ids.length >= 120) break;
+  }
+  return ids.length ? new Set(ids) : null;
+}
+function syncSearchBizHighlight() {
+  if (window.setBizSearchHighlight) setBizSearchHighlight(bizMatchesForQuery(sInput.value));
+}
 function renderResults(list) {
   sItems = list; sActive = -1;
+  syncSearchBizHighlight();
   if (!list.length) {
     sResults.innerHTML = sInput.value.trim() ? '<div class="res-empty">לא נמצאו תוצאות — נסו שם רחוב או מקום אחר</div>' : '';
     sResults.classList.toggle('open', !!sInput.value.trim());
@@ -601,7 +620,11 @@ sResults.addEventListener('click', e => {
   if (btn) { goToResult(sItems[+btn.dataset.i]); closeResults(); }
 });
 function closeResults() { sResults.classList.remove('open'); }
-$('searchClear').addEventListener('click', () => { sInput.value = ''; sBox.classList.remove('hasText'); closeResults(); sInput.focus(); });
+function clearSearch() {
+  sInput.value = ''; sBox.classList.remove('hasText'); closeResults();
+  if (window.setBizSearchHighlight) setBizSearchHighlight(null); // restore all businesses
+}
+$('searchClear').addEventListener('click', () => { clearSearch(); sInput.focus(); });
 document.addEventListener('pointerdown', e => {
   if (!e.target.closest('#searchWrap')) closeResults();
 });
@@ -1278,7 +1301,7 @@ window.addEventListener('keydown', e => {
     else if (placing) setPlacing(false);
     else if (popFor || window.__curBiz || busPopStop) closePop();
     else if ($('evPanel').classList.contains('open')) closePanel();
-    else if (window.closeAiPanel && $('aiPanel').classList.contains('open')) window.closeAiPanel();
+    else if (typeof closeAiPanel === 'function' && $('aiPanel').classList.contains('open')) closeAiPanel();
     else closeResults();
   }
 });

@@ -290,7 +290,9 @@ function loadOverture() {
     const [lon, lat] = f.geometry.coordinates;
     const x = PX(lon), y = PY(lat);
     if (!inCity(x, y)) continue;
-    const it = { id: 'o' + String(p.id || '').replace(/-/g, '').slice(0, 16), name: name.slice(0, 60), cat, sub, x, y, conf, src: 'ov' };
+    // Overture's stable id is on the GeoJSON *feature* (f.id), not in properties
+    const oid = String(f.id || '').replace(/-/g, '').slice(0, 18) || (x + '_' + y);
+    const it = { id: 'o' + oid, name: name.slice(0, 60), cat, sub, x, y, conf, src: 'ov' };
     const phone = (p.phones || [])[0];
     if (phone) it.phone = String(phone).slice(0, 20);
     const web = (p.websites || [])[0];

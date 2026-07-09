@@ -135,14 +135,29 @@ function bizIconHtml(ci) {
 // re-projects the few chosen ones — this is what keeps panning smooth on phones
 let bizSel = [];               // [{b, hi, nm, fx, fy}] fan offsets in screen px
 let bizSelV = -2, bizSelT = 0;
+// Google-Maps-style progressive reveal: far → a few prominent, zoom in → more.
+// (bizHi = search/assistant matches: always all of them, at any zoom.)
+function bizBudget(d) {
+  if (bizHi) return BIZ_POOL_N;
+  const base = d >= 1050 ? 0
+    : d >= 820 ? 9
+    : d >= 620 ? 20
+    : d >= 450 ? 38
+    : d >= 330 ? 64
+    : BIZ_POOL_N;
+  return IS_MOBILE ? Math.round(base * 0.6) : base;
+}
+function bizMaxDist() { return bizHi ? 1e9 : bizFocus ? 3200 : 1050; }
 function selectBiz(d) {
-  const namesOn = d < (IS_MOBILE ? 430 : 720);
+  const budget = bizBudget(d);
+  bizSel = [];
+  if (!budget) return;
+  const namesOn = d < (IS_MOBILE ? 380 : 640);
   const cand = [];
   for (const b of bizAll) {
     const hi = bizHi && bizHi.has(b.id);
-    if (bizHi && !hi && d >= 1500) continue;
-    if (bizFocus && !bizFocus.has(b.cat) && !hi && d >= 1500) continue;
-    if (!hi && d >= 1500 && !bizFocus) continue;
+    if (bizHi && !hi) continue;                              // search/assistant: only matches
+    if (bizFocus && !bizFocus.has(b.cat) && !hi) continue;   // category focus
     const [sx, sy, vis] = MAP.project(b.x, b.y, 0);
     if (!vis || sx < -20 || sx > innerWidth + 20 || sy < 90 || sy > innerHeight + 20) continue;
     const pr = hi ? 0 : (bizFocus && bizFocus.has(b.cat)) ? 1 : 2;
@@ -153,9 +168,8 @@ function selectBiz(d) {
   // stacked venues (malls, shared buildings): fan overlapping icons out in a stable ring
   const cellUse = new Map();
   const nmCells = new Set();
-  bizSel = [];
   for (const c of cand) {
-    if (bizSel.length >= BIZ_POOL_N) break;
+    if (bizSel.length >= budget) break;
     const ck = Math.round(c.sx / 26) + ':' + Math.round(c.sy / 26);
     const n = cellUse.get(ck) || 0;
     cellUse.set(ck, n + 1);
@@ -179,8 +193,8 @@ function selectBiz(d) {
 }
 function positionBiz(force) {
   const d = MAP.cam.dist;
-  const maxD = bizHi ? 7000 : bizFocus ? 3200 : 1500;
-  const active = bizLayerOn && bizAll.length && d < maxD;
+  // search/assistant matches (bizHi) show even when the layer is off, at any zoom
+  const active = (bizLayerOn || bizHi) && bizAll.length && d < bizMaxDist();
   let used = 0;
   if (active) {
     const t = nowMs();
@@ -290,7 +304,6 @@ function closeAiPanel(fromBack) {
   aiPanel.classList.remove('open');
   if (fromBack !== true) uiClosed('aiPanel');
 }
-window.closeAiPanel = () => closeAiPanel();
 $('aiToggle').addEventListener('click', openAiPanel);
 $('aiClose').addEventListener('click', () => closeAiPanel());
 
@@ -584,6 +597,14 @@ for (const b of bizAll) {
     goOrig(r);
   };
 }
+
+// the top search sets which businesses are the "found relevant" set — the map then
+// shows ONLY those (bizHi), hiding everything else until the search is cleared.
+window.setBizSearchHighlight = ids => {
+  bizHi = (ids && ids.size) ? ids : null;
+  positionBiz(true);
+  MAP.requestRender();
+};
 
 // ---------- deep-link + share support (biz=id) ----------
 window.BIZAPI = {
