@@ -131,19 +131,52 @@ input,select,textarea{font-family:inherit;font-size:inherit;color:var(--ink)}
 .lay-row.on .sw::after{transform:translateX(-15px)}
 .lay-row.on .lic{background:color-mix(in srgb,var(--emerald) 14%,transparent);color:var(--emerald)}
 
-/* events-count bubble: absolute, so the dock never shifts when it appears */
-#evToggle{position:relative}
-#evCount{position:absolute;top:-7px;left:-7px;min-width:20px;height:20px;border-radius:999px;display:none;
-  align-items:center;justify-content:center;padding:0 6px;font-size:11.5px;font-weight:800;
-  font-variant-numeric:tabular-nums;background:var(--gold);color:#14100a;border:1.5px solid var(--panel-solid)}
-:root[data-theme="light"] #evCount{color:#fffdf6}
-#evCount.on{display:flex}
+/* ---------- nearest-shelter button ---------- */
+#shelterBtn{display:flex;align-items:center;gap:8px;background:var(--panel);backdrop-filter:blur(14px);
+  -webkit-backdrop-filter:blur(14px);border:1.5px solid color-mix(in srgb,var(--danger) 55%,var(--hairline));
+  color:var(--ink);font-weight:800;font-size:14px;padding:12px 17px;border-radius:999px;box-shadow:var(--shadow);
+  transition:transform .2s,border-color .2s;white-space:nowrap}
+#shelterBtn svg{color:var(--danger);flex:none}
+#shelterBtn:hover{transform:translateY(-2px);border-color:var(--danger)}
+
+/* ---------- navigation ---------- */
+#routeSvg{position:absolute;inset:0;width:100%;height:100%;z-index:3;pointer-events:none;display:none}
+#routeSvg.on{display:block}
+#routeCase{fill:none;stroke:rgba(8,13,24,.6);stroke-width:9.5;stroke-linecap:round;stroke-linejoin:round}
+:root[data-theme="light"] #routeCase{stroke:rgba(255,255,255,.85)}
+#routeLine{fill:none;stroke:#3f9cf5;stroke-width:5;stroke-linecap:round;stroke-linejoin:round}
+#routeLine.foot{stroke-dasharray:1 11;stroke-width:6}
+#navDest{position:absolute;top:0;left:0;z-index:5;margin:-15px 0 0 -15px;width:30px;height:30px;display:none;pointer-events:none}
+#navDest.on{display:block}
+#navDest::after{content:'';position:absolute;inset:-8px;border-radius:50%;border:2px solid rgba(63,156,245,.55);
+  animation:ringPulse 2s ease-out infinite}
+#navBar{position:fixed;bottom:28px;left:50%;transform:translateX(-50%);z-index:36;display:none;align-items:center;gap:12px;
+  background:var(--panel-solid);border:1px solid var(--hairline);border-radius:20px;box-shadow:var(--shadow);
+  padding:11px 13px;width:min(560px,calc(100vw - 24px));animation:fadeSlide .35s ease backwards}
+#navBar.on{display:flex}
+.nav-main{flex:1;min-width:0}
+#navInstr{font-weight:800;font-size:15.5px;line-height:1.35}
+#navMeta{font-size:12.5px;color:var(--ink-faint);margin-top:2px;font-variant-numeric:tabular-nums}
+.nav-modes{flex:none;display:flex;gap:4px;background:rgba(255,255,255,.05);border:1px solid var(--hairline-soft);
+  border-radius:12px;padding:3px}
+.nav-modes button{width:38px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;color:var(--ink-faint)}
+.nav-modes button.on{background:color-mix(in srgb,var(--gold) 18%,transparent);color:var(--gold)}
+#navStepsBtn{flex:none;width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;color:var(--ink-faint)}
+#navStepsBtn:hover,#navStepsBtn.open{color:var(--gold)}
+#navSteps{position:fixed;z-index:35;bottom:104px;left:50%;transform:translateX(-50%) translateY(12px);opacity:0;pointer-events:none;
+  width:min(560px,calc(100vw - 24px));max-height:44vh;overflow-y:auto;background:var(--panel-solid);
+  border:1px solid var(--hairline);border-radius:18px;box-shadow:var(--shadow);padding:8px;
+  transition:opacity .25s,transform .25s cubic-bezier(.22,1,.36,1)}
+#navSteps.open{opacity:1;transform:translateX(-50%);pointer-events:auto}
+.ns-row{display:flex;gap:11px;padding:9px 11px;border-radius:10px;font-size:13.5px;align-items:center}
+.ns-row.cur{background:color-mix(in srgb,var(--gold) 12%,transparent);font-weight:700}
+.ns-d{flex:none;color:var(--ink-faint);font-variant-numeric:tabular-nums;font-size:12px;min-width:52px;text-align:left}
+.shel{position:absolute;top:0;left:0;z-index:4;width:24px;height:24px;margin:-12px;border-radius:8px;display:none;
+  align-items:center;justify-content:center;background:var(--panel-solid);border:1.5px solid var(--danger);
+  color:var(--danger);cursor:pointer;pointer-events:auto}
+.shel svg{width:14px;height:14px}
 
 /* ---------- events panel ---------- */
-#evToggle{display:flex;align-items:center;gap:9px;background:var(--panel);backdrop-filter:blur(14px);
-  -webkit-backdrop-filter:blur(14px);border:1px solid var(--hairline);color:var(--ink);font-weight:700;font-size:14px;
-  padding:11px 18px;border-radius:999px;box-shadow:var(--shadow);transition:transform .2s,border-color .2s}
-#evToggle:hover{transform:translateY(-2px);border-color:var(--gold)}
 #evPanel{position:fixed;top:0;bottom:0;right:0;z-index:40;width:min(400px,100vw);background:var(--panel-solid);
   border-left:1px solid var(--hairline-soft);box-shadow:var(--shadow);transform:translateX(105%);transition:transform .45s cubic-bezier(.22,1,.3,1);
   display:flex;flex-direction:column}
@@ -506,14 +539,16 @@ textarea.f-in{resize:vertical;min-height:74px}
 .biz-hours{margin-top:7px;font-size:12.5px;color:var(--ink-faint);display:flex;gap:6px;align-items:flex-start;line-height:1.45}
 .biz-hours svg{margin-top:2px;flex:none}
 
-/* ---------- bottom dock (assistant + events) ---------- */
-#dock{position:fixed;bottom:28px;right:24px;z-index:30;display:flex;flex-direction:column;align-items:flex-end;gap:10px;
+/* ---------- bottom dock (assistant + nearest shelter) ---------- */
+#dock{position:fixed;bottom:28px;right:24px;z-index:30;display:flex;align-items:center;gap:10px;
   animation:fadeSlide .8s .65s ease backwards}
+#dock.hide{display:none}
 #aiToggle{display:flex;align-items:center;gap:10px;background:linear-gradient(135deg,var(--gold),var(--gold-deep));
-  color:#14100a;font-weight:700;font-size:15px;padding:13px 22px;border-radius:999px;
+  color:#14100a;font-weight:700;font-size:15.5px;padding:14px 26px;border-radius:999px;
   box-shadow:0 10px 30px rgba(227,194,126,.35),var(--shadow);transition:transform .2s}
 :root[data-theme="light"] #aiToggle{color:#fffdf6;box-shadow:0 10px 26px rgba(138,109,44,.4)}
 #aiToggle:hover{transform:translateY(-2px)}
+#aiToggle .ai-hint{font-weight:500;opacity:.75;font-size:13px}
 
 /* ---------- "מה בא לך היום?" panel ---------- */
 #aiPanel{position:fixed;top:0;bottom:0;right:0;z-index:40;width:min(400px,100vw);background:var(--panel-solid);
@@ -603,7 +638,7 @@ textarea.f-in{resize:vertical;min-height:74px}
   #brand .t1{font-size:21px}
   #brand .t2{font-size:10.5px;letter-spacing:.26em}
   #aboutBtn{top:12px;left:14px}
-  #bellBtn{top:62px;left:14px}
+  #bellBtn{top:122px;left:14px} /* below the search bar, not under it */
   #searchWrap{top:64px;right:16px;width:calc(100vw - 32px)}
   #results{max-height:42vh}
   /* rail becomes one cohesive pill: grouped, compact, hugging the left edge */
@@ -621,14 +656,19 @@ textarea.f-in{resize:vertical;min-height:74px}
     border:1px solid var(--hairline-soft);background:var(--panel);box-shadow:var(--shadow);
     backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
   #compassBtn.hide{transform:scale(.8);opacity:0}
-  #dock{bottom:calc(16px + env(safe-area-inset-bottom));right:14px;left:14px;flex-direction:row-reverse;
-    justify-content:flex-start;align-items:center;gap:8px}
-  #aiToggle{padding:12px 18px;font-size:14px}
-  #evToggle{padding:11px 15px;font-size:13.5px}
-  /* panels become bottom sheets */
+  #dock{bottom:calc(16px + env(safe-area-inset-bottom));right:14px;left:14px;gap:8px}
+  /* the assistant IS the primary control on phones: one full-width bar */
+  #aiToggle{flex:1;justify-content:center;padding:15px 16px;font-size:15px}
+  #aiToggle .ai-hint{display:none}
+  #shelterBtn{flex:none;width:52px;height:52px;padding:0;justify-content:center;border-radius:50%}
+  #shelterBtn .sh-tx{display:none}
+  #navBar{bottom:calc(12px + env(safe-area-inset-bottom))}
+  #navSteps{bottom:calc(92px + env(safe-area-inset-bottom))}
+  /* panels become bottom sheets — the assistant gets almost the whole screen */
   #evPanel,#aiPanel{top:auto;left:0;right:0;width:100%;height:min(74vh,620px);border-left:none;
     border-top:1px solid var(--hairline);border-radius:24px 24px 0 0;
     transform:translateY(108%);padding-bottom:env(safe-area-inset-bottom)}
+  #aiPanel{height:min(88dvh,760px)}
   #evPanel.open,#aiPanel.open{transform:none}
   #evPanel::before,#aiPanel::before{content:'';position:absolute;top:9px;left:50%;transform:translateX(-50%);
     width:42px;height:4px;border-radius:2px;background:var(--hairline)}
@@ -671,9 +711,14 @@ textarea.f-in{resize:vertical;min-height:74px}
 <div id="scrimTop"></div>
 <div id="scrimBottom"></div>
 <div id="overlay">
+  <svg id="routeSvg" aria-hidden="true"><path id="routeCase"/><path id="routeLine"/></svg>
   <div id="labels"></div>
   <div id="markers"></div>
+  <div id="shelterLayer"></div>
   <div id="hiRing"></div>
+  <div id="navDest">
+    <svg width="30" height="30" viewBox="0 0 24 24" fill="#3f9cf5" stroke="#fff" stroke-width="1.4"><path d="M12 22s-7-5.8-7-11a7 7 0 0 1 14 0c0 5.2-7 11-7 11Z"/><circle cx="12" cy="10.6" r="2.7" fill="#fff" stroke="none"/></svg>
+  </div>
   <div id="geoDot"></div>
   <div id="pop"></div>
 </div>
@@ -763,19 +808,49 @@ textarea.f-in{resize:vertical;min-height:74px}
     <span class="ltx"><span class="lt">תכנון ובנייה</span><span class="ld">תוכניות, תמ״א 38 והתחדשות עירונית</span></span>
     <i class="sw"></i>
   </button>
+  <button class="lay-row" id="sheltersBtn">
+    <span class="lic"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.8 20 6v6c0 5-3.4 8.3-8 9.2C7.4 20.3 4 17 4 12V6Z"/><path d="M12 8v5M12 16h.01"/></svg></span>
+    <span class="ltx"><span class="lt">מקלטים ציבוריים</span><span class="ld">מהרשימה העירונית הרשמית</span></span>
+    <i class="sw"></i>
+  </button>
+  <button class="lay-row" id="eventsRowBtn">
+    <span class="lic"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M8 3v4M16 3v4M3.5 10h17"/></svg></span>
+    <span class="ltx"><span class="lt">אירועים בעיר</span><span class="ld">הרשימה המלאה, הוספה ושיתוף</span></span>
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--ink-faint)" stroke-width="2.1" stroke-linecap="round" style="flex:none"><path d="m14 6-6 6 6 6"/></svg>
+  </button>
 </div>
 
 <div id="dock">
+  <button id="shelterBtn" aria-label="ניווט מיידי למקלט הקרוב" title="המקלט הקרוב אליי">
+    <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.8 20 6v6c0 5-3.4 8.3-8 9.2C7.4 20.3 4 17 4 12V6Z"/><path d="M12 8v5M12 16h.01"/></svg>
+    <span class="sh-tx">מקלט קרוב</span>
+  </button>
   <button id="aiToggle">
     <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5l1.8 4.9 4.9 1.8-4.9 1.8L12 16.9l-1.8-4.9-4.9-1.8 4.9-1.8Z"/><path d="M19 15.5l.9 2.4 2.4.9-2.4.9-.9 2.4-.9-2.4-2.4-.9 2.4-.9Z"/></svg>
     מה בא לך היום?
-  </button>
-  <button id="evToggle">
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round"><rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M8 3v4M16 3v4M3.5 10h17"/></svg>
-    אירועים
-    <span id="evCount"></span>
+    <span class="ai-hint">קפה שקט · פיצה · אירועים</span>
   </button>
 </div>
+
+<div id="navBar" role="region" aria-label="הנחיות ניווט">
+  <button id="navClose" class="x-btn" aria-label="סיום ניווט"><svg width="16" height="16" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+  <div class="nav-main">
+    <div id="navInstr">מחשב מסלול…</div>
+    <div id="navMeta"></div>
+  </div>
+  <div class="nav-modes" role="group" aria-label="אופן הגעה">
+    <button id="navWalk" class="on" aria-label="הליכה" title="הליכה">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="13" cy="4.4" r="1.9"/><path d="m9.5 21 2-5.5-2.2-1.8.9-4.6L7 10.8 5.6 13M12.9 8l2.1 2.5 2.9.9M11.5 13.7l2.3 2.3 1.4 5"/></svg>
+    </button>
+    <button id="navDrive" aria-label="נסיעה" title="נסיעה">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 11.5 6.8 6.6A2 2 0 0 1 8.7 5.3h6.6a2 2 0 0 1 1.9 1.3L19 11.5M5 11.5h14a1.5 1.5 0 0 1 1.5 1.5v3.6H18M5 11.5A1.5 1.5 0 0 0 3.5 13v3.6H6M6 16.6a1.9 1.9 0 1 0 3.8 0M6 16.6h3.8m4.4 0a1.9 1.9 0 1 0 3.8 0m-3.8 0H9.8"/></svg>
+    </button>
+  </div>
+  <button id="navStepsBtn" aria-label="כל שלבי המסלול" title="שלבי המסלול">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round"><path d="m6 14 6-6 6 6"/></svg>
+  </button>
+</div>
+<div id="navSteps" role="list" aria-label="שלבי המסלול"></div>
 
 <aside id="evPanel" aria-label="אירועים בעיר">
   <div class="ev-head">
@@ -870,11 +945,13 @@ textarea.f-in{resize:vertical;min-height:74px}
       <hr class="about-hr"/>
       <b>חיפוש</b> — הקלידו כתובת מדויקת («ביאליק 12»), רחוב, שכונה או מוסד עירוני.<br/>
       <b>מה בא לך היום?</b> — ספרו לעוזר החכם מה מתחשק («קפה שקט», «מה קורה הערב?») והוא ימצא עסקים ואירועים סביבכם. העסקים מסומנים על המפה כשמתקרבים לגובה רחוב.<br/>
-      <b>אירועים</b> — לחצו «אירועים» והוסיפו אירוע בכל נקודה על המפה. אפשר לייצא קובץ ולשתף עם שכנים.<br/>
+      <b>ניווט</b> — מכל עסק, אירוע או תחנה אפשר להפעיל מסלול הליכה או נסיעה עם הוראות בעברית, ישירות על המפה.<br/>
+      <b>מקלט קרוב</b> — כפתור המגן שליד החיפוש מנווט מיד למקלט הציבורי הקרוב, מהרשימה העירונית הרשמית.<br/>
+      <b>אירועים</b> — בכפתור השכבות תמצאו את רשימת האירועים; אפשר להוסיף אירוע בכל נקודה על המפה, לייצא קובץ ולשתף עם שכנים.<br/>
       <b>תכנון ובנייה</b> — הפעילו את שכבת התכנון ולחצו על שטח מסומן כדי לראות מה מתוכנן שם: שם התוכנית, סטטוס, יח״ד וקישור לתיק הרשמי.<br/>
       <b>תחבורה</b> — הקו האדום, תחנותיו ותחנות האוטובוס — לחיצה על תחנה מציגה זמני הגעה בזמן אמת, כולל קווי הסופ״ש.<br/>
       <b>מידע לתושב</b> — הודעות רשמיות מהעירייה בפעמון שמשמאל, ואירועים עירוניים עם סימון «עירייה».<br/>
-      <b>ניווט</b> — גררו להזזה, גלגלת להתקרבות, <span class="k">גרירה ימנית</span> או <span class="k">Ctrl+גרירה</span> לסיבוב והטיה. במגע: שתי אצבעות.
+      <b>שליטה במפה</b> — גררו להזזה, גלגלת להתקרבות, <span class="k">גרירה ימנית</span> או <span class="k">Ctrl+גרירה</span> לסיבוב והטיה. במגע: שתי אצבעות.
       <hr class="about-hr"/>
       <div class="about-small">
         נתוני מפה: © OpenStreetMap contributors (ODbL) · עסקים: OpenStreetMap + Overture Maps Foundation (CDLA), עם ציון ודאות שמסנן עסקים שכנראה נסגרו · נתוני תכנון: מינהל התכנון (iplan) · גבהים משוערים לפי קומות במקומות שבהם אין מדידה · האירועים נשמרים מקומית בדפדפן זה בלבד.

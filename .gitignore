@@ -7,3 +7,6 @@ raw/
 cities/*/raw/
 cities/*/overture-places.geojson
 cities/*/.vercel/
+
+overture-places.geojson
+overture-places.geojson.state

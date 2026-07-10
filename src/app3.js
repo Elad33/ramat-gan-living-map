@@ -296,7 +296,7 @@ function showBusPop(stop) {
     '<div><div class="nm">' + escapeHtml(stop.name || 'תחנת אוטובוס') + '</div>' +
     '<div class="cd">תחנה ' + (stop.code || '—') + '</div></div></div>' +
     '<div id="busBody"><div class="sk-row"></div><div class="sk-row"></div><div class="sk-row"></div></div>' +
-    '<div class="acts">' + navActsHtml(stop.x, stop.y) + '</div>';
+    '<div class="acts">' + navActsHtml(stop.x, stop.y, stop.name) + '</div>';
   pop.classList.add('open');
   popOpened();
   placePop();
@@ -327,6 +327,7 @@ function overlayTick(animating, force) {
   if (vpVersion === lastLayoutV && !force) { updateRing(t); return; }
   // markers reposition every frame while moving; full label re-layout throttled
   positionMarkers();
+  if (window.__navTick) window.__navTick();
   updateRing(t);
   if (t - lastLayoutT < 90 && !force) { return; }
   lastLayoutT = t; lastLayoutV = vpVersion;
@@ -916,8 +917,6 @@ function renderEvList() {
   const list = $('evList');
   const vis = allEvents().filter(e => !hiddenCats.has(e.cat))
     .sort((a, b) => ((a.date || '9999') + (a.time || '')) < ((b.date || '9999') + (b.time || '')) ? -1 : 1);
-  $('evCount').textContent = allEvents().length || '';
-  $('evCount').classList.toggle('on', allEvents().length > 0);
   if (!vis.length) {
     list.innerHTML = '<div class="ev-none">אין עדיין אירועים על המפה.<br/>לחצו על «הוספת אירוע» וסמנו נקודה בעיר.</div>';
     return;
@@ -968,7 +967,7 @@ function showPop(id) {
     (ev.desc ? '<div class="desc">' + escapeHtml(ev.desc) + '</div>' : '') +
     (ev.link ? '<a class="pop-primary" href="' + escapeHtml(ev.link) + '" target="_blank" rel="noopener">לפרטים והרשמה<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M7 17 17 7M8 7h9v9"/></svg></a>' : '') +
     '<div class="acts">' +
-    navActsHtml(ev.x, ev.y) +
+    navActsHtml(ev.x, ev.y, ev.title) +
     '<button class="pop-act" data-act="fly"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>התקרבות</button>' +
     (ev.official ? '' : '<button class="pop-act del" data-act="del"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2m-8 0 1 13h8l1-13"/></svg>הסרה</button>') +
     '</div>';
@@ -998,7 +997,7 @@ function showVenuePop(mk) {
       '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M7 17 17 7M8 7h9v9"/></svg></a>').join('') +
     '</div>' +
     (mk.count > 9 ? '<div class="bus-note">ועוד ' + (mk.count - 9) + ' אירועים במקום הזה, ברשימה המלאה</div>' : '') +
-    '<div class="acts">' + navActsHtml(mk.x, mk.y) + '</div>';
+    '<div class="acts">' + navActsHtml(mk.x, mk.y, mk.locName || 'מוקד אירועים') + '</div>';
   pop.classList.add('open');
   popOpened();
   placePop();
@@ -1044,7 +1043,7 @@ function showPlanPop(plan, x, y) {
     '<div class="pop-meta">' + meta.join('<span>·</span>') + '</div>' +
     (plan.o ? '<div class="desc">' + escapeHtml(plan.o) + '</div>' : '') +
     (plan.url ? '<a class="pop-primary" href="' + escapeHtml(plan.url) + '" target="_blank" rel="noopener">לתיק התכנון הרשמי<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M7 17 17 7M8 7h9v9"/></svg></a>' : '') +
-    '<div class="acts">' + navActsHtml(x, y) + '</div>';
+    '<div class="acts">' + navActsHtml(x, y, plan.t || ('תוכנית ' + plan.n)) + '</div>';
   pop.classList.add('open');
   popOpened();
   placePop();
@@ -1090,7 +1089,7 @@ function closePanel(fromBack) {
   $('evPanel').classList.remove('open');
   if (fromBack !== true) uiClosed('evPanel');
 }
-$('evToggle').addEventListener('click', () => { renderEvList(); openPanel(); });
+$('eventsRowBtn').addEventListener('click', () => { closeLayersPop(); renderEvList(); openPanel(); });
 $('evClose').addEventListener('click', () => closePanel());
 
 // legend chips
@@ -1505,9 +1504,11 @@ function wazeLink(x, y) {
   const [lat, lon] = toGeo(x, y);
   return 'https://waze.com/ul?ll=' + lat.toFixed(6) + ',' + lon.toFixed(6) + '&navigate=yes';
 }
-function navActsHtml(x, y) {
-  return '<a class="pop-act" href="' + wazeLink(x, y) + '" target="_blank" rel="noopener">' +
-    '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11 21 3l-8 18-2.5-7.5Z"/></svg>ניווט</a>';
+function navActsHtml(x, y, name) {
+  return '<button class="pop-act" data-act="nav" data-nx="' + x + '" data-ny="' + y + '" data-nn="' + escapeHtml(String(name || '')) + '">' +
+    '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 20.5V9.4a2.4 2.4 0 0 1 2.4-2.4h4.8M13.5 4.5 16.7 7l-3.2 2.5M9 20.5h6"/></svg>מסלול</button>' +
+    '<a class="pop-act" href="' + wazeLink(x, y) + '" target="_blank" rel="noopener">' +
+    '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11 21 3l-8 18-2.5-7.5Z"/></svg>Waze</a>';
 }
 
 // deep links: #v=x,y,dist,tilt,bearing&ev=id / &stop=code / &plan=number
@@ -1810,7 +1811,7 @@ async function boot() {
     syncLayerButtons();
     loadCityContent(); // async; merges official events when it lands
     if (PICK_MODE) {
-      for (const id of ['evToggle', 'legend', 'bellBtn', 'aboutBtn', 'brand']) { const el = $(id); if (el) el.style.display = 'none'; }
+      for (const id of ['dock', 'legend', 'bellBtn', 'aboutBtn', 'brand']) { const el = $(id); if (el) el.style.display = 'none'; }
       $('markers').style.display = 'none';
       canvas.classList.add('placing');
       $('placeHint').firstChild.textContent = 'לחצו על המפה לבחירת מיקום ';
@@ -1900,8 +1901,6 @@ async function boot() {
       setTimeout(() => {
         const today = localISO(0);
         if (allEvents().some(e => e.date === today && !hiddenCats.has(e.cat))) {
-          const c = $('evCount');
-          c.style.background = 'var(--rose)'; c.style.color = '#fff';
           if (!store.getItem('rg.todayToast.' + today)) {
             store.setItem('rg.todayToast.' + today, '1');
             showToast('🎉 יש אירועים בעיר היום — הציצו ברשימה');

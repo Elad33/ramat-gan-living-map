@@ -274,7 +274,7 @@ function showBizPop(b) {
         '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M7 17 17 7M8 7h9v9"/></svg></a>';
     })() +
     '<div class="acts">' +
-    navActsHtml(b.x, b.y) +
+    navActsHtml(b.x, b.y, b.name) +
     (tel ? '<a class="pop-act" href="tel:' + tel + '"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 4h4l1.8 4.5-2.3 1.4a12 12 0 0 0 5.6 5.6l1.4-2.3L20 15v4a1.8 1.8 0 0 1-2 1.8A16.5 16.5 0 0 1 3.2 6 1.8 1.8 0 0 1 5 4Z"/></svg>חיוג</a>' : '') +
     '<button class="pop-act" data-act="fly"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>התקרבות</button>' +
     '</div>';

@@ -328,6 +328,75 @@ function nameMatch(a, b) {
   return inter >= 2 || minSize <= 2 || inter / minSize >= 0.5;
 }
 
+// Hebrew and Latin spellings of the same business never share tokens ("קפה גרג" vs
+// "Cafe Greg") — so both records used to survive. A consonant skeleton maps either
+// script to a shared phonetic form (kf grg == kf grg) and lets them merge.
+const HE2LAT = {
+  א: '', ב: 'b', ג: 'g', ד: 'd', ה: '', ו: '', ז: 'z', ח: 'h', ט: 't', י: '', כ: 'k', ך: 'k',
+  ל: 'l', מ: 'm', ם: 'm', נ: 'n', ן: 'n', ס: 's', ע: '', פ: 'f', ף: 'f', צ: 'z', ץ: 'z',
+  ק: 'k', ר: 'r', ש: 's', ת: 't',
+};
+function skeleton(tok) {
+  let w;
+  // word-initial ו is consonantal (ויקטורי = Victory), elsewhere it's usually a vowel
+  if (/[א-ת]/.test(tok)) w = [...tok].map((ch, i) => (ch === 'ו' && i === 0) ? 'b' : HE2LAT[ch] ?? '').join('');
+  else w = tok.toLowerCase()
+    .replace(/^w/, 'b') // word-initial W, same as word-initial ו
+    .replace(/ph/g, 'f').replace(/sch/g, 's').replace(/sh/g, 's').replace(/tch|ch/g, 'h')
+    .replace(/th/g, 't').replace(/ck/g, 'k').replace(/tz|ts/g, 'z')
+    .replace(/[^a-z]/g, '').replace(/[aeiouwy]/g, '')
+    .replace(/[cq]/g, 'k').replace(/x/g, 'ks').replace(/p/g, 'f').replace(/v/g, 'b');
+  return w.replace(/(.)\1+/g, '$1');
+}
+function skels(name) {
+  const out = new Set();
+  for (const t of tokens(name)) { const s = skeleton(t); if (s.length >= 2) out.add(s); }
+  return out;
+}
+// transliteration isn't exact ("מקדונלדס" keeps the final ס that "McDonald" drops),
+// so long skeletons tolerate one edit
+function skelClose(a, b) {
+  if (a === b) return true;
+  if (Math.min(a.length, b.length) < 5 || Math.abs(a.length - b.length) > 1) return false;
+  if (a.length === b.length) {
+    let diff = 0;
+    for (let i = 0; i < a.length; i++) if (a[i] !== b[i] && ++diff > 1) return false;
+    return true;
+  }
+  const [long, short] = a.length > b.length ? [a, b] : [b, a];
+  let i = 0, j = 0, skipped = 0;
+  while (i < long.length && j < short.length) {
+    if (long[i] === short[j]) { i++; j++; }
+    else if (++skipped > 1) return false;
+    else i++;
+  }
+  return true;
+}
+// stricter than nameMatch: phonetic collisions are noisier than exact tokens,
+// so nearly the whole smaller set must be covered
+function skelMatch(a, b, sameCat) {
+  if (!a.size || !b.size) return false;
+  let inter = 0;
+  for (const s of a) for (const t of b) if (skelClose(s, t)) { inter++; break; }
+  const minSize = Math.min(a.size, b.size);
+  if (minSize === 1) { // single-word names: demand a solid consonant match ("grg", not "kf")
+    const single = a.size === 1 ? [...a][0] : [...b][0];
+    return inter === 1 && (single.length >= 3 || (sameCat && single.length >= 2));
+  }
+  return inter >= Math.ceil(minSize * 0.75);
+}
+const phoneKey = p => { const d = String(p || '').replace(/\D/g, '').replace(/^972/, '0'); return d.length >= 8 ? d.slice(-8) : ''; };
+const domainKey = w => { try { return new URL(w).hostname.replace(/^www\./, ''); } catch { return ''; } };
+// same phone or same site at the same corner is the same business, whatever the spelling
+function contactMatch(A, B) {
+  const pa = phoneKey(A.phone), pb = phoneKey(B.phone);
+  if (pa && pa === pb) return true;
+  const da = domainKey(A.web), db = domainKey(B.web);
+  if (da && da === db) return true;
+  return (A.ig && A.ig === B.ig) || (A.fb && A.fb === B.fb);
+}
+const sameBiz = (A, B, d, dmax) => d <= dmax && (nameMatch(A.tk, B.tk) || skelMatch(A.sk, B.sk, A.cat === B.cat) || contactMatch(A, B));
+
 async function main() {
   const [osmRaw, ovAll] = [await fetchOSM(), loadOverture()];
   const osmItems = osmRaw ? processOSM(osmRaw) : [];
@@ -338,23 +407,24 @@ async function main() {
   console.log('Overture: alive ≥' + MIN_CONFIDENCE + ':', ovItems.length, '· closure-evidence <' + CLOSED_CONFIDENCE + ':', ovGone.length);
   if (!osmItems.length && !ovItems.length) throw new Error('both sources empty — keeping existing biz.js');
 
-  // Overture-internal dedupe (duplicate FB pages): same tokens within 60m → keep top confidence
+  // Overture-internal dedupe (duplicate FB pages, Hebrew+English spellings): within 60m → keep top confidence
   ovItems.sort((a, b) => b.conf - a.conf);
   const kept = [];
   for (const it of ovItems) {
-    it.tk = tokens(it.name);
+    it.tk = tokens(it.name); it.sk = skels(it.name);
     let dup = false;
     for (const k of kept) {
-      if (Math.abs(k.x - it.x) < 600 && Math.abs(k.y - it.y) < 600 && nameMatch(it.tk, k.tk)) { dup = true; break; }
+      if (Math.abs(k.x - it.x) < 600 && Math.abs(k.y - it.y) < 600
+        && sameBiz(it, k, Math.hypot(k.x - it.x, k.y - it.y), 600)) { dup = true; break; }
     }
     if (!dup) kept.push(it);
   }
   console.log('Overture after dedupe:', kept.length, '(dropped', ovItems.length - kept.length, 'duplicate pages)');
 
-  // match Overture ↔ OSM (grid index over OSM, 120m radius)
+  // match Overture ↔ OSM (grid index over OSM; 120m for exact-token matches, 60m for phonetic/contact)
   const grid = new Map();
   const GK = (x, y) => (x >> 10) + ':' + (y >> 10); // ~102m cells (dm)
-  osmItems.forEach(it => { it.tk = tokens(it.name); const k = GK(it.x, it.y); (grid.get(k) || grid.set(k, []).get(k)).push(it); });
+  osmItems.forEach(it => { it.tk = tokens(it.name); it.sk = skels(it.name); const k = GK(it.x, it.y); (grid.get(k) || grid.set(k, []).get(k)).push(it); });
   let merged = 0, closed = 0;
   const out = [];
   for (const ov of kept) {
@@ -363,7 +433,7 @@ async function main() {
       for (const os of grid.get(((ov.x >> 10) + dx) + ':' + ((ov.y >> 10) + dy)) || []) {
         if (os.used) continue;
         const d = Math.hypot(os.x - ov.x, os.y - ov.y);
-        if (d <= 1200 && nameMatch(ov.tk, os.tk)) { hit = os; break outer; }
+        if ((d <= 1200 && nameMatch(ov.tk, os.tk)) || sameBiz(ov, os, d, 600)) { hit = os; break outer; }
       }
     }
     if (hit) {
@@ -380,17 +450,48 @@ async function main() {
     } else out.push(ov);
   }
   // community-only entries stay — unless Meta's data says the same place is likely gone
-  for (const gone of ovGone) gone.tk = tokens(gone.name);
+  for (const gone of ovGone) { gone.tk = tokens(gone.name); gone.sk = skels(gone.name); }
   for (const os of osmItems) {
     if (os.used) continue;
-    const isGone = ovGone.some(g => Math.hypot(g.x - os.x, g.y - os.y) <= 800 && nameMatch(g.tk, os.tk));
+    const isGone = ovGone.some(g => Math.hypot(g.x - os.x, g.y - os.y) <= 800 && (nameMatch(g.tk, os.tk) || skelMatch(g.sk, os.sk)));
     if (isGone) { closed++; continue; }
     out.push(os);
   }
   console.log('merged pairs:', merged, '· OSM dropped as likely-closed:', closed, '· total:', out.length);
 
+  // final sweep: whatever slipped through per-source dedupe (OSM mapped twice in two
+  // scripts, merged records vs. strays) — same place within 60m under any matcher → one record
+  const fGrid = new Map();
+  const fin = [];
+  let squashed = 0;
+  const richness = r => ['sub', 'cuisine', 'addr', 'phone', 'web', 'ig', 'fb', 'hours'].reduce((n, k) => n + (r[k] ? 1 : 0), 0);
+  for (const it of out) { it.tk = tokens(it.name); it.sk = skels(it.name); }
+  for (const it of out) {
+    let twin = null;
+    outer2: for (let dx = -1; dx <= 1; dx++) for (let dy = -1; dy <= 1; dy++) {
+      for (const k of fGrid.get(((it.x >> 10) + dx) + ':' + ((it.y >> 10) + dy)) || []) {
+        if (sameBiz(it, k, Math.hypot(k.x - it.x, k.y - it.y), 600)) { twin = k; break outer2; }
+      }
+    }
+    if (twin) {
+      squashed++;
+      // keep the richer record; prefer a Hebrew name and an OSM position, fill missing fields
+      const winner = richness(it) > richness(twin) ? it : twin;
+      const loser = winner === it ? twin : it;
+      if (!heb(winner.name) && heb(loser.name)) winner.name = loser.name;
+      if (loser.id[0] !== 'o' && winner.id[0] === 'o') { winner.id = loser.id; winner.x = loser.x; winner.y = loser.y; }
+      for (const k of ['sub', 'cuisine', 'addr', 'phone', 'web', 'ig', 'fb', 'hours', 'wa']) if (!winner[k] && loser[k]) winner[k] = loser[k];
+      if (winner !== twin) { fin[fin.indexOf(twin)] = winner; const cell = fGrid.get(GK(twin.x, twin.y)); cell[cell.indexOf(twin)] = winner; }
+      continue;
+    }
+    fin.push(it);
+    const gk = GK(it.x, it.y);
+    (fGrid.get(gk) || fGrid.set(gk, []).get(gk)).push(it);
+  }
+  console.log('final sweep squashed', squashed, 'bilingual/stray duplicates · total:', fin.length);
+
   // ---- serialize ----
-  const items = out.map(it => {
+  const items = fin.map(it => {
     const extra = {};
     if (it.sub) extra.s = it.sub;
     if (it.cuisine) extra.c = it.cuisine;

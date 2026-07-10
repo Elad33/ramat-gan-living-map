@@ -33,10 +33,11 @@ const muniSnap = fs.existsSync(muniSnapPath)
   ? '\nwindow.MUNI_FALLBACK=' + fs.readFileSync(muniSnapPath, 'utf8').trim() + ';'
   : '';
 const biz = fs.existsSync(path.join(D, 'biz.js')) ? '\n' + fs.readFileSync(path.join(D, 'biz.js'), 'utf8') : '';
+const shelters = fs.existsSync(path.join(D, 'shelters.js')) ? '\n' + fs.readFileSync(path.join(D, 'shelters.js'), 'utf8') : '';
 const data = 'window.CITY_CFG=' + JSON.stringify(clientCfg) + ';\n'
   + fs.readFileSync(path.join(D, 'data.js'), 'utf8') + '\n'
-  + fs.readFileSync(path.join(D, 'data2.js'), 'utf8') + biz + muniSnap;
-const app = ['app1.js', 'app2.js', 'app3.js', 'app4.js'].map(f => fs.readFileSync(f, 'utf8')).join('\n');
+  + fs.readFileSync(path.join(D, 'data2.js'), 'utf8') + biz + shelters + muniSnap;
+const app = ['app1.js', 'app2.js', 'app3.js', 'app4.js', 'app5.js'].map(f => fs.readFileSync(f, 'utf8')).join('\n');
 
 let body = tpl.split('/*__FONTS__*/').join(fonts);
 body = body.split('/*__DATA__*/').join(data);

@@ -60,6 +60,7 @@ for (const f of ['data.js', 'data2.js']) {
 }
 run('עסקים (OSM + Overture Places)', 'node', [path.join(ROOT, 'scripts', 'fetch-businesses.mjs')], { cwd: RAW, soft: true });
 run('אירועי עירייה (אם מוגדר פיד)', 'node', [path.join(ROOT, 'scripts', 'fetch-muni-events.mjs')], { soft: true });
+run('מקלטים ציבוריים (רשימה עירונית ארצית)', 'node', [path.join(ROOT, 'scripts', 'fetch-shelters.mjs')], { soft: true });
 run('בניית האתר', 'node', ['build.mjs'], { cwd: path.join(ROOT, 'src') });
 
 // ---- 6. coverage score ----
