@@ -1,118 +1,7 @@
 {
- "updated": "2026-07-09T20:03:02.165Z",
+ "updated": "2026-07-10T17:06:29.719Z",
  "source": "https://www.ramat-gan.muni.il/event-lobby",
  "events": [
-  {
-   "id": "muni-eventsrg-eventsweb-site-event-3814",
-   "title": "סדנת עיסת נייר",
-   "cat": "community",
-   "anim": "community",
-   "muniCat": " סדנאות והרצאות",
-   "audience": [
-    "מבוגרים (60- 35)",
-    "הגיל השלישי (60+)",
-    "צעירים (18-35)"
-   ],
-   "date": "2026-07-09",
-   "time": "09:30",
-   "locName": "בית יד לבנים",
-   "address": "רחוב מעלה הבנים 30",
-   "x": -586.8,
-   "y": 731.7,
-   "approx": true,
-   "link": "https://www.ramat-gan.muni.il/events/rg-events/web-site-event-3814/",
-   "img": "https://www.ramat-gan.muni.il/media/3lco3yw3/לאתר-סדנת-עיסת-נייר_342-220.jpg",
-   "featured": false,
-   "free": true
-  },
-  {
-   "id": "muni-eventssleep-counseling-workshop",
-   "title": "סדנת ייעוץ שינה",
-   "cat": "community",
-   "anim": "community",
-   "muniCat": "פעילויות לילדים ולגיל הרך",
-   "audience": [
-    "צעירים (18-35)",
-    "מבוגרים (60- 35)",
-    "הגיל הרך (0-3)"
-   ],
-   "date": "2026-07-09",
-   "time": "11:30",
-   "locName": "בית לזרוס",
-   "address": "רחוב איינשטיין 16",
-   "x": -50.7,
-   "y": -855,
-   "approx": true,
-   "link": "https://www.ramat-gan.muni.il/events/sleep-counseling-workshop/",
-   "img": "https://www.ramat-gan.muni.il/media/ya2dkopm/התאמות-לאתר_סדנת-ייעוץ-שינה-97-הרמוניה-לזרוס_04.jpg",
-   "featured": false,
-   "free": true
-  },
-  {
-   "id": "muni-eventsrunning-group",
-   "title": "רצים יחד ברמת גן",
-   "cat": "sport",
-   "anim": "sport",
-   "muniCat": "תיאטרון אמנות מוזיקה וספורט",
-   "audience": [
-    "מבוגרים (60- 35)",
-    "צעירים (18-35)"
-   ],
-   "date": "2026-07-09",
-   "time": "18:00",
-   "locName": "הפארק הלאומי",
-   "address": "רחוב אחד העם 3",
-   "x": -359.3,
-   "y": -2368,
-   "approx": false,
-   "link": "https://www.ramat-gan.muni.il/events/running-group/",
-   "img": null,
-   "featured": false,
-   "free": true
-  },
-  {
-   "id": "muni-eventsrg-eventsweb-site-event-3212",
-   "title": "ללבוש ביטחון",
-   "cat": "community",
-   "anim": "community",
-   "muniCat": "הקומה השנייה: מרכז צעירים",
-   "audience": [
-    "צעירים (18-35)"
-   ],
-   "date": "2026-07-09",
-   "time": "19:30",
-   "locName": "מרכז הצעירים - הקומה השנייה",
-   "address": "רחוב הרא\"ה 9",
-   "x": -957.7,
-   "y": 1462.2,
-   "approx": false,
-   "link": "https://www.ramat-gan.muni.il/events/rg-events/web-site-event-3212/",
-   "img": "https://www.ramat-gan.muni.il/media/3i1liifq/220_342מובייל.jpg",
-   "featured": false,
-   "free": true
-  },
-  {
-   "id": "muni-eventsrg-eventsweb-site-event-1137",
-   "title": "נשים* יוצרות",
-   "cat": "community",
-   "anim": "community",
-   "muniCat": "הקהילה הגאה",
-   "audience": [
-    "צעירים (18-35)",
-    "מבוגרים (60- 35)"
-   ],
-   "date": "2026-07-09",
-   "time": "20:00",
-   "locName": "המרכז הגאה",
-   "address": "רחוב ביאליק 42",
-   "x": -1144.8,
-   "y": 1361.2,
-   "approx": false,
-   "link": "https://www.ramat-gan.muni.il/events/rg-events/web-site-event-1137/",
-   "img": "https://www.ramat-gan.muni.il/media/zy4flykm/התאמות-אירועי-יולי-משתנים_2026_342-220.jpg",
-   "featured": false,
-   "free": true
-  },
   {
    "id": "muni-eventsrg-eventsweb-site-event-305",
    "title": "סדנת ריתוך עם דניאל בר-עם",
@@ -167,7 +56,7 @@
    "audience": [],
    "date": "2026-07-10",
    "time": "11:00",
-   "locName": "קפה לוגאנו",
+   "locName": "רחבי העיר",
    "address": "",
    "x": null,
    "y": null,
@@ -220,46 +109,6 @@
    "free": true
   },
   {
-   "id": "muni-eventsfirst-aid-course-babies-and-kids-2026",
-   "title": "קורסי החייאה ועזרה ראשונה לתינוקות וילדים",
-   "cat": "community",
-   "anim": "community",
-   "muniCat": "בריאות",
-   "audience": [
-    "צעירים (18-35)",
-    "מבוגרים (60- 35)"
-   ],
-   "date": "2026-07-10",
-   "time": "20:15",
-   "locName": "מרכז קהילתי מרום נווה",
-   "address": "רחוב חזון אי\"ש 90",
-   "x": 620.5,
-   "y": 23,
-   "approx": true,
-   "link": "https://www.ramat-gan.muni.il/events/first-aid-course-babies-and-kids-2026/",
-   "img": null,
-   "featured": false,
-   "free": true
-  },
-  {
-   "id": "muni-eventssummer-ramat-gani-2026",
-   "title": "קיץ רמת גני",
-   "cat": "community",
-   "anim": "community",
-   "muniCat": "",
-   "audience": [],
-   "date": "2026-07-10",
-   "time": "20:30",
-   "locName": "פארק מחזור חיריה",
-   "address": "",
-   "x": null,
-   "y": null,
-   "link": "https://www.ramat-gan.muni.il/events/summer-ramat-gani-2026/",
-   "img": "https://www.ramat-gan.muni.il/media/1wpgegrx/קיץ-2026_התאמות-לאתר_342-220.jpg",
-   "featured": true,
-   "free": true
-  },
-  {
    "id": "muni-eventsbeit-zvi-rg-eventsweb-site-event-1177",
    "title": "פליישר",
    "cat": "sport",
@@ -302,6 +151,25 @@
    "link": "https://www.ramat-gan.muni.il/events/shabat-kehila-11726/",
    "img": null,
    "featured": false,
+   "free": true
+  },
+  {
+   "id": "muni-eventssummer-ramat-gani-2026",
+   "title": "קיץ רמת גני",
+   "cat": "community",
+   "anim": "community",
+   "muniCat": "",
+   "audience": [],
+   "date": "2026-07-11",
+   "time": "20:30",
+   "locName": "מוזיאון רמת גן לאמנות ישראלית",
+   "address": "",
+   "x": -522.2,
+   "y": 704.4,
+   "approx": true,
+   "link": "https://www.ramat-gan.muni.il/events/summer-ramat-gani-2026/",
+   "img": "https://www.ramat-gan.muni.il/media/1wpgegrx/קיץ-2026_התאמות-לאתר_342-220.jpg",
+   "featured": true,
    "free": true
   },
   {
@@ -872,6 +740,28 @@
    "link": "https://www.ramat-gan.muni.il/events/world-cup-2026/",
    "img": "https://www.ramat-gan.muni.il/media/znlbzvnx/התאמות-לאתר_-שידורי-מונדיאל-20206-בפארק-הלאומי_342-220.jpg",
    "featured": false
+  },
+  {
+   "id": "muni-eventsfirst-aid-course-babies-and-kids-2026",
+   "title": "קורסי החייאה ועזרה ראשונה לתינוקות וילדים",
+   "cat": "community",
+   "anim": "community",
+   "muniCat": "בריאות",
+   "audience": [
+    "צעירים (18-35)",
+    "מבוגרים (60- 35)"
+   ],
+   "date": "2026-07-14",
+   "time": "20:15",
+   "locName": "בית דורון",
+   "address": "רחוב הראשונים 1",
+   "x": -2159.4,
+   "y": 1231.7,
+   "approx": false,
+   "link": "https://www.ramat-gan.muni.il/events/first-aid-course-babies-and-kids-2026/",
+   "img": null,
+   "featured": false,
+   "free": true
   },
   {
    "id": "muni-eventspublic-singing",
