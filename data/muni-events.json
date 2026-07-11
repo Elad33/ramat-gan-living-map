@@ -1,97 +1,7 @@
 {
- "updated": "2026-07-11T13:51:41.506Z",
+ "updated": "2026-07-11T22:06:06.552Z",
  "source": "https://www.ramat-gan.muni.il/event-lobby",
  "events": [
-  {
-   "id": "muni-eventsshabat-kehila-11726",
-   "title": "שבת משפחה קהילה",
-   "cat": "community",
-   "anim": "community",
-   "muniCat": "סדרות",
-   "audience": [
-    "הגיל הרך (0-3)",
-    "ילדים (4-11)"
-   ],
-   "date": "2026-07-11",
-   "time": "10:00",
-   "locName": "רחבי העיר",
-   "address": "",
-   "x": null,
-   "y": null,
-   "link": "https://www.ramat-gan.muni.il/events/shabat-kehila-11726/",
-   "img": null,
-   "featured": false,
-   "free": true
-  },
-  {
-   "id": "muni-eventsbeit-zvi-rg-eventsweb-site-event-1178",
-   "title": "יאקיש ופופצ'ה",
-   "cat": "sport",
-   "anim": "sport",
-   "muniCat": "תיאטרון אמנות מוזיקה וספורט",
-   "audience": [
-    "צעירים (18-35)",
-    "מבוגרים (60- 35)",
-    "הגיל השלישי (60+)"
-   ],
-   "date": "2026-07-11",
-   "time": "19:30",
-   "locName": "תיאטרון בית צבי",
-   "address": "רחוב שועלי שמשון 2",
-   "x": -471.1,
-   "y": 866.7,
-   "approx": true,
-   "link": "https://www.ramat-gan.muni.il/events/beit-zvi-rg-events/web-site-event-1178/",
-   "img": "https://www.ramat-gan.muni.il/media/vhbpmdkv/yakish220-342.jpg",
-   "featured": false,
-   "free": true
-  },
-  {
-   "id": "muni-eventsinstincts",
-   "title": "ההצגה \"יצרים\"",
-   "cat": "sport",
-   "anim": "sport",
-   "muniCat": "תיאטרון אמנות מוזיקה וספורט",
-   "audience": [
-    "צעירים (18-35)",
-    "מבוגרים (60- 35)",
-    "הגיל השלישי (60+)"
-   ],
-   "date": "2026-07-11",
-   "time": "21:00",
-   "locName": "תיאטרון אימפרו",
-   "address": "רחוב ז'בוטינסקי 104",
-   "x": -968.9,
-   "y": 1996,
-   "approx": true,
-   "link": "https://www.ramat-gan.muni.il/events/instincts/",
-   "img": "https://www.ramat-gan.muni.il/media/0kod2xij/342220.jpg",
-   "featured": false,
-   "free": true
-  },
-  {
-   "id": "muni-eventsbeit-zvi-rg-eventsweb-site-event-1177",
-   "title": "פליישר",
-   "cat": "sport",
-   "anim": "sport",
-   "muniCat": "תיאטרון אמנות מוזיקה וספורט",
-   "audience": [
-    "צעירים (18-35)",
-    "הגיל השלישי (60+)",
-    "מבוגרים (60- 35)"
-   ],
-   "date": "2026-07-11",
-   "time": "21:00",
-   "locName": "תיאטרון בית צבי",
-   "address": "רחוב שועלי שמשון 2",
-   "x": -471.1,
-   "y": 866.7,
-   "approx": true,
-   "link": "https://www.ramat-gan.muni.il/events/beit-zvi-rg-events/web-site-event-1177/",
-   "img": "https://www.ramat-gan.muni.il/media/jdqbpv1a/flaisher220-342.jpg",
-   "featured": false,
-   "free": true
-  },
   {
    "id": "muni-eventslectures-for-age-60-and-over",
    "title": "הרצאות במועדונים לוותיקים",
@@ -281,6 +191,29 @@
    "y": null,
    "link": "https://www.ramat-gan.muni.il/events/2026-zoom-story-time/",
    "img": null,
+   "featured": false,
+   "free": true
+  },
+  {
+   "id": "muni-eventsbeit-zvi-rg-eventsweb-site-event-1178",
+   "title": "יאקיש ופופצ'ה",
+   "cat": "sport",
+   "anim": "sport",
+   "muniCat": "תיאטרון אמנות מוזיקה וספורט",
+   "audience": [
+    "צעירים (18-35)",
+    "מבוגרים (60- 35)",
+    "הגיל השלישי (60+)"
+   ],
+   "date": "2026-07-12",
+   "time": "19:30",
+   "locName": "תיאטרון בית צבי",
+   "address": "רחוב שועלי שמשון 2",
+   "x": -471.1,
+   "y": 866.7,
+   "approx": true,
+   "link": "https://www.ramat-gan.muni.il/events/beit-zvi-rg-events/web-site-event-1178/",
+   "img": "https://www.ramat-gan.muni.il/media/vhbpmdkv/yakish220-342.jpg",
    "featured": false,
    "free": true
   },
@@ -520,6 +453,29 @@
    "approx": false,
    "link": "https://www.ramat-gan.muni.il/events/rg-events/web-site-event-3996/",
    "img": "https://www.ramat-gan.muni.il/media/gouprv00/220_342מובייל.jpg",
+   "featured": false,
+   "free": true
+  },
+  {
+   "id": "muni-eventsbeit-zvi-rg-eventsweb-site-event-1177",
+   "title": "פליישר",
+   "cat": "sport",
+   "anim": "sport",
+   "muniCat": "תיאטרון אמנות מוזיקה וספורט",
+   "audience": [
+    "צעירים (18-35)",
+    "הגיל השלישי (60+)",
+    "מבוגרים (60- 35)"
+   ],
+   "date": "2026-07-13",
+   "time": "21:00",
+   "locName": "תיאטרון בית צבי",
+   "address": "רחוב שועלי שמשון 2",
+   "x": -471.1,
+   "y": 866.7,
+   "approx": true,
+   "link": "https://www.ramat-gan.muni.il/events/beit-zvi-rg-events/web-site-event-1177/",
+   "img": "https://www.ramat-gan.muni.il/media/jdqbpv1a/flaisher220-342.jpg",
    "featured": false,
    "free": true
   },
