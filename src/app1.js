@@ -98,6 +98,10 @@ function mat4LookAt(eye, ctr, up) {
   return new Float64Array([xx, yx, zx, 0, xy, yy, zy, 0, xz, yz, zz, 0,
     -(xx * eye[0] + xy * eye[1] + xz * eye[2]), -(yx * eye[0] + yy * eye[1] + yz * eye[2]), -(zx * eye[0] + zy * eye[1] + zz * eye[2]), 1]);
 }
+function mat4Ortho(l, r, b, t, n, f) {
+  return new Float64Array([2 / (r - l), 0, 0, 0, 0, 2 / (t - b), 0, 0, 0, 0, -2 / (f - n), 0,
+    -(r + l) / (r - l), -(t + b) / (t - b), -(f + n) / (f - n), 1]);
+}
 function mat4Inv(m) {
   const inv = new Float64Array(16);
   inv[0] = m[5]*m[10]*m[15]-m[5]*m[11]*m[14]-m[9]*m[6]*m[15]+m[9]*m[7]*m[14]+m[13]*m[6]*m[11]-m[13]*m[7]*m[10];
@@ -165,6 +169,23 @@ precision highp float;`;
 const F3 = `#version 300 es
 precision highp float;`;
 
+// shared shadow-map sampling — 5-tap PCF on a hardware-compared depth texture.
+// uShadowK==0 (or an out-of-frustum point) short-circuits to fully lit.
+const SHADOW_FN = `
+uniform highp sampler2DShadow uShadow;
+uniform float uShadowK, uShTexel;
+float shadowF(vec4 sp){
+  if (uShadowK < 0.001) return 1.0;
+  vec3 p = sp.xyz / sp.w * 0.5 + 0.5;
+  if (p.x <= 0.002 || p.x >= 0.998 || p.y <= 0.002 || p.y >= 0.998 || p.z >= 1.0) return 1.0;
+  float s = texture(uShadow, p) * 0.34;
+  s += texture(uShadow, vec3(p.x + uShTexel, p.y, p.z)) * 0.165;
+  s += texture(uShadow, vec3(p.x - uShTexel, p.y, p.z)) * 0.165;
+  s += texture(uShadow, vec3(p.x, p.y + uShTexel, p.z)) * 0.165;
+  s += texture(uShadow, vec3(p.x, p.y - uShTexel, p.z)) * 0.165;
+  return s;
+}`;
+
 // building shader — cinematic light model, every effect gated by a THEMES knob
 const bldProg = makeShader(`${V3}
 layout(location=0) in vec3 aPos;
@@ -174,17 +195,21 @@ layout(location=3) in float aH;
 layout(location=4) in float aRnd;
 layout(location=5) in float aWall;
 layout(location=6) in vec2 aN;
-uniform mat4 uVP;
+uniform mat4 uVP, uLightVP;
 out float vShade; out float vU; out float vZ; out float vH; out float vRnd; out float vWall; out float vW;
 out vec3 vPos; out vec2 vN;
+out vec4 vShP;
 void main(){
   gl_Position = uVP * vec4(aPos, 1.0);
   vShade = aShade; vU = aU; vZ = aPos.z; vH = aH; vRnd = aRnd; vWall = aWall;
   vPos = aPos; vN = aN;
+  vShP = uLightVP * vec4(aPos + vec3(aN * 1.3, 0.9), 1.0); // normal+up offset kills acne
   vW = gl_Position.w;
 }`, `${F3}
 in float vShade; in float vU; in float vZ; in float vH; in float vRnd; in float vWall; in float vW;
 in vec3 vPos; in vec2 vN;
+in vec4 vShP;
+${SHADOW_FN}
 uniform vec3 uBase, uTop, uWin, uFog;
 uniform float uNight, uFogD, uFogAmt;
 uniform vec3 uEye, uSunDir, uRimCol, uWinCool, uSunWarm;
@@ -205,6 +230,10 @@ void main(){
   col *= mix(vec3(1.0), vec3(0.93, 0.96, 1.06), (1.0 - sunF) * uSunK * 0.6);
   // soft ambient occlusion at street level, grounds the buildings
   if (vWall > 0.5) col *= 0.86 + 0.14 * smoothstep(0.0, 5.5, vZ);
+  // cast shadows (buildings shade each other); back-facing walls skip the test —
+  // they are already dark and would only collect acne. Windows added after stay lit.
+  float face = mix(1.0, smoothstep(-0.05, 0.30, dot(N.xy, normalize(uSunDir.xy + vec2(1e-5)))), vWall);
+  col *= 1.0 - uShadowK * (1.0 - shadowF(vShP)) * face;
   // windows on walls (dusk): warm/cool mix, dark floors, bright penthouses, glow bleed
   if (vWall > 0.5 && uNight > 0.01) {
     float wx = vU / 3.4;
@@ -250,11 +279,14 @@ void main(){
 const flatProg = makeShader(`${V3}
 layout(location=0) in vec3 aPos;
 layout(location=1) in float aSide;
-uniform mat4 uVP;
+uniform mat4 uVP, uLightVP;
 out float vSide; out float vW; out vec3 vP;
-void main(){ gl_Position = uVP * vec4(aPos, 1.0); vSide = aSide; vP = aPos; vW = gl_Position.w; }`,
+out vec4 vShP;
+void main(){ gl_Position = uVP * vec4(aPos, 1.0); vSide = aSide; vP = aPos; vShP = uLightVP * vec4(aPos + vec3(0.0, 0.0, 1.2), 1.0); vW = gl_Position.w; }`,
 `${F3}
 in float vSide; in float vW; in vec3 vP;
+in vec4 vShP;
+${SHADOW_FN}
 uniform vec4 uColor;
 uniform vec3 uFog; uniform float uFogD, uFogAmt, uFogH, uRipple, uTime;
 out vec4 frag;
@@ -263,6 +295,7 @@ void main(){
   vec3 base = uColor.rgb;
   // gentle water shimmer (set only on the water range)
   base += base * 0.30 * sin(vP.x * 0.9 + uTime * 1.1) * sin(vP.y * 0.75 - uTime * 0.8) * uRipple;
+  base *= 1.0 - uShadowK * (1.0 - shadowF(vShP));
   float f = (1.0 - exp(-vW / uFogD)) * (1.0 + uFogH);
   vec3 col = mix(base, uFog, min(f * uFogAmt, 0.96));
   frag = vec4(col, uColor.a * edge);
@@ -271,11 +304,14 @@ void main(){
 // ground plane
 const groundProg = makeShader(`${V3}
 layout(location=0) in vec2 aPos;
-uniform mat4 uVP;
+uniform mat4 uVP, uLightVP;
 out vec2 vXY; out float vW;
-void main(){ gl_Position = uVP * vec4(aPos, 0.0, 1.0); vXY = aPos; vW = gl_Position.w; }`,
+out vec4 vShP;
+void main(){ gl_Position = uVP * vec4(aPos, 0.0, 1.0); vXY = aPos; vShP = uLightVP * vec4(aPos, 1.2, 1.0); vW = gl_Position.w; }`,
 `${F3}
 in vec2 vXY; in float vW;
+in vec4 vShP;
+${SHADOW_FN}
 uniform vec3 uG0, uG1, uFog;
 uniform float uFogD, uFogAmt, uFogH;
 out vec4 frag;
@@ -284,6 +320,7 @@ void main(){
   float r = length(vXY) / 5200.0;
   vec3 col = mix(uG0, uG1, smoothstep(0.15, 1.1, r));
   col += (hash12(floor(vXY * 0.5)) - 0.5) * 0.012; // paper grain
+  col *= 1.0 - uShadowK * (1.0 - shadowF(vShP));
   float f = (1.0 - exp(-vW / uFogD)) * (1.0 + uFogH);
   col = mix(col, uFog, min(f * uFogAmt, 0.96));
   frag = vec4(col, 1.0);
@@ -391,6 +428,108 @@ void main(){
   frag = vec4(uCol, 1.0) * (g * uAmt * (0.35 + 0.65 * vTw));
 }`);
 
+// procedural trees — instanced camera-facing billboards, alpha-tested so they
+// depth-write cleanly (no sorting); canopy + trunk drawn in the fragment shader
+const treeProg = makeShader(`${V3}
+layout(location=0) in vec2 aQ;        // corner: x -1..1, y 0..1
+layout(location=1) in vec4 aInst;     // x, y, canopy radius, rnd
+uniform mat4 uVP, uLightVP;
+uniform vec3 uEye;
+out vec2 vQ; out float vRnd; out float vW;
+out vec4 vShP;
+void main(){
+  vec2 toEye = normalize(uEye.xy - aInst.xy + vec2(1e-4));
+  vec2 right = vec2(-toEye.y, toEye.x);
+  float s = aInst.z;
+  vec3 wp = vec3(aInst.xy + right * aQ.x * s, aQ.y * s * 2.5);
+  gl_Position = uVP * vec4(wp, 1.0);
+  vQ = aQ; vRnd = aInst.w;
+  vShP = uLightVP * vec4(aInst.xy, 1.4, 1.0);
+  vW = gl_Position.w;
+}`, `${F3}
+in vec2 vQ; in float vRnd; in float vW;
+in vec4 vShP;
+${SHADOW_FN}
+uniform vec3 uCol0, uCol1, uFog;
+uniform float uFogD, uFogAmt, uFogH;
+out vec4 frag;
+float hash12(vec2 p){ vec3 p3 = fract(vec3(p.xyx) * .1031); p3 += dot(p3, p3.yzx + 33.33); return fract((p3.x + p3.y) * p3.z); }
+void main(){
+  // canopy: wobbly-edged ellipse; trunk: thin stem below
+  vec2 c = vec2(vQ.x / (0.72 + 0.20 * vRnd), (vQ.y - 0.62) / 0.38);
+  float r = length(c);
+  float wob = (hash12(floor((vQ * 6.0 + vRnd * 31.0) * 4.0)) - 0.5) * 0.34;
+  float canopy = step(r + wob * smoothstep(0.5, 1.0, r), 1.0);
+  float trunk = step(abs(vQ.x), 0.05 + 0.02 * vRnd) * step(vQ.y, 0.45);
+  if (canopy + trunk < 0.5) discard;
+  float shade = 0.55 + 0.45 * smoothstep(-0.2, 1.0, vQ.y - 0.3 * r); // darker base, lit crown
+  vec3 col = mix(uCol0, uCol1, shade + (hash12(floor(vQ * 9.0 + vRnd * 57.0)) - 0.5) * 0.35);
+  col = mix(vec3(0.16, 0.11, 0.07) * (uCol0 + 0.5), col, canopy); // trunk under canopy color cast
+  col *= 1.0 - uShadowK * (1.0 - shadowF(vShP));
+  float f = (1.0 - exp(-vW / uFogD)) * (1.0 + uFogH);
+  col = mix(col, uFog, min(f * uFogAmt, 0.96));
+  frag = vec4(col, 1.0);
+}`);
+
+// traffic light-trails — comet-tailed pulses flowing along arterial lanes.
+// Fully GPU-animated from the length coordinate, so geometry is static.
+const trailProg = makeShader(`${V3}
+layout(location=0) in vec3 aPos;
+layout(location=1) in vec4 aD; // cumulative length, dir(+1/-1), road phase, side(-1..1)
+uniform mat4 uVP;
+out vec4 vD; out float vW;
+void main(){ gl_Position = uVP * vec4(aPos, 1.0); vD = aD; vW = gl_Position.w; }`,
+`${F3}
+in vec4 vD; in float vW;
+uniform float uTime, uAmt, uFogD, uFogAmt;
+uniform vec3 uColW, uColR;
+out vec4 frag;
+void main(){
+  float sp = 11.0 + 6.0 * vD.z;          // per-road speed variation
+  float gap = 55.0 + 35.0 * vD.z;        // car spacing
+  float t = fract((vD.x * vD.y - sp * uTime) / gap + vD.z * 7.31);
+  float comet = pow(t, 16.0) * 2.6 + pow(t, 4.0) * 0.14; // bright head, long tail
+  float edge = 1.0 - vD.w * vD.w;
+  vec3 col = vD.y > 0.0 ? uColW : uColR;  // headlights one lane, taillights the other
+  float fog = 1.0 - (1.0 - exp(-vW / uFogD)) * uFogAmt * 0.85;
+  frag = vec4(col, 1.0) * (comet * edge * uAmt * fog);
+}`);
+
+// wet-asphalt lamp reflections — one quad per street lamp, stretched from the
+// lamp's base toward the viewer (the direction a real reflection smears)
+const streakProg = makeShader(`${V3}
+layout(location=0) in vec2 aQ;   // x: -1..1 across, y: 0..1 along the smear
+layout(location=1) in vec4 aL;   // lamp x, y, h, rnd
+uniform mat4 uVP;
+uniform vec3 uEye;
+out vec2 vQ; out float vRnd;
+void main(){
+  vec2 dir = normalize(uEye.xy - aL.xy + vec2(1e-3));
+  vec2 perp = vec2(-dir.y, dir.x);
+  float len = 13.0 + 15.0 * aL.w;
+  vec2 p = aL.xy + dir * (aQ.y * len + 1.2) + perp * aQ.x * (0.9 + 0.5 * aL.w);
+  gl_Position = uVP * vec4(p, 1.55, 1.0);
+  vQ = aQ; vRnd = aL.w;
+}`, `${F3}
+in vec2 vQ; in float vRnd;
+uniform vec3 uCol; uniform float uAmt;
+out vec4 frag;
+void main(){
+  float a = (1.0 - vQ.y);
+  a *= a;                       // fade with distance from the lamp
+  a *= 1.0 - vQ.x * vQ.x;       // soft edges
+  frag = vec4(uCol, 1.0) * (a * uAmt * (0.5 + 0.5 * vRnd));
+}`);
+
+// depth-only pass for the shadow map (buildings are the casters)
+const depthProg = makeShader(`${V3}
+layout(location=0) in vec3 aPos;
+uniform mat4 uVP;
+void main(){ gl_Position = uVP * vec4(aPos, 1.0); }`,
+`${F3}
+out vec4 frag;
+void main(){ frag = vec4(1.0); }`);
+
 // post: bright pass / blur / composite
 const quadVS = `${V3}
 layout(location=0) in vec2 aPos;
@@ -414,21 +553,56 @@ void main(){
   c += (texture(uTex, vUV + o2).rgb + texture(uTex, vUV - o2).rgb) * 0.0702702;
   frag = vec4(c, 1.0);
 }`);
+// screen-space ambient occlusion — depth unsharp-mask (Luft et al.): a pixel
+// deeper than its neighbourhood average sits in a crevice. Cheap, no matrices.
+const ssaoProg = makeShader(quadVS, `${F3}
+in vec2 vUV;
+uniform sampler2D uDepth;
+uniform vec2 uNF, uPx;
+uniform float uProjScale;
+out vec4 frag;
+float lin(float d){ float n = uNF.x, f = uNF.y; return 2.0 * n * f / (f + n - (d * 2.0 - 1.0) * (f - n)); }
+void main(){
+  float d = texture(uDepth, vUV).r;
+  if (d >= 0.9999) { frag = vec4(0.0); return; }
+  float z = lin(d);
+  float rpx = clamp(uProjScale * 7.0 / z, 2.0, 42.0); // ~7m world radius
+  vec2 r = uPx * rpx;
+  vec2 K[12] = vec2[](vec2(1.,0.),vec2(.5,.87),vec2(-.5,.87),vec2(-1.,0.),vec2(-.5,-.87),vec2(.5,-.87),
+                      vec2(.35,.13),vec2(-.13,.35),vec2(-.35,-.13),vec2(.13,-.35),vec2(.7,-.45),vec2(-.7,.45));
+  float occ = 0.0;
+  for (int i = 0; i < 12; i++) {
+    float diff = z - lin(texture(uDepth, vUV + K[i] * r).r); // >0: neighbour closer
+    occ += clamp(diff / 6.0, 0.0, 1.0) * smoothstep(30.0, 8.0, diff); // range check kills halos
+  }
+  frag = vec4(clamp(occ / 12.0 * 1.6, 0.0, 0.75), 0.0, 0.0, 1.0);
+}`);
+
 const compProg = makeShader(quadVS, `${F3}
-in vec2 vUV; uniform sampler2D uScene, uBloom;
-uniform float uBloomK, uVig, uExpo, uSat;
-uniform vec3 uTint;
+in vec2 vUV; uniform sampler2D uScene, uBloom, uAO;
+uniform float uBloomK, uVig, uExpo, uSat, uAoK, uRayK, uGrainK, uTime;
+uniform vec3 uTint, uRayCol;
+uniform vec2 uSunUV;
 out vec4 frag;
 float hash12(vec2 p){ vec3 p3 = fract(vec3(p.xyx) * .1031); p3 += dot(p3, p3.yzx + 33.33); return fract((p3.x + p3.y) * p3.z); }
 void main(){
   vec3 c = texture(uScene, vUV).rgb + texture(uBloom, vUV).rgb * uBloomK;
+  c *= 1.0 - texture(uAO, vUV).r * uAoK;
+  // crepuscular rays: march the bloom buffer toward the sun's screen position
+  if (uRayK > 0.001) {
+    vec2 dv = (uSunUV - vUV) / 10.0;
+    vec2 p = vUV;
+    float w = 1.0, acc = 0.0;
+    for (int i = 0; i < 10; i++) { p += dv; acc += dot(texture(uBloom, p).rgb, vec3(0.333)) * w; w *= 0.86; }
+    c += uRayCol * acc * uRayK * 0.12;
+  }
   c *= uExpo * uTint;
   c = (c * (2.51 * c + 0.03)) / (c * (2.43 * c + 0.59) + 0.14); // ACES fit (Narkowicz)
   float l = dot(c, vec3(0.2126, 0.7152, 0.0722));
   c = mix(vec3(l), c, uSat);
   vec2 d = vUV - 0.5;
   c *= 1.0 - dot(d, d) * uVig;
-  c += (hash12(gl_FragCoord.xy) - 0.5) / 255.0;
+  c += (hash12(gl_FragCoord.xy + fract(uTime) * vec2(37.0, 17.0)) - 0.5) * (1.0 / 255.0 + uGrainK * 0.06);
   frag = vec4(c, 1.0);
 }`);
 

@@ -2531,6 +2531,10 @@ function mat4LookAt(eye, ctr, up) {
   return new Float64Array([xx, yx, zx, 0, xy, yy, zy, 0, xz, yz, zz, 0,
     -(xx * eye[0] + xy * eye[1] + xz * eye[2]), -(yx * eye[0] + yy * eye[1] + yz * eye[2]), -(zx * eye[0] + zy * eye[1] + zz * eye[2]), 1]);
 }
+function mat4Ortho(l, r, b, t, n, f) {
+  return new Float64Array([2 / (r - l), 0, 0, 0, 0, 2 / (t - b), 0, 0, 0, 0, -2 / (f - n), 0,
+    -(r + l) / (r - l), -(t + b) / (t - b), -(f + n) / (f - n), 1]);
+}
 function mat4Inv(m) {
   const inv = new Float64Array(16);
   inv[0] = m[5]*m[10]*m[15]-m[5]*m[11]*m[14]-m[9]*m[6]*m[15]+m[9]*m[7]*m[14]+m[13]*m[6]*m[11]-m[13]*m[7]*m[10];
@@ -2598,6 +2602,23 @@ precision highp float;`;
 const F3 = `#version 300 es
 precision highp float;`;
 
+// shared shadow-map sampling — 5-tap PCF on a hardware-compared depth texture.
+// uShadowK==0 (or an out-of-frustum point) short-circuits to fully lit.
+const SHADOW_FN = `
+uniform highp sampler2DShadow uShadow;
+uniform float uShadowK, uShTexel;
+float shadowF(vec4 sp){
+  if (uShadowK < 0.001) return 1.0;
+  vec3 p = sp.xyz / sp.w * 0.5 + 0.5;
+  if (p.x <= 0.002 || p.x >= 0.998 || p.y <= 0.002 || p.y >= 0.998 || p.z >= 1.0) return 1.0;
+  float s = texture(uShadow, p) * 0.34;
+  s += texture(uShadow, vec3(p.x + uShTexel, p.y, p.z)) * 0.165;
+  s += texture(uShadow, vec3(p.x - uShTexel, p.y, p.z)) * 0.165;
+  s += texture(uShadow, vec3(p.x, p.y + uShTexel, p.z)) * 0.165;
+  s += texture(uShadow, vec3(p.x, p.y - uShTexel, p.z)) * 0.165;
+  return s;
+}`;
+
 // building shader — cinematic light model, every effect gated by a THEMES knob
 const bldProg = makeShader(`${V3}
 layout(location=0) in vec3 aPos;
@@ -2607,17 +2628,21 @@ layout(location=3) in float aH;
 layout(location=4) in float aRnd;
 layout(location=5) in float aWall;
 layout(location=6) in vec2 aN;
-uniform mat4 uVP;
+uniform mat4 uVP, uLightVP;
 out float vShade; out float vU; out float vZ; out float vH; out float vRnd; out float vWall; out float vW;
 out vec3 vPos; out vec2 vN;
+out vec4 vShP;
 void main(){
   gl_Position = uVP * vec4(aPos, 1.0);
   vShade = aShade; vU = aU; vZ = aPos.z; vH = aH; vRnd = aRnd; vWall = aWall;
   vPos = aPos; vN = aN;
+  vShP = uLightVP * vec4(aPos + vec3(aN * 1.3, 0.9), 1.0); // normal+up offset kills acne
   vW = gl_Position.w;
 }`, `${F3}
 in float vShade; in float vU; in float vZ; in float vH; in float vRnd; in float vWall; in float vW;
 in vec3 vPos; in vec2 vN;
+in vec4 vShP;
+${SHADOW_FN}
 uniform vec3 uBase, uTop, uWin, uFog;
 uniform float uNight, uFogD, uFogAmt;
 uniform vec3 uEye, uSunDir, uRimCol, uWinCool, uSunWarm;
@@ -2638,6 +2663,10 @@ void main(){
   col *= mix(vec3(1.0), vec3(0.93, 0.96, 1.06), (1.0 - sunF) * uSunK * 0.6);
   // soft ambient occlusion at street level, grounds the buildings
   if (vWall > 0.5) col *= 0.86 + 0.14 * smoothstep(0.0, 5.5, vZ);
+  // cast shadows (buildings shade each other); back-facing walls skip the test —
+  // they are already dark and would only collect acne. Windows added after stay lit.
+  float face = mix(1.0, smoothstep(-0.05, 0.30, dot(N.xy, normalize(uSunDir.xy + vec2(1e-5)))), vWall);
+  col *= 1.0 - uShadowK * (1.0 - shadowF(vShP)) * face;
   // windows on walls (dusk): warm/cool mix, dark floors, bright penthouses, glow bleed
   if (vWall > 0.5 && uNight > 0.01) {
     float wx = vU / 3.4;
@@ -2683,11 +2712,14 @@ void main(){
 const flatProg = makeShader(`${V3}
 layout(location=0) in vec3 aPos;
 layout(location=1) in float aSide;
-uniform mat4 uVP;
+uniform mat4 uVP, uLightVP;
 out float vSide; out float vW; out vec3 vP;
-void main(){ gl_Position = uVP * vec4(aPos, 1.0); vSide = aSide; vP = aPos; vW = gl_Position.w; }`,
+out vec4 vShP;
+void main(){ gl_Position = uVP * vec4(aPos, 1.0); vSide = aSide; vP = aPos; vShP = uLightVP * vec4(aPos + vec3(0.0, 0.0, 1.2), 1.0); vW = gl_Position.w; }`,
 `${F3}
 in float vSide; in float vW; in vec3 vP;
+in vec4 vShP;
+${SHADOW_FN}
 uniform vec4 uColor;
 uniform vec3 uFog; uniform float uFogD, uFogAmt, uFogH, uRipple, uTime;
 out vec4 frag;
@@ -2696,6 +2728,7 @@ void main(){
   vec3 base = uColor.rgb;
   // gentle water shimmer (set only on the water range)
   base += base * 0.30 * sin(vP.x * 0.9 + uTime * 1.1) * sin(vP.y * 0.75 - uTime * 0.8) * uRipple;
+  base *= 1.0 - uShadowK * (1.0 - shadowF(vShP));
   float f = (1.0 - exp(-vW / uFogD)) * (1.0 + uFogH);
   vec3 col = mix(base, uFog, min(f * uFogAmt, 0.96));
   frag = vec4(col, uColor.a * edge);
@@ -2704,11 +2737,14 @@ void main(){
 // ground plane
 const groundProg = makeShader(`${V3}
 layout(location=0) in vec2 aPos;
-uniform mat4 uVP;
+uniform mat4 uVP, uLightVP;
 out vec2 vXY; out float vW;
-void main(){ gl_Position = uVP * vec4(aPos, 0.0, 1.0); vXY = aPos; vW = gl_Position.w; }`,
+out vec4 vShP;
+void main(){ gl_Position = uVP * vec4(aPos, 0.0, 1.0); vXY = aPos; vShP = uLightVP * vec4(aPos, 1.2, 1.0); vW = gl_Position.w; }`,
 `${F3}
 in vec2 vXY; in float vW;
+in vec4 vShP;
+${SHADOW_FN}
 uniform vec3 uG0, uG1, uFog;
 uniform float uFogD, uFogAmt, uFogH;
 out vec4 frag;
@@ -2717,6 +2753,7 @@ void main(){
   float r = length(vXY) / 5200.0;
   vec3 col = mix(uG0, uG1, smoothstep(0.15, 1.1, r));
   col += (hash12(floor(vXY * 0.5)) - 0.5) * 0.012; // paper grain
+  col *= 1.0 - uShadowK * (1.0 - shadowF(vShP));
   float f = (1.0 - exp(-vW / uFogD)) * (1.0 + uFogH);
   col = mix(col, uFog, min(f * uFogAmt, 0.96));
   frag = vec4(col, 1.0);
@@ -2824,6 +2861,108 @@ void main(){
   frag = vec4(uCol, 1.0) * (g * uAmt * (0.35 + 0.65 * vTw));
 }`);
 
+// procedural trees — instanced camera-facing billboards, alpha-tested so they
+// depth-write cleanly (no sorting); canopy + trunk drawn in the fragment shader
+const treeProg = makeShader(`${V3}
+layout(location=0) in vec2 aQ;        // corner: x -1..1, y 0..1
+layout(location=1) in vec4 aInst;     // x, y, canopy radius, rnd
+uniform mat4 uVP, uLightVP;
+uniform vec3 uEye;
+out vec2 vQ; out float vRnd; out float vW;
+out vec4 vShP;
+void main(){
+  vec2 toEye = normalize(uEye.xy - aInst.xy + vec2(1e-4));
+  vec2 right = vec2(-toEye.y, toEye.x);
+  float s = aInst.z;
+  vec3 wp = vec3(aInst.xy + right * aQ.x * s, aQ.y * s * 2.5);
+  gl_Position = uVP * vec4(wp, 1.0);
+  vQ = aQ; vRnd = aInst.w;
+  vShP = uLightVP * vec4(aInst.xy, 1.4, 1.0);
+  vW = gl_Position.w;
+}`, `${F3}
+in vec2 vQ; in float vRnd; in float vW;
+in vec4 vShP;
+${SHADOW_FN}
+uniform vec3 uCol0, uCol1, uFog;
+uniform float uFogD, uFogAmt, uFogH;
+out vec4 frag;
+float hash12(vec2 p){ vec3 p3 = fract(vec3(p.xyx) * .1031); p3 += dot(p3, p3.yzx + 33.33); return fract((p3.x + p3.y) * p3.z); }
+void main(){
+  // canopy: wobbly-edged ellipse; trunk: thin stem below
+  vec2 c = vec2(vQ.x / (0.72 + 0.20 * vRnd), (vQ.y - 0.62) / 0.38);
+  float r = length(c);
+  float wob = (hash12(floor((vQ * 6.0 + vRnd * 31.0) * 4.0)) - 0.5) * 0.34;
+  float canopy = step(r + wob * smoothstep(0.5, 1.0, r), 1.0);
+  float trunk = step(abs(vQ.x), 0.05 + 0.02 * vRnd) * step(vQ.y, 0.45);
+  if (canopy + trunk < 0.5) discard;
+  float shade = 0.55 + 0.45 * smoothstep(-0.2, 1.0, vQ.y - 0.3 * r); // darker base, lit crown
+  vec3 col = mix(uCol0, uCol1, shade + (hash12(floor(vQ * 9.0 + vRnd * 57.0)) - 0.5) * 0.35);
+  col = mix(vec3(0.16, 0.11, 0.07) * (uCol0 + 0.5), col, canopy); // trunk under canopy color cast
+  col *= 1.0 - uShadowK * (1.0 - shadowF(vShP));
+  float f = (1.0 - exp(-vW / uFogD)) * (1.0 + uFogH);
+  col = mix(col, uFog, min(f * uFogAmt, 0.96));
+  frag = vec4(col, 1.0);
+}`);
+
+// traffic light-trails — comet-tailed pulses flowing along arterial lanes.
+// Fully GPU-animated from the length coordinate, so geometry is static.
+const trailProg = makeShader(`${V3}
+layout(location=0) in vec3 aPos;
+layout(location=1) in vec4 aD; // cumulative length, dir(+1/-1), road phase, side(-1..1)
+uniform mat4 uVP;
+out vec4 vD; out float vW;
+void main(){ gl_Position = uVP * vec4(aPos, 1.0); vD = aD; vW = gl_Position.w; }`,
+`${F3}
+in vec4 vD; in float vW;
+uniform float uTime, uAmt, uFogD, uFogAmt;
+uniform vec3 uColW, uColR;
+out vec4 frag;
+void main(){
+  float sp = 11.0 + 6.0 * vD.z;          // per-road speed variation
+  float gap = 55.0 + 35.0 * vD.z;        // car spacing
+  float t = fract((vD.x * vD.y - sp * uTime) / gap + vD.z * 7.31);
+  float comet = pow(t, 16.0) * 2.6 + pow(t, 4.0) * 0.14; // bright head, long tail
+  float edge = 1.0 - vD.w * vD.w;
+  vec3 col = vD.y > 0.0 ? uColW : uColR;  // headlights one lane, taillights the other
+  float fog = 1.0 - (1.0 - exp(-vW / uFogD)) * uFogAmt * 0.85;
+  frag = vec4(col, 1.0) * (comet * edge * uAmt * fog);
+}`);
+
+// wet-asphalt lamp reflections — one quad per street lamp, stretched from the
+// lamp's base toward the viewer (the direction a real reflection smears)
+const streakProg = makeShader(`${V3}
+layout(location=0) in vec2 aQ;   // x: -1..1 across, y: 0..1 along the smear
+layout(location=1) in vec4 aL;   // lamp x, y, h, rnd
+uniform mat4 uVP;
+uniform vec3 uEye;
+out vec2 vQ; out float vRnd;
+void main(){
+  vec2 dir = normalize(uEye.xy - aL.xy + vec2(1e-3));
+  vec2 perp = vec2(-dir.y, dir.x);
+  float len = 13.0 + 15.0 * aL.w;
+  vec2 p = aL.xy + dir * (aQ.y * len + 1.2) + perp * aQ.x * (0.9 + 0.5 * aL.w);
+  gl_Position = uVP * vec4(p, 1.55, 1.0);
+  vQ = aQ; vRnd = aL.w;
+}`, `${F3}
+in vec2 vQ; in float vRnd;
+uniform vec3 uCol; uniform float uAmt;
+out vec4 frag;
+void main(){
+  float a = (1.0 - vQ.y);
+  a *= a;                       // fade with distance from the lamp
+  a *= 1.0 - vQ.x * vQ.x;       // soft edges
+  frag = vec4(uCol, 1.0) * (a * uAmt * (0.5 + 0.5 * vRnd));
+}`);
+
+// depth-only pass for the shadow map (buildings are the casters)
+const depthProg = makeShader(`${V3}
+layout(location=0) in vec3 aPos;
+uniform mat4 uVP;
+void main(){ gl_Position = uVP * vec4(aPos, 1.0); }`,
+`${F3}
+out vec4 frag;
+void main(){ frag = vec4(1.0); }`);
+
 // post: bright pass / blur / composite
 const quadVS = `${V3}
 layout(location=0) in vec2 aPos;
@@ -2847,21 +2986,56 @@ void main(){
   c += (texture(uTex, vUV + o2).rgb + texture(uTex, vUV - o2).rgb) * 0.0702702;
   frag = vec4(c, 1.0);
 }`);
+// screen-space ambient occlusion — depth unsharp-mask (Luft et al.): a pixel
+// deeper than its neighbourhood average sits in a crevice. Cheap, no matrices.
+const ssaoProg = makeShader(quadVS, `${F3}
+in vec2 vUV;
+uniform sampler2D uDepth;
+uniform vec2 uNF, uPx;
+uniform float uProjScale;
+out vec4 frag;
+float lin(float d){ float n = uNF.x, f = uNF.y; return 2.0 * n * f / (f + n - (d * 2.0 - 1.0) * (f - n)); }
+void main(){
+  float d = texture(uDepth, vUV).r;
+  if (d >= 0.9999) { frag = vec4(0.0); return; }
+  float z = lin(d);
+  float rpx = clamp(uProjScale * 7.0 / z, 2.0, 42.0); // ~7m world radius
+  vec2 r = uPx * rpx;
+  vec2 K[12] = vec2[](vec2(1.,0.),vec2(.5,.87),vec2(-.5,.87),vec2(-1.,0.),vec2(-.5,-.87),vec2(.5,-.87),
+                      vec2(.35,.13),vec2(-.13,.35),vec2(-.35,-.13),vec2(.13,-.35),vec2(.7,-.45),vec2(-.7,.45));
+  float occ = 0.0;
+  for (int i = 0; i < 12; i++) {
+    float diff = z - lin(texture(uDepth, vUV + K[i] * r).r); // >0: neighbour closer
+    occ += clamp(diff / 6.0, 0.0, 1.0) * smoothstep(30.0, 8.0, diff); // range check kills halos
+  }
+  frag = vec4(clamp(occ / 12.0 * 1.6, 0.0, 0.75), 0.0, 0.0, 1.0);
+}`);
+
 const compProg = makeShader(quadVS, `${F3}
-in vec2 vUV; uniform sampler2D uScene, uBloom;
-uniform float uBloomK, uVig, uExpo, uSat;
-uniform vec3 uTint;
+in vec2 vUV; uniform sampler2D uScene, uBloom, uAO;
+uniform float uBloomK, uVig, uExpo, uSat, uAoK, uRayK, uGrainK, uTime;
+uniform vec3 uTint, uRayCol;
+uniform vec2 uSunUV;
 out vec4 frag;
 float hash12(vec2 p){ vec3 p3 = fract(vec3(p.xyx) * .1031); p3 += dot(p3, p3.yzx + 33.33); return fract((p3.x + p3.y) * p3.z); }
 void main(){
   vec3 c = texture(uScene, vUV).rgb + texture(uBloom, vUV).rgb * uBloomK;
+  c *= 1.0 - texture(uAO, vUV).r * uAoK;
+  // crepuscular rays: march the bloom buffer toward the sun's screen position
+  if (uRayK > 0.001) {
+    vec2 dv = (uSunUV - vUV) / 10.0;
+    vec2 p = vUV;
+    float w = 1.0, acc = 0.0;
+    for (int i = 0; i < 10; i++) { p += dv; acc += dot(texture(uBloom, p).rgb, vec3(0.333)) * w; w *= 0.86; }
+    c += uRayCol * acc * uRayK * 0.12;
+  }
   c *= uExpo * uTint;
   c = (c * (2.51 * c + 0.03)) / (c * (2.43 * c + 0.59) + 0.14); // ACES fit (Narkowicz)
   float l = dot(c, vec3(0.2126, 0.7152, 0.0722));
   c = mix(vec3(l), c, uSat);
   vec2 d = vUV - 0.5;
   c *= 1.0 - dot(d, d) * uVig;
-  c += (hash12(gl_FragCoord.xy) - 0.5) / 255.0;
+  c += (hash12(gl_FragCoord.xy + fract(uTime) * vec2(37.0, 17.0)) - 0.5) * (1.0 / 255.0 + uGrainK * 0.06);
   frag = vec4(c, 1.0);
 }`);
 
@@ -3225,6 +3399,27 @@ function buildLamps() {
     }
   }
   meshes.lamps = pts.length ? makePointsVAO(new Float32Array(pts)) : null;
+  meshes.lampSeeds = pts.length ? new Float32Array(pts) : null;
+}
+
+// wet-street reflection streaks share the lamp seeds, drawn as instanced quads
+function buildStreaks() {
+  if (!meshes.lampSeeds) { meshes.streaks = null; return; }
+  const vao = gl.createVertexArray();
+  gl.bindVertexArray(vao);
+  const qb = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, qb);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, 0, 1, 0, -1, 1, 1, 1]), gl.STATIC_DRAW);
+  gl.enableVertexAttribArray(0);
+  gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
+  const ib = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, ib);
+  gl.bufferData(gl.ARRAY_BUFFER, meshes.lampSeeds, gl.STATIC_DRAW);
+  gl.enableVertexAttribArray(1);
+  gl.vertexAttribPointer(1, 4, gl.FLOAT, false, 0, 0);
+  gl.vertexAttribDivisor(1, 1);
+  gl.bindVertexArray(null);
+  meshes.streaks = { vao, count: meshes.lampSeeds.length / 4 };
 }
 
 // blinking red aviation beacons on the tallest towers
@@ -3244,6 +3439,129 @@ function buildBeacons() {
     seeds.set([p.x, p.y, p.h + 2.5, Math.abs((p.x * 12.9898 + p.y * 78.233) % 1)], i * 4);
   });
   meshes.beacons = makePointsVAO(seeds);
+}
+
+// procedural greenery — no OSM tree data exists for these cities, so trees are
+// scattered deterministically: park interiors (1/~450m²) + sidewalk rows along
+// tertiary/residential streets, kept off building footprints via a centroid grid
+function buildTrees() {
+  const cap = window.IS_MOBILE ? 1600 : 4000;
+  const rnd = makeRng(0x7ee5);
+  const inst = [];
+  const inPoly = (p, x, y) => {
+    const n = p.length / 2; let ins = false;
+    for (let i = 0, j = n - 1; i < n; j = i++) {
+      const xi = p[2 * i], yi = p[2 * i + 1], xj = p[2 * j], yj = p[2 * j + 1];
+      if ((yi > y) !== (yj > y) && x < (xj - xi) * (y - yi) / (yj - yi) + xi) ins = !ins;
+    }
+    return ins;
+  };
+  for (const p of parkPolys) {
+    let mnx = 1e9, mny = 1e9, mxx = -1e9, mxy = -1e9;
+    for (let i = 0; i < p.length / 2; i++) {
+      mnx = Math.min(mnx, p[2 * i]); mxx = Math.max(mxx, p[2 * i]);
+      mny = Math.min(mny, p[2 * i + 1]); mxy = Math.max(mxy, p[2 * i + 1]);
+    }
+    let want = Math.min(Math.floor(Math.abs(signedArea(p)) / 450), 260);
+    let tries = want * 8;
+    while (want > 0 && tries-- > 0 && inst.length / 4 < cap * 0.7) {
+      const x = mnx + rnd() * (mxx - mnx), y = mny + rnd() * (mxy - mny);
+      if (!inPoly(p, x, y)) continue;
+      inst.push(x, y, 2.3 + rnd() * 2.2, rnd());
+      want--;
+    }
+    if (inst.length / 4 >= cap * 0.7) break;
+  }
+  const grid = new Map();
+  B.centroids.forEach(c => {
+    if (!c) return;
+    const k = Math.floor(c[0] / 16) + ':' + Math.floor(c[1] / 16);
+    if (!grid.has(k)) grid.set(k, []);
+    grid.get(k).push(c);
+  });
+  const nearBld = (x, y) => {
+    const gx = Math.floor(x / 16), gy = Math.floor(y / 16);
+    for (let i = -1; i <= 1; i++) for (let j = -1; j <= 1; j++) {
+      const cell = grid.get((gx + i) + ':' + (gy + j));
+      if (cell) for (const c of cell) if (Math.hypot(c[0] - x, c[1] - y) < 11) return true;
+    }
+    return false;
+  };
+  outer: for (let cls = 2; cls <= 3; cls++) {
+    const off = ROAD_W[cls] / 2 + 2.6;
+    for (const road of roadsByCls[cls]) {
+      let acc = 30, side = 1;
+      for (let i = 0; i < road.length / 2 - 1; i++) {
+        const x0 = road[2 * i], y0 = road[2 * i + 1], x1 = road[2 * i + 2], y1 = road[2 * i + 3];
+        const dx = x1 - x0, dy = y1 - y0, len = Math.hypot(dx, dy) || 1;
+        acc += len;
+        if (acc < 48) continue;
+        acc = 0; side = -side;
+        if (rnd() < 0.4) continue; // organic gaps
+        const x = x1 - dy / len * off * side, y = y1 + dx / len * off * side;
+        if (nearBld(x, y)) continue;
+        inst.push(x, y, 1.9 + rnd() * 1.5, rnd());
+        if (inst.length / 4 >= cap) break outer;
+      }
+    }
+  }
+  if (!inst.length) { meshes.trees = null; return; }
+  const vao = gl.createVertexArray();
+  gl.bindVertexArray(vao);
+  const qb = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, qb);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, 0, 1, 0, -1, 1, 1, 1]), gl.STATIC_DRAW);
+  gl.enableVertexAttribArray(0);
+  gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
+  const ib = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, ib);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(inst), gl.STATIC_DRAW);
+  gl.enableVertexAttribArray(1);
+  gl.vertexAttribPointer(1, 4, gl.FLOAT, false, 0, 0);
+  gl.vertexAttribDivisor(1, 1);
+  gl.bindVertexArray(null);
+  meshes.trees = { vao, count: inst.length / 4 };
+}
+
+// static lane geometry for the traffic trails: two offset strips per arterial
+// road (one per direction), length + phase baked per vertex — animation is GPU-only
+function buildTrails() {
+  const maxCls = window.IS_MOBILE ? 1 : 2;
+  const P = [], D = [], I = [];
+  let vc = 0;
+  const rndH = (x, y) => Math.abs((x * 12.9898 + y * 78.233) % 1);
+  for (let cls = 0; cls <= maxCls; cls++) {
+    const z = ROAD_Z[cls] + 0.15;
+    const lane = ROAD_W[cls] * 0.22;
+    for (const road of roadsByCls[cls]) {
+      const n = road.length / 2;
+      if (n < 2) continue;
+      const ph = rndH(road[0], road[1]);
+      for (const dir of [1, -1]) {
+        const base = vc;
+        let acc = 0;
+        for (let i = 0; i < n; i++) {
+          const x = road[2 * i], y = road[2 * i + 1];
+          let dx0 = 0, dy0 = 0, dx1 = 0, dy1 = 0;
+          if (i > 0) { dx0 = x - road[2 * i - 2]; dy0 = y - road[2 * i - 1]; const l = Math.hypot(dx0, dy0) || 1; dx0 /= l; dy0 /= l; }
+          if (i < n - 1) { dx1 = road[2 * i + 2] - x; dy1 = road[2 * i + 3] - y; const l = Math.hypot(dx1, dy1) || 1; dx1 /= l; dy1 /= l; }
+          let tx = dx0 + dx1, ty = dy0 + dy1;
+          const tl = Math.hypot(tx, ty);
+          if (tl < 1e-6) { tx = dx1 || dx0 || 1; ty = dy1 || dy0; } else { tx /= tl; ty /= tl; }
+          const nx = -ty, ny = tx;
+          if (i > 0) acc += Math.hypot(x - road[2 * i - 2], y - road[2 * i - 1]);
+          const cx = x + nx * lane * dir, cy = y + ny * lane * dir;
+          P.push(cx + nx * 1.4, cy + ny * 1.4, z, cx - nx * 1.4, cy - ny * 1.4, z); // 2.8m strip
+          D.push(acc, dir, ph, 1, acc, dir, ph, -1);
+          vc += 2;
+        }
+        for (let i = 0; i < n - 1; i++) { const v = base + i * 2; I.push(v, v + 1, v + 2, v + 1, v + 3, v + 2); }
+      }
+    }
+  }
+  meshes.trails = I.length
+    ? makeVAO([{ data: new Float32Array(P), size: 3, loc: 0 }, { data: new Float32Array(D), size: 4, loc: 1 }], new Uint32Array(I))
+    : null;
 }
 
 // ---------- finalize meshes ----------
@@ -3281,6 +3599,9 @@ function uploadMeshes() {
   buildDust();
   buildLamps();
   buildBeacons();
+  buildTrees();
+  buildTrails();
+  buildStreaks();
 }
 
 // ---------- framebuffers ----------
@@ -3326,21 +3647,102 @@ function setupFBOs(w, h) {
       FB.samples = 0;
     }
   }
-  if (FB.samples === 0) {
-    FB.msaaDepth = gl.createRenderbuffer();
-    gl.bindRenderbuffer(gl.RENDERBUFFER, FB.msaaDepth);
-    gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT24, w, h);
+  // full-res depth as a TEXTURE so SSAO can read it: the MSAA path resolves depth
+  // into it via blit; the non-MSAA path renders straight into it
+  if (FB.depthFbo) { gl.deleteFramebuffer(FB.depthFbo); gl.deleteTexture(FB.depthT); }
+  FB.depthT = gl.createTexture();
+  gl.bindTexture(gl.TEXTURE_2D, FB.depthT);
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.DEPTH_COMPONENT24, w, h, 0, gl.DEPTH_COMPONENT, gl.UNSIGNED_INT, null);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+  FB.depthFbo = gl.createFramebuffer();
+  gl.bindFramebuffer(gl.FRAMEBUFFER, FB.depthFbo);
+  gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D, FB.depthT, 0);
+  gl.drawBuffers([gl.NONE]);
+  gl.readBuffer(gl.NONE);
+  if (gl.checkFramebufferStatus(gl.FRAMEBUFFER) !== gl.FRAMEBUFFER_COMPLETE) {
+    ERRLOG.push('depth FBO incomplete');
+    gl.deleteFramebuffer(FB.depthFbo); gl.deleteTexture(FB.depthT);
+    FB.depthFbo = FB.depthT = null;
   }
   FB.scene = makeTexFBO(w, h);
   if (FB.samples === 0) {
     gl.bindFramebuffer(gl.FRAMEBUFFER, FB.scene.fbo);
-    gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, FB.msaaDepth);
+    if (FB.depthT) {
+      gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D, FB.depthT, 0);
+    } else {
+      FB.msaaDepth = gl.createRenderbuffer();
+      gl.bindRenderbuffer(gl.RENDERBUFFER, FB.msaaDepth);
+      gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT24, w, h);
+      gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, FB.msaaDepth);
+    }
     if (gl.checkFramebufferStatus(gl.FRAMEBUFFER) !== gl.FRAMEBUFFER_COMPLETE) ERRLOG.push('scene FBO incomplete');
   }
   const bw = Math.max(2, w >> 1), bh = Math.max(2, h >> 1);
   FB.bloomA = makeTexFBO(bw, bh);
   FB.bloomB = makeTexFBO(bw, bh);
+  if (FB.ao) { gl.deleteFramebuffer(FB.ao.fbo); gl.deleteTexture(FB.ao.tex); }
+  FB.ao = makeTexFBO(bw, bh);
   gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+}
+
+// ---------- shadow map (screen-size independent; created lazily, once) ----------
+const IDENT32 = new Float32Array([1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]);
+function ensureShadow() {
+  if (FB.shadow !== undefined) return;
+  const size = window.IS_MOBILE ? 1024 : 2048;
+  const tex = gl.createTexture();
+  gl.bindTexture(gl.TEXTURE_2D, tex);
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.DEPTH_COMPONENT24, size, size, 0, gl.DEPTH_COMPONENT, gl.UNSIGNED_INT, null);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR); // hardware 2x2 PCF
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_COMPARE_MODE, gl.COMPARE_REF_TO_TEXTURE);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_COMPARE_FUNC, gl.LEQUAL);
+  const fbo = gl.createFramebuffer();
+  gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
+  gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D, tex, 0);
+  gl.drawBuffers([gl.NONE]);
+  gl.readBuffer(gl.NONE);
+  if (gl.checkFramebufferStatus(gl.FRAMEBUFFER) !== gl.FRAMEBUFFER_COMPLETE) {
+    ERRLOG.push('shadow FBO incomplete');
+    gl.deleteFramebuffer(fbo); gl.deleteTexture(tex);
+    FB.shadow = null; // shaders branch out on uShadowK=0 — soft degrade
+  } else {
+    gl.viewport(0, 0, size, size);
+    gl.depthMask(true);
+    gl.clear(gl.DEPTH_BUFFER_BIT); // all-lit baseline for frames that skip the pass
+    FB.shadow = { fbo, tex, size };
+  }
+  gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+}
+// orthographic sun/moon frustum: follows the camera target, snapped to shadow
+// texels so panning doesn't shimmer, sized to the visible slab (z 0..260m)
+function computeLightVP() {
+  const sd = PAL.sunDir || [0.62, 0.7, 0.35];
+  const sl = Math.hypot(sd[0], sd[1], sd[2]) || 1;
+  const sn = [sd[0] / sl, sd[1] / sl, Math.max(sd[2] / sl, 0.12)];
+  const R = clamp(cam.dist * 1.6, 260, 4200);
+  const view = mat4LookAt([cam.cx + sn[0] * 5000, cam.cy + sn[1] * 5000, sn[2] * 5000], [cam.cx, cam.cy, 0], [0, 0, 1]);
+  let mnx = 1e9, mny = 1e9, mnz = 1e9, mxx = -1e9, mxy = -1e9, mxz = -1e9;
+  for (let i = 0; i < 8; i++) {
+    const wx = cam.cx + ((i & 1) ? R : -R), wy = cam.cy + ((i & 2) ? R : -R), wz = (i & 4) ? 260 : 0;
+    const lx = view[0] * wx + view[4] * wy + view[8] * wz + view[12];
+    const ly = view[1] * wx + view[5] * wy + view[9] * wz + view[13];
+    const lz = view[2] * wx + view[6] * wy + view[10] * wz + view[14];
+    mnx = Math.min(mnx, lx); mxx = Math.max(mxx, lx);
+    mny = Math.min(mny, ly); mxy = Math.max(mxy, ly);
+    mnz = Math.min(mnz, lz); mxz = Math.max(mxz, lz);
+  }
+  const tx = (mxx - mnx) / FB.shadow.size, ty = (mxy - mny) / FB.shadow.size;
+  mnx = Math.floor(mnx / tx) * tx; mny = Math.floor(mny / ty) * ty;
+  const proj = mat4Ortho(mnx, mnx + Math.ceil((mxx - mnx) / tx) * tx,
+                         mny, mny + Math.ceil((mxy - mny) / ty) * ty,
+                         -mxz - 400, -mnz + 400);
+  return mat4Mul(proj, view);
 }
 
 // ---------- camera ----------
@@ -3351,7 +3753,7 @@ const camLim = {
   minX: BBOX.minX - 1800, maxX: BBOX.maxX + 1800, minY: BBOX.minY - 1800, maxY: BBOX.maxY + 1800,
 };
 let VP = null, INV_VP = null, ASPECT = 1;
-let EYE = [0, 0, 0];
+let EYE = [0, 0, 0], NEAR = 2, FAR = 20000;
 function clampCam() {
   cam.dist = clamp(cam.dist, camLim.minDist, camLim.maxDist);
   cam.tilt = clamp(cam.tilt, camLim.minTilt, camLim.maxTilt);
@@ -3367,6 +3769,7 @@ function computeVP() {
   const view = mat4LookAt(eye, [cam.cx, cam.cy, 0], [0, 0, 1]);
   const near = Math.max(2, cam.dist * 0.04);
   const far = cam.dist * 6 + 6000;
+  NEAR = near; FAR = far;
   const proj = mat4Persp(48 * Math.PI / 180, ASPECT, near, far);
   VP = mat4Mul(proj, view);
   INV_VP = mat4Inv(VP);
@@ -3405,6 +3808,39 @@ let timeSec = 0;
 function draw() {
   const w = FB.w, h = FB.h;
   const vp32 = new Float32Array(VP);
+
+  // --- shadow depth pass (fades out toward city-wide zoom, then skipped) ---
+  ensureShadow();
+  const shFade = clamp(1 - (cam.dist - 3800) / 3200, 0, 1);
+  const shK = FB.shadow ? (PAL.shadowK ?? 0) * shFade : 0;
+  let lvp32 = IDENT32;
+  if (shK > 0.01) {
+    lvp32 = new Float32Array(computeLightVP());
+    gl.bindFramebuffer(gl.FRAMEBUFFER, FB.shadow.fbo);
+    gl.viewport(0, 0, FB.shadow.size, FB.shadow.size);
+    gl.enable(gl.DEPTH_TEST); gl.depthFunc(gl.LEQUAL); gl.depthMask(true);
+    gl.clear(gl.DEPTH_BUFFER_BIT);
+    gl.enable(gl.POLYGON_OFFSET_FILL); gl.polygonOffset(2.0, 4.0);
+    gl.useProgram(depthProg.p);
+    gl.uniformMatrix4fv(depthProg.u.uVP, false, lvp32);
+    gl.bindVertexArray(meshes.bld.vao);
+    gl.drawElements(gl.TRIANGLES, meshes.bld.count, gl.UNSIGNED_INT, 0);
+    gl.disable(gl.POLYGON_OFFSET_FILL);
+    gl.disable(gl.DEPTH_TEST);
+  }
+  if (FB.shadow) {
+    gl.activeTexture(gl.TEXTURE7);
+    gl.bindTexture(gl.TEXTURE_2D, FB.shadow.tex);
+    gl.activeTexture(gl.TEXTURE0);
+  }
+  const shTexel = FB.shadow ? 1 / FB.shadow.size : 1;
+  const setShadow = prog => {
+    gl.uniform1i(prog.u.uShadow, 7);
+    gl.uniform1f(prog.u.uShadowK, shK);
+    gl.uniform1f(prog.u.uShTexel, shTexel);
+    gl.uniformMatrix4fv(prog.u.uLightVP, false, lvp32);
+  };
+
   const target = FB.samples > 0 ? FB.msaaFbo : FB.scene.fbo;
   gl.bindFramebuffer(gl.FRAMEBUFFER, target);
   gl.viewport(0, 0, w, h);
@@ -3440,6 +3876,7 @@ function draw() {
   gl.uniform1f(groundProg.u.uFogD, PAL.fogD);
   gl.uniform1f(groundProg.u.uFogAmt, PAL.fogAmt);
   gl.uniform1f(groundProg.u.uFogH, PAL.fogH ?? 0);
+  setShadow(groundProg);
   gl.bindVertexArray(meshes.ground.vao);
   gl.drawElements(gl.TRIANGLES, meshes.ground.count, gl.UNSIGNED_INT, 0);
 
@@ -3454,6 +3891,7 @@ function draw() {
   gl.uniform1f(flatProg.u.uFogH, PAL.fogH ?? 0);
   gl.uniform1f(flatProg.u.uTime, timeSec);
   gl.uniform1f(flatProg.u.uRipple, 0);
+  setShadow(flatProg);
   gl.bindVertexArray(meshes.flat.vao);
   for (const r of flatRanges) {
     const col = PAL.flat[r.key];
@@ -3512,8 +3950,25 @@ function draw() {
   gl.uniform3fv(bldProg.u.uSunWarm, PAL.sunWarm || [1, 1, 1]);
   gl.uniform1f(bldProg.u.uSunK, PAL.sunK ?? 0);
   gl.uniform1f(bldProg.u.uSheenK, PAL.sheenK ?? 0);
+  setShadow(bldProg);
   gl.bindVertexArray(meshes.bld.vao);
   gl.drawElements(gl.TRIANGLES, meshes.bld.count, gl.UNSIGNED_INT, 0);
+
+  // trees (opaque alpha-test billboards; same depth state as buildings)
+  if ((PAL.treeAmt ?? 0) > 0.01 && meshes.trees) {
+    gl.useProgram(treeProg.p);
+    gl.uniformMatrix4fv(treeProg.u.uVP, false, vp32);
+    gl.uniform3fv(treeProg.u.uEye, EYE);
+    gl.uniform3fv(treeProg.u.uCol0, PAL.treeCol0 || [0.10, 0.16, 0.10]);
+    gl.uniform3fv(treeProg.u.uCol1, PAL.treeCol1 || [0.2, 0.3, 0.16]);
+    gl.uniform3fv(treeProg.u.uFog, PAL.fog);
+    gl.uniform1f(treeProg.u.uFogD, PAL.fogD);
+    gl.uniform1f(treeProg.u.uFogAmt, PAL.fogAmt);
+    gl.uniform1f(treeProg.u.uFogH, PAL.fogH ?? 0);
+    setShadow(treeProg);
+    gl.bindVertexArray(meshes.trees.vao);
+    gl.drawArraysInstanced(gl.TRIANGLE_STRIP, 0, 4, meshes.trees.count);
+  }
 
   // street lamps + tower beacons (additive, depth-tested so buildings occlude them)
   if ((PAL.lampAmt ?? 0) > 0.01 && meshes.lamps) {
@@ -3543,6 +3998,41 @@ function draw() {
     gl.disable(gl.BLEND);
   }
 
+  // traffic trails (additive, depth-tested so buildings occlude them)
+  if ((PAL.trailAmt ?? 0) > 0.01 && meshes.trails) {
+    gl.enable(gl.BLEND);
+    gl.blendFunc(gl.ONE, gl.ONE);
+    gl.depthMask(false);
+    gl.useProgram(trailProg.p);
+    gl.uniformMatrix4fv(trailProg.u.uVP, false, vp32);
+    gl.uniform1f(trailProg.u.uTime, timeSec);
+    gl.uniform1f(trailProg.u.uAmt, PAL.trailAmt);
+    gl.uniform1f(trailProg.u.uFogD, PAL.fogD);
+    gl.uniform1f(trailProg.u.uFogAmt, PAL.fogAmt);
+    gl.uniform3fv(trailProg.u.uColW, PAL.trailColW || [1.0, 0.93, 0.72]);
+    gl.uniform3fv(trailProg.u.uColR, PAL.trailColR || [1.0, 0.16, 0.10]);
+    gl.bindVertexArray(meshes.trails.vao);
+    gl.drawElements(gl.TRIANGLES, meshes.trails.count, gl.UNSIGNED_INT, 0);
+    gl.depthMask(true);
+    gl.disable(gl.BLEND);
+  }
+
+  // wet-asphalt lamp reflections (additive, view-dependent stretch done in the VS)
+  if ((PAL.wetK ?? 0) > 0.01 && meshes.streaks) {
+    gl.enable(gl.BLEND);
+    gl.blendFunc(gl.ONE, gl.ONE);
+    gl.depthMask(false);
+    gl.useProgram(streakProg.p);
+    gl.uniformMatrix4fv(streakProg.u.uVP, false, vp32);
+    gl.uniform3fv(streakProg.u.uEye, EYE);
+    gl.uniform3fv(streakProg.u.uCol, PAL.lampCol || [1, 0.72, 0.38]);
+    gl.uniform1f(streakProg.u.uAmt, PAL.wetK);
+    gl.bindVertexArray(meshes.streaks.vao);
+    gl.drawArraysInstanced(gl.TRIANGLE_STRIP, 0, 4, meshes.streaks.count);
+    gl.depthMask(true);
+    gl.disable(gl.BLEND);
+  }
+
   // gaussian dust
   if (PAL.dustAmt > 0.01) {
     gl.enable(gl.BLEND);
@@ -3560,11 +4050,32 @@ function draw() {
   }
   gl.disable(gl.DEPTH_TEST);
 
-  // resolve MSAA
+  // resolve MSAA (color to the scene texture, depth to the SSAO depth texture)
   if (FB.samples > 0) {
     gl.bindFramebuffer(gl.READ_FRAMEBUFFER, FB.msaaFbo);
     gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, FB.scene.fbo);
     gl.blitFramebuffer(0, 0, w, h, 0, 0, w, h, gl.COLOR_BUFFER_BIT, gl.NEAREST);
+    if (FB.depthFbo) {
+      gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, FB.depthFbo);
+      gl.blitFramebuffer(0, 0, w, h, 0, 0, w, h, gl.DEPTH_BUFFER_BIT, gl.NEAREST);
+    }
+  }
+
+  // SSAO at half resolution (skipped entirely at aoK=0)
+  const aoK = FB.depthT ? (PAL.aoK ?? 0) : 0;
+  if (aoK > 0.01) {
+    gl.disable(gl.BLEND);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, FB.ao.fbo);
+    gl.viewport(0, 0, FB.ao.w, FB.ao.h);
+    gl.useProgram(ssaoProg.p);
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, FB.depthT);
+    gl.uniform1i(ssaoProg.u.uDepth, 0);
+    gl.uniform2f(ssaoProg.u.uNF, NEAR, FAR);
+    gl.uniform2f(ssaoProg.u.uPx, 1 / FB.ao.w, 1 / FB.ao.h);
+    gl.uniform1f(ssaoProg.u.uProjScale, FB.ao.h / (2 * Math.tan(24 * Math.PI / 180)));
+    gl.bindVertexArray(meshes.quad.vao);
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
   }
 
   // bloom: bright pass
@@ -3592,6 +4103,22 @@ function draw() {
     gl.uniform2f(blurProg.u.uDir, 0, 1.35 / FB.bloomA.h);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
   }
+  // sun screen position for crepuscular rays (fades as the sun leaves the frame)
+  let rayK = PAL.rayK ?? 0;
+  let sunUV = [0.5, 1.2];
+  if (rayK > 0.001) {
+    const sd = PAL.sunDir || [0.62, 0.7, 0.35];
+    const px = EYE[0] + sd[0] * 50000, py = EYE[1] + sd[1] * 50000, pz = EYE[2] + sd[2] * 50000;
+    const wc = VP[3] * px + VP[7] * py + VP[11] * pz + VP[15];
+    if (wc <= 0) rayK = 0;
+    else {
+      sunUV = [(VP[0] * px + VP[4] * py + VP[8] * pz + VP[12]) / wc * 0.5 + 0.5,
+               (VP[1] * px + VP[5] * py + VP[9] * pz + VP[13]) / wc * 0.5 + 0.5];
+      const ox = Math.max(0, Math.abs(sunUV[0] - 0.5) - 0.5), oy = Math.max(0, Math.abs(sunUV[1] - 0.5) - 0.5);
+      rayK *= clamp(1 - Math.hypot(ox, oy) * 1.8, 0, 1);
+    }
+  }
+
   // composite to screen
   gl.bindFramebuffer(gl.FRAMEBUFFER, null);
   gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
@@ -3602,6 +4129,15 @@ function draw() {
   gl.activeTexture(gl.TEXTURE1);
   gl.bindTexture(gl.TEXTURE_2D, FB.bloomA.tex);
   gl.uniform1i(compProg.u.uBloom, 1);
+  gl.activeTexture(gl.TEXTURE2);
+  gl.bindTexture(gl.TEXTURE_2D, FB.ao.tex);
+  gl.uniform1i(compProg.u.uAO, 2);
+  gl.uniform1f(compProg.u.uAoK, aoK);
+  gl.uniform1f(compProg.u.uRayK, rayK);
+  gl.uniform3fv(compProg.u.uRayCol, PAL.rayCol || [1, 0.85, 0.6]);
+  gl.uniform2f(compProg.u.uSunUV, sunUV[0], sunUV[1]);
+  gl.uniform1f(compProg.u.uGrainK, PAL.grainK ?? 0);
+  gl.uniform1f(compProg.u.uTime, timeSec);
   gl.uniform1f(compProg.u.uBloomK, PAL.bloomK);
   gl.uniform1f(compProg.u.uVig, PAL.vig);
   gl.uniform1f(compProg.u.uExpo, PAL.expo ?? 1);
@@ -3880,7 +4416,7 @@ const THEMES = {
       park: [0.052, 0.148, 0.112, 0.92], cemetery: [0.058, 0.115, 0.098, 0.85],
       pitch: [0.06, 0.165, 0.14, 0.8], water: [0.055, 0.135, 0.23, 0.95],
       bndWide: [0.89, 0.76, 0.49, 0.055], bndLine: [0.89, 0.76, 0.49, 0.5],
-      road0: [0.70, 0.575, 0.355, 0.95], road1: [0.47, 0.425, 0.335, 0.92],
+      road0: [0.61, 0.50, 0.31, 0.95], road1: [0.42, 0.38, 0.30, 0.92],
       road2: [0.335, 0.345, 0.42, 0.92], road3: [0.225, 0.255, 0.345, 0.88],
       road4: [0.165, 0.195, 0.275, 0.8], road5: [0.16, 0.19, 0.27, 0.72],
       road6: [0.135, 0.165, 0.235, 0.55], road7: [0.15, 0.18, 0.25, 0.6],
@@ -3892,19 +4428,24 @@ const THEMES = {
     dust: [0.8, 0.62, 0.30], dustAmt: 0.55,
     bloomThresh: 0.30, bloomK: 0.8, vig: 0.34,
     // cinematic night: cool moon fill, mixed windows, street haze, stars, sodium lamps
-    sunDir: [0.62, 0.70, 0.35], sunWarm: [0.75, 0.82, 1.10], sunK: 0.10,
+    sunDir: [0.62, 0.70, 0.62], sunWarm: [0.75, 0.82, 1.10], sunK: 0.10, // moon higher — shorter night shadows
     rimK: 0.35, rimCol: [0.55, 0.70, 1.0], specK: 0.18,
     winCool: [0.62, 0.80, 1.0], winLit: 0.40, floorDark: 0.18, penthouse: 0.7, winBleed: 1,
     fogH: 0.55, starAmt: 0.9, milky: 0.35, skyGlowCol: [0.42, 0.24, 0.09], skyGlowAmt: 0.38, sunDiscAmt: 0,
     lampCol: [1.0, 0.72, 0.38], lampAmt: 0.8, beaconAmt: 1,
     expo: 1.15, sat: 1.12, tint: [1.02, 1.0, 0.99], sheenK: 0.5, rippleK: 0.35, animK: 1,
     bloomPasses: 3, anamK: 1.6,
+    shadowK: 0.34, // moon shadows — soft, cool
+    treeAmt: 1, treeCol0: [0.045, 0.085, 0.065], treeCol1: [0.11, 0.20, 0.13],
+    trailAmt: 0.9, trailColW: [1.0, 0.93, 0.72], trailColR: [1.0, 0.16, 0.10],
+    wetK: 0.5, // wet-asphalt lamp streaks
+    aoK: 0.7, rayK: 0, grainK: 0.7,
   },
   light: {
     css: '#e9ecef',
     sky0: [0.80, 0.845, 0.90], sky1: [0.965, 0.925, 0.865],
     ground0: [0.912, 0.898, 0.872], ground1: [0.852, 0.838, 0.812],
-    fog: [0.93, 0.905, 0.868], fogD: 11500, fogAmt: 0.55,
+    fog: [0.94, 0.90, 0.845], fogD: 11500, fogAmt: 0.55, // haze glows warm at golden hour
     bldBase: [0.742, 0.726, 0.695], bldTop: [0.99, 0.976, 0.948],
     win: [1.0, 0.9, 0.6], night: 0,
     flat: {
@@ -3924,12 +4465,16 @@ const THEMES = {
     bloomThresh: 0.78, bloomK: 0.22, vig: 0.15,
     // golden hour: low western sun, warm sun-facing facades, cool shade, sun disc
     sunDir: [0.85, 0.35, 0.30], sunWarm: [1.12, 1.02, 0.86], sunK: 0.40,
-    rimK: 0.18, rimCol: [1.0, 0.95, 0.85], specK: 0.10,
+    rimK: 0.30, rimCol: [1.0, 0.93, 0.80], specK: 0.10, // warm edge light on backlit towers
     winCool: [1.0, 0.9, 0.6], winLit: 0.38, floorDark: 0, penthouse: 0, winBleed: 0,
     fogH: 0.35, starAmt: 0, milky: 0, skyGlowCol: [0.42, 0.28, 0.13], skyGlowAmt: 0.3, sunDiscAmt: 0.8,
     lampCol: [1.0, 0.72, 0.38], lampAmt: 0, beaconAmt: 0,
     expo: 1.05, sat: 1.05, tint: [1.04, 1.0, 0.95], sheenK: 0, rippleK: 0, animK: 0,
     bloomPasses: 2, anamK: 1,
+    shadowK: 0.55, // long golden-hour shadows
+    treeAmt: 1, treeCol0: [0.24, 0.36, 0.19], treeCol1: [0.47, 0.62, 0.33],
+    trailAmt: 0, wetK: 0, // headlights/wet glow read as noise in daylight
+    aoK: 0.8, rayK: 0.55, rayCol: [1.0, 0.83, 0.58], grainK: 0.5,
   },
 };
 let themeName = null;
@@ -5706,6 +6251,7 @@ async function boot() {
     setTimeout(() => $('loader').remove(), 1100);
     if (MAP.QA_MODE) {
       if (/light/.test(location.search + location.hash)) applyTheme('light', false);
+      if (/dark/.test(location.search + location.hash)) applyTheme('dark', false);
       Object.assign(MAP.cam, { cx: tgt.cx, cy: tgt.cy, dist: 2600, tilt: 0.8, bearing: -0.35 });
       const m = (location.search + location.hash).match(/qa=([\d.,-]+)/);
       if (m) { // qa=cx,cy,dist,tilt,bearing overrides for targeted shots
@@ -5905,6 +6451,8 @@ if (IS_MOBILE) { // trim GPU-heavy extras; the core cinematic look stays
   THEMES.dark.milky = 0; THEMES.light.milky = 0;
   THEMES.dark.bloomPasses = 2; THEMES.dark.anamK = 1;
   THEMES.dark.sheenK = 0; THEMES.dark.lampAmt = 0.55;
+  THEMES.dark.aoK = 0.55; THEMES.light.aoK = 0.6; // lighter SSAO
+  THEMES.dark.grainK = 0.5; THEMES.dark.wetK = 0.4;
 }
 const BIZ_POOL_N = IS_MOBILE ? 46 : 150;
 const bizPool = [];

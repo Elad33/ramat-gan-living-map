@@ -113,6 +113,8 @@ if (IS_MOBILE) { // trim GPU-heavy extras; the core cinematic look stays
   THEMES.dark.milky = 0; THEMES.light.milky = 0;
   THEMES.dark.bloomPasses = 2; THEMES.dark.anamK = 1;
   THEMES.dark.sheenK = 0; THEMES.dark.lampAmt = 0.55;
+  THEMES.dark.aoK = 0.55; THEMES.light.aoK = 0.6; // lighter SSAO
+  THEMES.dark.grainK = 0.5; THEMES.dark.wetK = 0.4;
 }
 const BIZ_POOL_N = IS_MOBILE ? 46 : 150;
 const bizPool = [];

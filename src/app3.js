@@ -22,7 +22,7 @@ const THEMES = {
       park: [0.052, 0.148, 0.112, 0.92], cemetery: [0.058, 0.115, 0.098, 0.85],
       pitch: [0.06, 0.165, 0.14, 0.8], water: [0.055, 0.135, 0.23, 0.95],
       bndWide: [0.89, 0.76, 0.49, 0.055], bndLine: [0.89, 0.76, 0.49, 0.5],
-      road0: [0.70, 0.575, 0.355, 0.95], road1: [0.47, 0.425, 0.335, 0.92],
+      road0: [0.61, 0.50, 0.31, 0.95], road1: [0.42, 0.38, 0.30, 0.92],
       road2: [0.335, 0.345, 0.42, 0.92], road3: [0.225, 0.255, 0.345, 0.88],
       road4: [0.165, 0.195, 0.275, 0.8], road5: [0.16, 0.19, 0.27, 0.72],
       road6: [0.135, 0.165, 0.235, 0.55], road7: [0.15, 0.18, 0.25, 0.6],
@@ -34,19 +34,24 @@ const THEMES = {
     dust: [0.8, 0.62, 0.30], dustAmt: 0.55,
     bloomThresh: 0.30, bloomK: 0.8, vig: 0.34,
     // cinematic night: cool moon fill, mixed windows, street haze, stars, sodium lamps
-    sunDir: [0.62, 0.70, 0.35], sunWarm: [0.75, 0.82, 1.10], sunK: 0.10,
+    sunDir: [0.62, 0.70, 0.62], sunWarm: [0.75, 0.82, 1.10], sunK: 0.10, // moon higher — shorter night shadows
     rimK: 0.35, rimCol: [0.55, 0.70, 1.0], specK: 0.18,
     winCool: [0.62, 0.80, 1.0], winLit: 0.40, floorDark: 0.18, penthouse: 0.7, winBleed: 1,
     fogH: 0.55, starAmt: 0.9, milky: 0.35, skyGlowCol: [0.42, 0.24, 0.09], skyGlowAmt: 0.38, sunDiscAmt: 0,
     lampCol: [1.0, 0.72, 0.38], lampAmt: 0.8, beaconAmt: 1,
     expo: 1.15, sat: 1.12, tint: [1.02, 1.0, 0.99], sheenK: 0.5, rippleK: 0.35, animK: 1,
     bloomPasses: 3, anamK: 1.6,
+    shadowK: 0.34, // moon shadows — soft, cool
+    treeAmt: 1, treeCol0: [0.045, 0.085, 0.065], treeCol1: [0.11, 0.20, 0.13],
+    trailAmt: 0.9, trailColW: [1.0, 0.93, 0.72], trailColR: [1.0, 0.16, 0.10],
+    wetK: 0.5, // wet-asphalt lamp streaks
+    aoK: 0.7, rayK: 0, grainK: 0.7,
   },
   light: {
     css: '#e9ecef',
     sky0: [0.80, 0.845, 0.90], sky1: [0.965, 0.925, 0.865],
     ground0: [0.912, 0.898, 0.872], ground1: [0.852, 0.838, 0.812],
-    fog: [0.93, 0.905, 0.868], fogD: 11500, fogAmt: 0.55,
+    fog: [0.94, 0.90, 0.845], fogD: 11500, fogAmt: 0.55, // haze glows warm at golden hour
     bldBase: [0.742, 0.726, 0.695], bldTop: [0.99, 0.976, 0.948],
     win: [1.0, 0.9, 0.6], night: 0,
     flat: {
@@ -66,12 +71,16 @@ const THEMES = {
     bloomThresh: 0.78, bloomK: 0.22, vig: 0.15,
     // golden hour: low western sun, warm sun-facing facades, cool shade, sun disc
     sunDir: [0.85, 0.35, 0.30], sunWarm: [1.12, 1.02, 0.86], sunK: 0.40,
-    rimK: 0.18, rimCol: [1.0, 0.95, 0.85], specK: 0.10,
+    rimK: 0.30, rimCol: [1.0, 0.93, 0.80], specK: 0.10, // warm edge light on backlit towers
     winCool: [1.0, 0.9, 0.6], winLit: 0.38, floorDark: 0, penthouse: 0, winBleed: 0,
     fogH: 0.35, starAmt: 0, milky: 0, skyGlowCol: [0.42, 0.28, 0.13], skyGlowAmt: 0.3, sunDiscAmt: 0.8,
     lampCol: [1.0, 0.72, 0.38], lampAmt: 0, beaconAmt: 0,
     expo: 1.05, sat: 1.05, tint: [1.04, 1.0, 0.95], sheenK: 0, rippleK: 0, animK: 0,
     bloomPasses: 2, anamK: 1,
+    shadowK: 0.55, // long golden-hour shadows
+    treeAmt: 1, treeCol0: [0.24, 0.36, 0.19], treeCol1: [0.47, 0.62, 0.33],
+    trailAmt: 0, wetK: 0, // headlights/wet glow read as noise in daylight
+    aoK: 0.8, rayK: 0.55, rayCol: [1.0, 0.83, 0.58], grainK: 0.5,
   },
 };
 let themeName = null;
@@ -1848,6 +1857,7 @@ async function boot() {
     setTimeout(() => $('loader').remove(), 1100);
     if (MAP.QA_MODE) {
       if (/light/.test(location.search + location.hash)) applyTheme('light', false);
+      if (/dark/.test(location.search + location.hash)) applyTheme('dark', false);
       Object.assign(MAP.cam, { cx: tgt.cx, cy: tgt.cy, dist: 2600, tilt: 0.8, bearing: -0.35 });
       const m = (location.search + location.hash).match(/qa=([\d.,-]+)/);
       if (m) { // qa=cx,cy,dist,tilt,bearing overrides for targeted shots
