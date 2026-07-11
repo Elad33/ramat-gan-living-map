@@ -50,7 +50,7 @@
 *::-webkit-scrollbar-track{background:transparent}
 *{scrollbar-width:thin;scrollbar-color:rgba(227,194,126,.3) transparent}
 html,body{height:100%}
-html{direction:rtl}
+html{direction:rtl;touch-action:pan-x pan-y} /* page itself must never pinch-zoom — the map handles its own */
 body{direction:rtl;background:var(--bg);color:var(--ink);font-family:var(--font-ui);overflow:hidden;
   -webkit-font-smoothing:antialiased;font-size:15px;line-height:1.45}
 button{font-family:inherit;color:inherit;background:none;border:none;cursor:pointer;font-size:inherit}
@@ -701,7 +701,7 @@ textarea.f-in{resize:vertical;min-height:74px}
     width:42px;height:4px;border-radius:2px;background:var(--hairline)}
   .ai-form{margin:12px 20px 0}
   .ai-sugg{margin:9px 20px 0}
-  #aiInput,.f-in{font-size:16px} /* ≥16px, or iOS zooms the page on focus */
+  #aiInput,.f-in,#subEmail,#searchInput{font-size:16px} /* ≥16px, or iOS auto-zooms the page on focus */
   #bizChips{padding:2px 20px 9px}
   #bizList{padding:10px 20px 24px}
   .bz-row{min-height:52px}

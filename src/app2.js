@@ -594,6 +594,41 @@ function resize() {
 }
 window.addEventListener('resize', resize);
 
+/* mobile resilience — a page-level pinch/auto-zoom or a keyboard scroll can leave the
+   layout viewport scaled or offset: the fixed chrome sits off-screen and the canvas
+   stretches blurry ("רואים רק את המפה"). Detect and snap back. */
+if (window.visualViewport) {
+  let vvT = 0;
+  const vvFix = () => {
+    clearTimeout(vvT);
+    vvT = setTimeout(() => {
+      const ae = document.activeElement;
+      const typing = ae && /^(INPUT|TEXTAREA|SELECT)$/.test(ae.tagName);
+      // once the keyboard is gone and the page isn't zoomed, undo any stuck scroll
+      if (!typing && visualViewport.scale <= 1.02 && (scrollX || scrollY)) scrollTo(0, 0);
+      resize();
+      needRender = true;
+    }, 120);
+  };
+  visualViewport.addEventListener('resize', vvFix);
+  visualViewport.addEventListener('scroll', vvFix);
+}
+window.addEventListener('orientationchange', () => { setTimeout(resize, 250); setTimeout(resize, 700); });
+// iOS: two-finger pinch anywhere outside the canvas zooms the PAGE — swallow it.
+// (map pinch runs on pointer events over the canvas and is unaffected)
+for (const ev of ['gesturestart', 'gesturechange', 'gestureend'])
+  document.addEventListener(ev, e => e.preventDefault());
+// GPU pressure / backgrounding can kill the WebGL context — recover instead of freezing
+canvas.addEventListener('webglcontextlost', e => e.preventDefault());
+canvas.addEventListener('webglcontextrestored', () => location.reload());
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState !== 'visible') return;
+  canvas.classList.remove('dragging'); // never leave the chrome dimmed
+  if (gl.isContextLost && gl.isContextLost()) { location.reload(); return; }
+  resize();
+  needRender = true;
+});
+
 // ---------- animation: flyTo ----------
 let fly = null;
 function flyTo(opts) {

@@ -2,7 +2,7 @@
 <html lang="he" dir="rtl">
 <head>
 <meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"/>
 <title>גבעתיים · המפה החיה</title>
 <meta name="description" content="מפה תלת־ממדית חיה של גבעתיים — כל רחוב, בניין וכתובת. חיפוש כתובות, אירועים, עסקים, תכנון ובנייה ותחבורה ציבורית."/>
 <meta property="og:title" content="גבעתיים · המפה החיה"/>
@@ -77,7 +77,7 @@
 *::-webkit-scrollbar-track{background:transparent}
 *{scrollbar-width:thin;scrollbar-color:rgba(227,194,126,.3) transparent}
 html,body{height:100%}
-html{direction:rtl}
+html{direction:rtl;touch-action:pan-x pan-y} /* page itself must never pinch-zoom — the map handles its own */
 body{direction:rtl;background:var(--bg);color:var(--ink);font-family:var(--font-ui);overflow:hidden;
   -webkit-font-smoothing:antialiased;font-size:15px;line-height:1.45}
 button{font-family:inherit;color:inherit;background:none;border:none;cursor:pointer;font-size:inherit}
@@ -728,7 +728,7 @@ textarea.f-in{resize:vertical;min-height:74px}
     width:42px;height:4px;border-radius:2px;background:var(--hairline)}
   .ai-form{margin:12px 20px 0}
   .ai-sugg{margin:9px 20px 0}
-  #aiInput,.f-in{font-size:16px} /* ≥16px, or iOS zooms the page on focus */
+  #aiInput,.f-in,#subEmail,#searchInput{font-size:16px} /* ≥16px, or iOS auto-zooms the page on focus */
   #bizChips{padding:2px 20px 9px}
   #bizList{padding:10px 20px 24px}
   .bz-row{min-height:52px}
@@ -2254,6 +2254,41 @@ function resize() {
   }
 }
 window.addEventListener('resize', resize);
+
+/* mobile resilience — a page-level pinch/auto-zoom or a keyboard scroll can leave the
+   layout viewport scaled or offset: the fixed chrome sits off-screen and the canvas
+   stretches blurry ("רואים רק את המפה"). Detect and snap back. */
+if (window.visualViewport) {
+  let vvT = 0;
+  const vvFix = () => {
+    clearTimeout(vvT);
+    vvT = setTimeout(() => {
+      const ae = document.activeElement;
+      const typing = ae && /^(INPUT|TEXTAREA|SELECT)$/.test(ae.tagName);
+      // once the keyboard is gone and the page isn't zoomed, undo any stuck scroll
+      if (!typing && visualViewport.scale <= 1.02 && (scrollX || scrollY)) scrollTo(0, 0);
+      resize();
+      needRender = true;
+    }, 120);
+  };
+  visualViewport.addEventListener('resize', vvFix);
+  visualViewport.addEventListener('scroll', vvFix);
+}
+window.addEventListener('orientationchange', () => { setTimeout(resize, 250); setTimeout(resize, 700); });
+// iOS: two-finger pinch anywhere outside the canvas zooms the PAGE — swallow it.
+// (map pinch runs on pointer events over the canvas and is unaffected)
+for (const ev of ['gesturestart', 'gesturechange', 'gestureend'])
+  document.addEventListener(ev, e => e.preventDefault());
+// GPU pressure / backgrounding can kill the WebGL context — recover instead of freezing
+canvas.addEventListener('webglcontextlost', e => e.preventDefault());
+canvas.addEventListener('webglcontextrestored', () => location.reload());
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState !== 'visible') return;
+  canvas.classList.remove('dragging'); // never leave the chrome dimmed
+  if (gl.isContextLost && gl.isContextLost()) { location.reload(); return; }
+  resize();
+  needRender = true;
+});
 
 // ---------- animation: flyTo ----------
 let fly = null;

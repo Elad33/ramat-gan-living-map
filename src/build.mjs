@@ -50,7 +50,7 @@ const html = `<!doctype html>
 <html lang="he" dir="rtl">
 <head>
 <meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"/>
 <title>${title}</title>
 <meta name="description" content="מפה תלת־ממדית חיה של ${cfg.nameHe} — כל רחוב, בניין וכתובת. חיפוש כתובות, אירועים, עסקים, תכנון ובנייה ותחבורה ציבורית."/>
 <meta property="og:title" content="${title}"/>
