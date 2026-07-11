@@ -20,10 +20,21 @@ const clientCfg = {
   features: cfg.features || {},
 };
 
+// city logo: cities/<slug>.logo.svg holds a paths fragment (inlined into the 64×64
+// brand/loader <svg>); cities without one keep the default livemap diamond
+const DEFAULT_LOGO = `
+    <path d="M14 22 L24 10 H40 L50 22 L32 54 Z" stroke="var(--gold)" stroke-width="2.4" stroke-linejoin="round" fill="rgba(227,194,126,.09)"/>
+    <path d="M14 22 H50 M24 10 L28 22 L32 54 M40 10 L36 22 L32 54" stroke="var(--gold)" stroke-width="1.2" opacity=".6"/>`;
+const logoFile = path.join(ROOT, 'cities', cfg.slug + '.logo.svg');
+const logoPaths = fs.existsSync(logoFile)
+  ? fs.readFileSync(logoFile, 'utf8').replace(/<!--[\s\S]*?-->/g, '').trim()
+  : DEFAULT_LOGO;
+
 const brand = s => s
   .split('{{TITLE}}').join(cfg.brand.title)
   .split('{{NAME_HE}}').join(cfg.nameHe)
-  .split('{{SUBTITLE}}').join(cfg.brand.subtitle);
+  .split('{{SUBTITLE}}').join(cfg.brand.subtitle)
+  .split('{{LOGO_PATHS}}').join(logoPaths);
 
 const tpl = brand(fs.readFileSync('template.html', 'utf8'));
 const fonts = fs.readFileSync(path.join(ROOT, 'data', 'fonts-embedded.css'), 'utf8'); // fonts are shared
@@ -87,7 +98,9 @@ if (cfg.isDefault) {
   manifest.theme_color = cfg.themeColor;
   fs.writeFileSync(path.join(OUT, 'manifest.webmanifest'), JSON.stringify(manifest, null, 2));
   fs.copyFileSync(path.join(ROOT, 'sw.js'), path.join(OUT, 'sw.js'));
-  fs.cpSync(path.join(ROOT, 'icons'), path.join(OUT, 'icons'), { recursive: true });
+  // per-city PWA icons when present (root icons/ belongs to the default city)
+  const cityIcons = path.join(ROOT, 'cities', cfg.slug + '-icons');
+  fs.cpSync(fs.existsSync(cityIcons) ? cityIcons : path.join(ROOT, 'icons'), path.join(OUT, 'icons'), { recursive: true });
   fs.cpSync(path.join(ROOT, 'api'), path.join(OUT, 'api'), { recursive: true });
   if (fs.existsSync(path.join(ROOT, 'vercel.json')))
     fs.copyFileSync(path.join(ROOT, 'vercel.json'), path.join(OUT, 'vercel.json'));
