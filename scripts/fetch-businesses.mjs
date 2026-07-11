@@ -397,6 +397,56 @@ function contactMatch(A, B) {
 }
 const sameBiz = (A, B, d, dmax) => d <= dmax && (nameMatch(A.tk, B.tk) || skelMatch(A.sk, B.sk, A.cat === B.cat) || contactMatch(A, B));
 
+/* ---------------- venue-anchor consensus ----------------
+   Facebook-sourced Overture pins are often garbage: stores whose address reads
+   "קניון איילון" land kilometres from the mall (geocoded to a street centroid or
+   the business district). External geocoding isn't needed — the records
+   themselves vote: everything mentioning the same venue phrase forms a group,
+   the heaviest spatial cluster (OSM members count ×3, surveyed) is the truth,
+   and Overture outliers >300m away are moved onto it with a small deterministic
+   scatter. OSM records are never moved. */
+function anchorSnap(ovRecs, osmRecs) {
+  const normA = s => clean(String(s || '')).toLowerCase().replace(/["'`’׳״().,\-–־]/g, ' ').replace(/\s+/g, ' ').trim();
+  const keyOf = a => {
+    const m = /(קניון|מתחם|סנטר|מרכז מסחרי|mall)\s+[֐-׿a-zA-Z0-9]+/.exec(normA(a));
+    return m ? m[0] : '';
+  };
+  const groups = new Map();
+  const add = (key, x, y, w, rec) => {
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key).push({ x, y, w, rec });
+  };
+  for (const os of osmRecs) { const k = keyOf(os.addr) || keyOf(os.name); if (k) add(k, os.x, os.y, 3, null); }
+  for (const ov of ovRecs) { const k = keyOf(ov.addr) || keyOf(ov.name); if (k) add(k, ov.x, ov.y, 1, ov); }
+  let snapped = 0;
+  for (const [key, g] of groups) {
+    if (g.length < 3) continue; // no consensus without a quorum
+    let best = null, bestW = 0;
+    for (const m of g) {
+      let w = 0;
+      for (const o of g) if (Math.hypot(o.x - m.x, o.y - m.y) <= 2500) w += o.w; // 250m linkage
+      if (w > bestW) { bestW = w; best = m; }
+    }
+    const totW = g.reduce((s, m) => s + m.w, 0);
+    if (bestW < totW * 0.5) continue; // split vote — leave everything alone
+    let cx = 0, cy = 0, cw = 0;
+    for (const o of g) if (Math.hypot(o.x - best.x, o.y - best.y) <= 2500) { cx += o.x * o.w; cy += o.y * o.w; cw += o.w; }
+    cx /= cw; cy /= cw;
+    let moved = 0;
+    for (const m of g) {
+      if (!m.rec) continue;
+      if (Math.hypot(m.rec.x - cx, m.rec.y - cy) <= 3000) continue; // within 300m — plausible
+      const h1 = Math.abs((m.rec.x * 12.9898 + m.rec.y * 78.233) % 1);
+      const h2 = Math.abs((m.rec.x * 3.1415 + m.rec.y * 2.7182) % 1);
+      m.rec.x = Math.round(cx + (h1 - 0.5) * 700); // ±35m deterministic scatter
+      m.rec.y = Math.round(cy + (h2 - 0.5) * 700);
+      moved++;
+    }
+    if (moved) { snapped += moved; console.log('  anchor "' + key + '": moved', moved, 'stray records onto the consensus cluster'); }
+  }
+  console.log('anchor consensus: relocated', snapped, 'mislocated Overture records');
+}
+
 async function main() {
   const [osmRaw, ovAll] = [await fetchOSM(), loadOverture()];
   const osmItems = osmRaw ? processOSM(osmRaw) : [];
@@ -420,6 +470,9 @@ async function main() {
     if (!dup) kept.push(it);
   }
   console.log('Overture after dedupe:', kept.length, '(dropped', ovItems.length - kept.length, 'duplicate pages)');
+
+  // fix Facebook's garbage pins before position-sensitive matching
+  anchorSnap(kept, osmItems);
 
   // match Overture ↔ OSM (grid index over OSM; 120m for exact-token matches, 60m for phonetic/contact)
   const grid = new Map();
