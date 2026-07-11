@@ -165,7 +165,7 @@ precision highp float;`;
 const F3 = `#version 300 es
 precision highp float;`;
 
-// building shader
+// building shader — cinematic light model, every effect gated by a THEMES knob
 const bldProg = makeShader(`${V3}
 layout(location=0) in vec3 aPos;
 layout(location=1) in float aShade;
@@ -173,44 +173,76 @@ layout(location=2) in float aU;
 layout(location=3) in float aH;
 layout(location=4) in float aRnd;
 layout(location=5) in float aWall;
+layout(location=6) in vec2 aN;
 uniform mat4 uVP;
 out float vShade; out float vU; out float vZ; out float vH; out float vRnd; out float vWall; out float vW;
+out vec3 vPos; out vec2 vN;
 void main(){
   gl_Position = uVP * vec4(aPos, 1.0);
   vShade = aShade; vU = aU; vZ = aPos.z; vH = aH; vRnd = aRnd; vWall = aWall;
+  vPos = aPos; vN = aN;
   vW = gl_Position.w;
 }`, `${F3}
 in float vShade; in float vU; in float vZ; in float vH; in float vRnd; in float vWall; in float vW;
+in vec3 vPos; in vec2 vN;
 uniform vec3 uBase, uTop, uWin, uFog;
 uniform float uNight, uFogD, uFogAmt;
+uniform vec3 uEye, uSunDir, uRimCol, uWinCool, uSunWarm;
+uniform float uTime, uRimK, uSpecK, uWinLit, uFloorDark, uPenthouse, uWinBleed, uFogH, uSunK, uSheenK;
 out vec4 frag;
 float hash12(vec2 p){ vec3 p3 = fract(vec3(p.xyx) * .1031); p3 += dot(p3, p3.yzx + 33.33); return fract((p3.x + p3.y) * p3.z); }
 void main(){
   float hMix = clamp(vZ / max(vH, 1.0), 0.0, 1.0);
   float tallBoost = 0.45 + 0.55 * smoothstep(10.0, 130.0, vH);
+  float tall = smoothstep(12.0, 90.0, vH);
   vec3 col = mix(uBase, uTop, hMix * tallBoost);
   col *= 0.90 + 0.20 * vRnd;
   col *= vShade;
+  vec3 N = normalize(mix(vec3(0.0, 0.0, 1.0), vec3(vN, 0.0), vWall) + vec3(1e-5));
+  // directional color: sun-facing facades warm up, shade faces cool (golden hour / moon fill)
+  float sunF = max(dot(N.xy, normalize(uSunDir.xy + vec2(1e-5))), 0.0) * (0.35 + 0.65 * hMix);
+  col *= mix(vec3(1.0), uSunWarm, sunF * uSunK);
+  col *= mix(vec3(1.0), vec3(0.93, 0.96, 1.06), (1.0 - sunF) * uSunK * 0.6);
   // soft ambient occlusion at street level, grounds the buildings
   if (vWall > 0.5) col *= 0.86 + 0.14 * smoothstep(0.0, 5.5, vZ);
-  // windows on walls (dusk)
+  // windows on walls (dusk): warm/cool mix, dark floors, bright penthouses, glow bleed
   if (vWall > 0.5 && uNight > 0.01) {
     float wx = vU / 3.4;
     float wz = (vZ - 0.8) / 3.1;
     vec2 cell = floor(vec2(wx, wz));
     vec2 f = fract(vec2(wx, wz));
+    float rb = vRnd * 517.0;
     float body = step(0.18, f.x) * step(f.x, 0.82) * step(0.25, f.y) * step(f.y, 0.8);
-    float lit = step(0.62, hash12(cell + vec2(vRnd * 517.0, vRnd * 131.0)));
+    float floorOn = step(uFloorDark, hash12(vec2(cell.y * 7.7, rb)));
+    float lit = step(1.0 - uWinLit, hash12(cell + vec2(rb, vRnd * 131.0))) * floorOn;
     float aa = clamp(1.6 - fwidth(wx) * 5.0, 0.0, 1.0) * clamp(1.6 - fwidth(wz) * 5.0, 0.0, 1.0);
-    float glow = body * lit * aa * step(0.8, vZ) * step(vZ, vH - 0.4);
-    col += uWin * glow * uNight * (0.55 + 0.45 * hash12(cell * 1.7 + vec2(vRnd)));
+    float halo = smoothstep(0.04, 0.30, f.x) * (1.0 - smoothstep(0.70, 0.96, f.x))
+               * smoothstep(0.08, 0.36, f.y) * (1.0 - smoothstep(0.64, 0.92, f.y));
+    float vis = step(0.8, vZ) * step(vZ, vH - 0.4);
+    float glow = body * lit * aa * vis;
+    float bleed = max(halo - body, 0.0) * lit * vis * uWinBleed;
+    vec3 winCol = mix(uWinCool, uWin, step(0.35, hash12(cell * 3.7 + vec2(rb))));
+    float pent = 1.0 + uPenthouse * smoothstep(vH - 9.0, vH - 3.0, vZ) * tall;
+    col += winCol * (glow + bleed) * uNight * pent * (0.55 + 0.45 * hash12(cell * 1.7 + vec2(vRnd)));
   }
   // luminous crown on towers (subtle)
   float crown = smoothstep(75.0, 235.0, vH) * smoothstep(vH - 5.0, vH, vZ);
-  col += uWin * crown * (0.08 + 0.28 * uNight);
-  // distance fog
+  col += uWin * crown * (0.05 + 0.20 * uNight);
+  // camera-facing fresnel rim + sun sheen — makes towers pop off the skyline
+  vec3 V = normalize(uEye - vPos + vec3(1e-4));
+  float ndv = max(dot(N, V), 0.0);
+  float fres = pow(1.0 - ndv, 3.0);
+  col += uRimCol * fres * uRimK * (0.35 + 0.65 * hMix) * (0.4 + 0.6 * tall);
+  vec3 Hv = normalize(V + normalize(uSunDir + vec3(1e-5)));
+  col += uRimCol * pow(max(dot(N, Hv), 0.0), 24.0) * uSpecK * vWall * tall;
+  // slow light band sweeping glass towers (uTime; frozen deterministically in QA)
+  float glass = step(0.55, vRnd) * smoothstep(40.0, 90.0, vH) * vWall;
+  float q = fract((vU + vZ * 1.3) / 260.0 + uTime * 0.012 + vRnd);
+  col += uRimCol * exp(-pow((q - 0.5) * 7.0, 2.0)) * fres * glass * uSheenK;
+  // distance fog, denser at street level so towers rise out of the haze
   float f = 1.0 - exp(-vW / uFogD);
-  col = mix(col, uFog, f * uFogAmt);
+  f *= 1.0 + uFogH * exp(-max(vZ, 0.0) / 45.0);
+  col = mix(col, uFog, min(f * uFogAmt, 0.96));
   frag = vec4(col, 1.0);
 }`);
 
@@ -219,17 +251,20 @@ const flatProg = makeShader(`${V3}
 layout(location=0) in vec3 aPos;
 layout(location=1) in float aSide;
 uniform mat4 uVP;
-out float vSide; out float vW;
-void main(){ gl_Position = uVP * vec4(aPos, 1.0); vSide = aSide; vW = gl_Position.w; }`,
+out float vSide; out float vW; out vec3 vP;
+void main(){ gl_Position = uVP * vec4(aPos, 1.0); vSide = aSide; vP = aPos; vW = gl_Position.w; }`,
 `${F3}
-in float vSide; in float vW;
+in float vSide; in float vW; in vec3 vP;
 uniform vec4 uColor;
-uniform vec3 uFog; uniform float uFogD, uFogAmt;
+uniform vec3 uFog; uniform float uFogD, uFogAmt, uFogH, uRipple, uTime;
 out vec4 frag;
 void main(){
   float edge = 1.0 - smoothstep(0.45, 1.0, abs(vSide));
-  float f = 1.0 - exp(-vW / uFogD);
-  vec3 col = mix(uColor.rgb, uFog, f * uFogAmt);
+  vec3 base = uColor.rgb;
+  // gentle water shimmer (set only on the water range)
+  base += base * 0.30 * sin(vP.x * 0.9 + uTime * 1.1) * sin(vP.y * 0.75 - uTime * 0.8) * uRipple;
+  float f = (1.0 - exp(-vW / uFogD)) * (1.0 + uFogH);
+  vec3 col = mix(base, uFog, min(f * uFogAmt, 0.96));
   frag = vec4(col, uColor.a * edge);
 }`);
 
@@ -242,19 +277,19 @@ void main(){ gl_Position = uVP * vec4(aPos, 0.0, 1.0); vXY = aPos; vW = gl_Posit
 `${F3}
 in vec2 vXY; in float vW;
 uniform vec3 uG0, uG1, uFog;
-uniform float uFogD, uFogAmt;
+uniform float uFogD, uFogAmt, uFogH;
 out vec4 frag;
 float hash12(vec2 p){ vec3 p3 = fract(vec3(p.xyx) * .1031); p3 += dot(p3, p3.yzx + 33.33); return fract((p3.x + p3.y) * p3.z); }
 void main(){
   float r = length(vXY) / 5200.0;
   vec3 col = mix(uG0, uG1, smoothstep(0.15, 1.1, r));
   col += (hash12(floor(vXY * 0.5)) - 0.5) * 0.012; // paper grain
-  float f = 1.0 - exp(-vW / uFogD);
-  col = mix(col, uFog, f * uFogAmt);
+  float f = (1.0 - exp(-vW / uFogD)) * (1.0 + uFogH);
+  col = mix(col, uFog, min(f * uFogAmt, 0.96));
   frag = vec4(col, 1.0);
 }`);
 
-// sky background
+// sky background — direction-based: stars anchored to the world, horizon city-glow, sun disc
 const skyProg = makeShader(`${V3}
 layout(location=0) in vec2 aPos;
 out vec2 vUV;
@@ -262,10 +297,73 @@ void main(){ gl_Position = vec4(aPos, 0.9999, 1.0); vUV = aPos * 0.5 + 0.5; }`,
 `${F3}
 in vec2 vUV;
 uniform vec3 uSkyTop, uSkyHor;
+uniform mat4 uInvVP;
+uniform vec3 uEye, uSkyGlowCol, uSunDir3;
+uniform float uStarAmt, uMilky, uSkyGlowAmt, uSunDiscAmt;
 out vec4 frag;
+float hash12(vec2 p){ vec3 p3 = fract(vec3(p.xyx) * .1031); p3 += dot(p3, p3.yzx + 33.33); return fract((p3.x + p3.y) * p3.z); }
 void main(){
   float t = smoothstep(0.0, 0.9, vUV.y);
-  frag = vec4(mix(uSkyHor, uSkyTop, t), 1.0);
+  vec3 col = mix(uSkyHor, uSkyTop, t);
+  vec2 ndc = vUV * 2.0 - 1.0;
+  vec4 pf = uInvVP * vec4(ndc, 0.9, 1.0);
+  vec3 dir = normalize(pf.xyz / pf.w - uEye);
+  float up = clamp(dir.z, 0.0, 1.0);
+  // amber city-glow hugging the horizon
+  col += uSkyGlowCol * pow(1.0 - up, 9.0) * uSkyGlowAmt;
+  // stars, fixed to the world so orbiting feels 3D (static = deterministic)
+  if (uStarAmt > 0.001 && dir.z > 0.02) {
+    vec2 sp = dir.xy / (dir.z + 0.4) * 2.5;
+    vec2 cid = floor(sp * 64.0);
+    float hs = hash12(cid);
+    vec2 jit = vec2(hash12(cid + 7.1), hash12(cid + 3.7)) - 0.5;
+    float d = length(fract(sp * 64.0) - 0.5 - jit * 0.55);
+    float star = smoothstep(0.10, 0.0, d) * step(0.991, hs) * (0.4 + 0.6 * hash12(cid * 1.3));
+    float band = exp(-pow((dir.x * 0.45 + dir.z * 0.9 - 0.55) * 3.2, 2.0)) * (0.5 + 0.5 * hash12(floor(sp * 9.0)));
+    col += (vec3(0.75, 0.82, 1.0) * star * uStarAmt + vec3(0.18, 0.20, 0.30) * band * uMilky) * smoothstep(0.02, 0.2, dir.z);
+  }
+  // sun disc + halo (day theme)
+  float sd = max(dot(dir, uSunDir3), 0.0);
+  col += vec3(1.0, 0.85, 0.6) * (pow(sd, 900.0) * 3.0 + pow(sd, 12.0) * 0.12) * uSunDiscAmt;
+  frag = vec4(col, 1.0);
+}`);
+
+// street-light halos (static points along major roads) + tower aviation beacons
+const lampProg = makeShader(`${V3}
+layout(location=0) in vec4 aSeed; // x,y,z,rnd
+uniform mat4 uVP;
+out float vR;
+void main(){
+  gl_Position = uVP * vec4(aSeed.xyz, 1.0);
+  gl_PointSize = clamp(3400.0 / max(gl_Position.w, 1.0), 1.5, 10.0);
+  vR = aSeed.w;
+}`,
+`${F3}
+in float vR;
+uniform vec3 uCol; uniform float uAmt;
+out vec4 frag;
+void main(){
+  vec2 d = gl_PointCoord - 0.5;
+  float g = exp(-dot(d, d) * 7.0);
+  frag = vec4(uCol, 1.0) * (g * uAmt * (0.7 + 0.3 * vR));
+}`);
+const beaconProg = makeShader(`${V3}
+layout(location=0) in vec4 aSeed; // x,y,z,phase
+uniform mat4 uVP; uniform float uTime;
+out float vB;
+void main(){
+  gl_Position = uVP * vec4(aSeed.xyz, 1.0);
+  gl_PointSize = clamp(2200.0 / max(gl_Position.w, 1.0), 2.0, 9.0);
+  vB = 0.55 + 0.45 * sin(uTime * 2.4 + aSeed.w * 6.2831); // never fully off
+}`,
+`${F3}
+in float vB;
+uniform float uAmt;
+out vec4 frag;
+void main(){
+  vec2 d = gl_PointCoord - 0.5;
+  float g = exp(-dot(d, d) * 8.0);
+  frag = vec4(1.0, 0.22, 0.16, 1.0) * (g * uAmt * vB);
 }`);
 
 // gaussian dust particles
@@ -318,12 +416,16 @@ void main(){
 }`);
 const compProg = makeShader(quadVS, `${F3}
 in vec2 vUV; uniform sampler2D uScene, uBloom;
-uniform float uBloomK, uVig;
+uniform float uBloomK, uVig, uExpo, uSat;
+uniform vec3 uTint;
 out vec4 frag;
 float hash12(vec2 p){ vec3 p3 = fract(vec3(p.xyx) * .1031); p3 += dot(p3, p3.yzx + 33.33); return fract((p3.x + p3.y) * p3.z); }
 void main(){
   vec3 c = texture(uScene, vUV).rgb + texture(uBloom, vUV).rgb * uBloomK;
-  c = c * (1.0 + 0.12 * c) / (1.0 + c * 0.14); // gentle filmic lift
+  c *= uExpo * uTint;
+  c = (c * (2.51 * c + 0.03)) / (c * (2.43 * c + 0.59) + 0.14); // ACES fit (Narkowicz)
+  float l = dot(c, vec3(0.2126, 0.7152, 0.0722));
+  c = mix(vec3(l), c, uSat);
   vec2 d = vUV - 0.5;
   c *= 1.0 - dot(d, d) * uVig;
   c += (hash12(gl_FragCoord.xy) - 0.5) / 255.0;
@@ -368,6 +470,7 @@ class Acc {
 // ---------- build buildings mesh (chunked) ----------
 const B = {
   pos: new Acc(), shade: new Acc(), u: new Acc(), h: new Acc(), rnd: new Acc(), wall: new Acc(),
+  n: new Acc(), // wall outward normal (xy); roof = 0,0 → shader treats as up
   idx: new Acc(), vcount: 0,
   centroids: [], heights: [], // per building, for search/landmarks
 };
@@ -394,12 +497,13 @@ function buildBuilding(rec) {
   // roof
   const roofIdx = triangulate(pts);
   const rp = new Float32Array(n * 3), rs = new Float32Array(n), ru = new Float32Array(n),
-        rh = new Float32Array(n), rr = new Float32Array(n), rw = new Float32Array(n);
+        rh = new Float32Array(n), rr = new Float32Array(n), rw = new Float32Array(n),
+        rn = new Float32Array(n * 2); // zeros → roof normal resolves to up
   for (let i = 0; i < n; i++) {
     rp[3 * i] = pts[2 * i]; rp[3 * i + 1] = pts[2 * i + 1]; rp[3 * i + 2] = h;
     rs[i] = 1.06; ru[i] = 0; rh[i] = h; rr[i] = rnd; rw[i] = 0;
   }
-  B.pos.push(rp); B.shade.push(rs); B.u.push(ru); B.h.push(rh); B.rnd.push(rr); B.wall.push(rw);
+  B.pos.push(rp); B.shade.push(rs); B.u.push(ru); B.h.push(rh); B.rnd.push(rr); B.wall.push(rw); B.n.push(rn);
   const ri = new Uint32Array(roofIdx.length);
   for (let i = 0; i < roofIdx.length; i++) ri[i] = roofIdx[i] + base;
   B.idx.push(ri);
@@ -407,7 +511,8 @@ function buildBuilding(rec) {
 
   // walls
   const wp = new Float32Array(n * 4 * 3), ws = new Float32Array(n * 4), wu = new Float32Array(n * 4),
-        wh = new Float32Array(n * 4), wr = new Float32Array(n * 4), ww = new Float32Array(n * 4);
+        wh = new Float32Array(n * 4), wr = new Float32Array(n * 4), ww = new Float32Array(n * 4),
+        wn = new Float32Array(n * 4 * 2);
   const wi = new Uint32Array(n * 6);
   let dist = 0;
   for (let i = 0; i < n; i++) {
@@ -426,9 +531,10 @@ function buildBuilding(rec) {
     wh[i * 4] = wh[i * 4 + 1] = wh[i * 4 + 2] = wh[i * 4 + 3] = h;
     wr[i * 4] = wr[i * 4 + 1] = wr[i * 4 + 2] = wr[i * 4 + 3] = rnd;
     ww[i * 4] = ww[i * 4 + 1] = ww[i * 4 + 2] = ww[i * 4 + 3] = 1;
+    wn.set([nx, ny, nx, ny, nx, ny, nx, ny], i * 8);
     wi.set([vb, vb + 1, vb + 2, vb, vb + 2, vb + 3], i * 6);
   }
-  B.pos.push(wp); B.shade.push(ws); B.u.push(wu); B.h.push(wh); B.rnd.push(wr); B.wall.push(ww);
+  B.pos.push(wp); B.shade.push(ws); B.u.push(wu); B.h.push(wh); B.rnd.push(wr); B.wall.push(ww); B.n.push(wn);
   B.idx.push(wi);
   B.vcount += n * 4;
 }

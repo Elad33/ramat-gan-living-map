@@ -128,8 +128,25 @@ function assembleRail() {
 }
 
 // ---------- particles ("אבקת יהלומים") ----------
+// seeded LCG so QA screenshots are diff-able (Math.random broke determinism)
+function makeRng(seed) {
+  let s = seed >>> 0;
+  return () => { s = (s * 1664525 + 1013904223) >>> 0; return s / 4294967296; };
+}
+function makePointsVAO(seeds) {
+  const vao = gl.createVertexArray();
+  gl.bindVertexArray(vao);
+  const buf = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+  gl.bufferData(gl.ARRAY_BUFFER, seeds, gl.STATIC_DRAW);
+  gl.enableVertexAttribArray(0);
+  gl.vertexAttribPointer(0, 4, gl.FLOAT, false, 0, 0);
+  gl.bindVertexArray(null);
+  return { vao, count: seeds.length / 4 };
+}
 function buildDust() {
   const N = 1500;
+  const rnd = makeRng(0x5eed);
   const seeds = new Float32Array(N * 4);
   // sample: 55% over parks, rest across city
   const pb = parkPolys.map(p => {
@@ -140,29 +157,63 @@ function buildDust() {
   const totW = pb.reduce((s, b) => s + b.w, 0);
   for (let i = 0; i < N; i++) {
     let x, y;
-    if (pb.length && Math.random() < 0.55) {
-      let t = Math.random() * totW, bi = 0;
+    if (pb.length && rnd() < 0.55) {
+      let t = rnd() * totW, bi = 0;
       while (bi < pb.length - 1 && t > pb[bi].w) { t -= pb[bi].w; bi++; }
       const b = pb[bi];
-      x = b.mnx + Math.random() * (b.mxx - b.mnx);
-      y = b.mny + Math.random() * (b.mxy - b.mny);
+      x = b.mnx + rnd() * (b.mxx - b.mnx);
+      y = b.mny + rnd() * (b.mxy - b.mny);
     } else {
-      x = BBOX.minX + Math.random() * (BBOX.maxX - BBOX.minX);
-      y = BBOX.minY + Math.random() * (BBOX.maxY - BBOX.minY);
+      x = BBOX.minX + rnd() * (BBOX.maxX - BBOX.minX);
+      y = BBOX.minY + rnd() * (BBOX.maxY - BBOX.minY);
     }
     seeds[4 * i] = x; seeds[4 * i + 1] = y;
-    seeds[4 * i + 2] = 4 + Math.random() * 55;
-    seeds[4 * i + 3] = Math.random();
+    seeds[4 * i + 2] = 4 + rnd() * 55;
+    seeds[4 * i + 3] = rnd();
   }
-  const vao = gl.createVertexArray();
-  gl.bindVertexArray(vao);
-  const buf = gl.createBuffer();
-  gl.bindBuffer(gl.ARRAY_BUFFER, buf);
-  gl.bufferData(gl.ARRAY_BUFFER, seeds, gl.STATIC_DRAW);
-  gl.enableVertexAttribArray(0);
-  gl.vertexAttribPointer(0, 4, gl.FLOAT, false, 0, 0);
-  gl.bindVertexArray(null);
-  meshes.dust = { vao, count: N };
+  meshes.dust = makePointsVAO(seeds);
+}
+
+// warm sodium halos every ~65m along the arterial roads (static, hash-thinned)
+function buildLamps() {
+  const cap = window.IS_MOBILE ? 800 : 2200;
+  const pts = [];
+  outer: for (let cls = 0; cls <= 2; cls++) {
+    for (const road of roadsByCls[cls]) {
+      let acc = 0;
+      for (let i = 0; i < road.length / 2 - 1; i++) {
+        const x0 = road[2 * i], y0 = road[2 * i + 1], x1 = road[2 * i + 2], y1 = road[2 * i + 3];
+        const seg = Math.hypot(x1 - x0, y1 - y0);
+        acc += seg;
+        if (acc < 65) continue;
+        acc = 0;
+        const hx = Math.abs((x1 * 12.9898 + y1 * 78.233) % 1);
+        if (hx < 0.15) continue; // thin out, breaks mechanical repetition
+        pts.push(x1, y1, 6, hx);
+        if (pts.length / 4 >= cap) break outer;
+      }
+    }
+  }
+  meshes.lamps = pts.length ? makePointsVAO(new Float32Array(pts)) : null;
+}
+
+// blinking red aviation beacons on the tallest towers
+function buildBeacons() {
+  const cands = [];
+  B.centroids.forEach((c, i) => { if (c && B.heights[i] >= 90) cands.push({ x: c[0], y: c[1], h: B.heights[i] }); });
+  cands.sort((a, b) => b.h - a.h);
+  const picked = [];
+  for (const c of cands) {
+    if (picked.length >= 16) break;
+    if (picked.some(p => Math.hypot(p.x - c.x, p.y - c.y) < 40)) continue; // multi-part towers
+    picked.push(c);
+  }
+  if (!picked.length) { meshes.beacons = null; return; }
+  const seeds = new Float32Array(picked.length * 4);
+  picked.forEach((p, i) => {
+    seeds.set([p.x, p.y, p.h + 2.5, Math.abs((p.x * 12.9898 + p.y * 78.233) % 1)], i * 4);
+  });
+  meshes.beacons = makePointsVAO(seeds);
 }
 
 // ---------- finalize meshes ----------
@@ -174,6 +225,7 @@ function uploadMeshes() {
     { data: B.h.concat(Float32Array), size: 1, loc: 3 },
     { data: B.rnd.concat(Float32Array), size: 1, loc: 4 },
     { data: B.wall.concat(Float32Array), size: 1, loc: 5 },
+    { data: B.n.concat(Float32Array), size: 2, loc: 6 },
   ], B.idx.concat(Uint32Array));
   meshes.flat = makeVAO([
     { data: F_ACC.pos.concat(Float32Array), size: 3, loc: 0 },
@@ -188,7 +240,7 @@ function uploadMeshes() {
     { data: RL_ACC.side.concat(Float32Array), size: 1, loc: 1 },
   ], RL_ACC.idx.concat(Uint32Array));
   const gx = (BBOX.minX + BBOX.maxX) / 2, gy = (BBOX.minY + BBOX.maxY) / 2;
-  const gw = (BBOX.maxX - BBOX.minX) * 2.2, gh = (BBOX.maxY - BBOX.minY) * 2.2;
+  const gw = (BBOX.maxX - BBOX.minX) * 6, gh = (BBOX.maxY - BBOX.minY) * 6; // far past the fog — no visible plane edge at high tilt
   meshes.ground = makeVAO([
     { data: new Float32Array([gx - gw, gy - gh, gx + gw, gy - gh, gx - gw, gy + gh, gx + gw, gy + gh]), size: 2, loc: 0 },
   ], new Uint32Array([0, 1, 2, 1, 3, 2]));
@@ -197,6 +249,8 @@ function uploadMeshes() {
   ], null);
   meshes.quad.count = 3;
   buildDust();
+  buildLamps();
+  buildBeacons();
 }
 
 // ---------- framebuffers ----------
@@ -267,6 +321,7 @@ const camLim = {
   minX: BBOX.minX - 1800, maxX: BBOX.maxX + 1800, minY: BBOX.minY - 1800, maxY: BBOX.maxY + 1800,
 };
 let VP = null, INV_VP = null, ASPECT = 1;
+let EYE = [0, 0, 0];
 function clampCam() {
   cam.dist = clamp(cam.dist, camLim.minDist, camLim.maxDist);
   cam.tilt = clamp(cam.tilt, camLim.minTilt, camLim.maxTilt);
@@ -278,6 +333,7 @@ function computeVP() {
   const st = Math.sin(cam.tilt), ct = Math.cos(cam.tilt);
   const sb = Math.sin(cam.bearing), cb = Math.cos(cam.bearing);
   const eye = [cam.cx + cam.dist * st * sb, cam.cy - cam.dist * st * cb, cam.dist * ct];
+  EYE = eye;
   const view = mat4LookAt(eye, [cam.cx, cam.cy, 0], [0, 0, 1]);
   const near = Math.max(2, cam.dist * 0.04);
   const far = cam.dist * 6 + 6000;
@@ -332,6 +388,16 @@ function draw() {
   gl.useProgram(skyProg.p);
   gl.uniform3fv(skyProg.u.uSkyTop, PAL.sky0);
   gl.uniform3fv(skyProg.u.uSkyHor, PAL.sky1);
+  gl.uniformMatrix4fv(skyProg.u.uInvVP, false, new Float32Array(INV_VP));
+  gl.uniform3fv(skyProg.u.uEye, EYE);
+  const sd = PAL.sunDir || [0.62, 0.7, 0.35];
+  const sdl = Math.hypot(sd[0], sd[1], sd[2]) || 1;
+  gl.uniform3fv(skyProg.u.uSunDir3, [sd[0] / sdl, sd[1] / sdl, sd[2] / sdl]);
+  gl.uniform3fv(skyProg.u.uSkyGlowCol, PAL.skyGlowCol || [0.3, 0.2, 0.12]);
+  gl.uniform1f(skyProg.u.uSkyGlowAmt, PAL.skyGlowAmt ?? 0);
+  gl.uniform1f(skyProg.u.uStarAmt, PAL.starAmt ?? 0);
+  gl.uniform1f(skyProg.u.uMilky, PAL.milky ?? 0);
+  gl.uniform1f(skyProg.u.uSunDiscAmt, PAL.sunDiscAmt ?? 0);
   gl.bindVertexArray(meshes.quad.vao);
   gl.drawArrays(gl.TRIANGLES, 0, 3);
 
@@ -343,6 +409,7 @@ function draw() {
   gl.uniform3fv(groundProg.u.uFog, PAL.fog);
   gl.uniform1f(groundProg.u.uFogD, PAL.fogD);
   gl.uniform1f(groundProg.u.uFogAmt, PAL.fogAmt);
+  gl.uniform1f(groundProg.u.uFogH, PAL.fogH ?? 0);
   gl.bindVertexArray(meshes.ground.vao);
   gl.drawElements(gl.TRIANGLES, meshes.ground.count, gl.UNSIGNED_INT, 0);
 
@@ -354,12 +421,17 @@ function draw() {
   gl.uniform3fv(flatProg.u.uFog, PAL.fog);
   gl.uniform1f(flatProg.u.uFogD, PAL.fogD);
   gl.uniform1f(flatProg.u.uFogAmt, PAL.fogAmt);
+  gl.uniform1f(flatProg.u.uFogH, PAL.fogH ?? 0);
+  gl.uniform1f(flatProg.u.uTime, timeSec);
+  gl.uniform1f(flatProg.u.uRipple, 0);
   gl.bindVertexArray(meshes.flat.vao);
   for (const r of flatRanges) {
     const col = PAL.flat[r.key];
     if (!col || col[3] === 0) continue;
     gl.uniform4fv(flatProg.u.uColor, col);
+    if (r.key === 'water') gl.uniform1f(flatProg.u.uRipple, PAL.rippleK ?? 0);
     gl.drawElements(gl.TRIANGLES, r.count, gl.UNSIGNED_INT, r.start * 4);
+    if (r.key === 'water') gl.uniform1f(flatProg.u.uRipple, 0);
   }
   // optional layers (same program/state)
   if (LAYERS.transit && meshes.rail) {
@@ -395,8 +467,51 @@ function draw() {
   gl.uniform3fv(bldProg.u.uFog, PAL.fog);
   gl.uniform1f(bldProg.u.uFogD, PAL.fogD);
   gl.uniform1f(bldProg.u.uFogAmt, PAL.fogAmt);
+  gl.uniform3fv(bldProg.u.uEye, EYE);
+  gl.uniform1f(bldProg.u.uTime, timeSec);
+  gl.uniform3fv(bldProg.u.uSunDir, PAL.sunDir || [0.62, 0.7, 0.35]);
+  gl.uniform3fv(bldProg.u.uRimCol, PAL.rimCol || [0.55, 0.7, 1]);
+  gl.uniform1f(bldProg.u.uRimK, PAL.rimK ?? 0);
+  gl.uniform1f(bldProg.u.uSpecK, PAL.specK ?? 0);
+  gl.uniform3fv(bldProg.u.uWinCool, PAL.winCool || PAL.win);
+  gl.uniform1f(bldProg.u.uWinLit, PAL.winLit ?? 0.38);
+  gl.uniform1f(bldProg.u.uFloorDark, PAL.floorDark ?? 0);
+  gl.uniform1f(bldProg.u.uPenthouse, PAL.penthouse ?? 0);
+  gl.uniform1f(bldProg.u.uWinBleed, PAL.winBleed ?? 0);
+  gl.uniform1f(bldProg.u.uFogH, PAL.fogH ?? 0);
+  gl.uniform3fv(bldProg.u.uSunWarm, PAL.sunWarm || [1, 1, 1]);
+  gl.uniform1f(bldProg.u.uSunK, PAL.sunK ?? 0);
+  gl.uniform1f(bldProg.u.uSheenK, PAL.sheenK ?? 0);
   gl.bindVertexArray(meshes.bld.vao);
   gl.drawElements(gl.TRIANGLES, meshes.bld.count, gl.UNSIGNED_INT, 0);
+
+  // street lamps + tower beacons (additive, depth-tested so buildings occlude them)
+  if ((PAL.lampAmt ?? 0) > 0.01 && meshes.lamps) {
+    gl.enable(gl.BLEND);
+    gl.blendFunc(gl.ONE, gl.ONE);
+    gl.depthMask(false);
+    gl.useProgram(lampProg.p);
+    gl.uniformMatrix4fv(lampProg.u.uVP, false, vp32);
+    gl.uniform3fv(lampProg.u.uCol, PAL.lampCol || [1, 0.72, 0.38]);
+    gl.uniform1f(lampProg.u.uAmt, PAL.lampAmt);
+    gl.bindVertexArray(meshes.lamps.vao);
+    gl.drawArrays(gl.POINTS, 0, meshes.lamps.count);
+    gl.depthMask(true);
+    gl.disable(gl.BLEND);
+  }
+  if ((PAL.beaconAmt ?? 0) > 0.01 && meshes.beacons) {
+    gl.enable(gl.BLEND);
+    gl.blendFunc(gl.ONE, gl.ONE);
+    gl.depthMask(false);
+    gl.useProgram(beaconProg.p);
+    gl.uniformMatrix4fv(beaconProg.u.uVP, false, vp32);
+    gl.uniform1f(beaconProg.u.uTime, timeSec);
+    gl.uniform1f(beaconProg.u.uAmt, PAL.beaconAmt);
+    gl.bindVertexArray(meshes.beacons.vao);
+    gl.drawArrays(gl.POINTS, 0, meshes.beacons.count);
+    gl.depthMask(true);
+    gl.disable(gl.BLEND);
+  }
 
   // gaussian dust
   if (PAL.dustAmt > 0.01) {
@@ -433,13 +548,14 @@ function draw() {
   gl.uniform1f(brightProg.u.uThresh, PAL.bloomThresh);
   gl.bindVertexArray(meshes.quad.vao);
   gl.drawArrays(gl.TRIANGLES, 0, 3);
-  // blur ping-pong ×2
+  // blur ping-pong (extra pass + anamorphic horizontal stretch are theme knobs)
   gl.useProgram(blurProg.p);
   gl.uniform1i(blurProg.u.uTex, 0);
-  for (let i = 0; i < 2; i++) {
+  const passes = PAL.bloomPasses ?? 2, anamK = PAL.anamK ?? 1;
+  for (let i = 0; i < passes; i++) {
     gl.bindFramebuffer(gl.FRAMEBUFFER, FB.bloomB.fbo);
     gl.bindTexture(gl.TEXTURE_2D, FB.bloomA.tex);
-    gl.uniform2f(blurProg.u.uDir, 1.35 / FB.bloomA.w, 0);
+    gl.uniform2f(blurProg.u.uDir, anamK * 1.35 / FB.bloomA.w, 0);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
     gl.bindFramebuffer(gl.FRAMEBUFFER, FB.bloomA.fbo);
     gl.bindTexture(gl.TEXTURE_2D, FB.bloomB.tex);
@@ -458,6 +574,9 @@ function draw() {
   gl.uniform1i(compProg.u.uBloom, 1);
   gl.uniform1f(compProg.u.uBloomK, PAL.bloomK);
   gl.uniform1f(compProg.u.uVig, PAL.vig);
+  gl.uniform1f(compProg.u.uExpo, PAL.expo ?? 1);
+  gl.uniform1f(compProg.u.uSat, PAL.sat ?? 1);
+  gl.uniform3fv(compProg.u.uTint, PAL.tint || [1, 1, 1]);
   gl.drawArrays(gl.TRIANGLES, 0, 3);
 }
 
@@ -639,7 +758,8 @@ function frame(tms) {
     computeVP();
     animating = true;
   }
-  const continuous = PAL && PAL.dustAmt > 0.01;
+  // continuous rendering: dust (legacy) or any uTime effect — desktop only; mobile renders on interaction
+  const continuous = PAL && (PAL.dustAmt > 0.01 || (!window.IS_MOBILE && (PAL.animK ?? 0) > 0));
   if (needRender || animating || continuous) {
     draw();
     needRender = false;

@@ -16,8 +16,8 @@ const THEMES = {
     sky0: [0.014, 0.022, 0.048], sky1: [0.06, 0.085, 0.15],
     ground0: [0.05, 0.07, 0.128], ground1: [0.028, 0.04, 0.078],
     fog: [0.05, 0.07, 0.128], fogD: 10500, fogAmt: 0.6,
-    bldBase: [0.095, 0.13, 0.225], bldTop: [0.29, 0.36, 0.53],
-    win: [1.0, 0.77, 0.40], night: 1,
+    bldBase: [0.095, 0.13, 0.225], bldTop: [0.32, 0.40, 0.58],
+    win: [1.08, 0.84, 0.45], night: 1,
     flat: {
       park: [0.052, 0.148, 0.112, 0.92], cemetery: [0.058, 0.115, 0.098, 0.85],
       pitch: [0.06, 0.165, 0.14, 0.8], water: [0.055, 0.135, 0.23, 0.95],
@@ -32,14 +32,22 @@ const THEMES = {
       rail: [0.88, 0.34, 0.30, 0.95], railTunnel: [0.88, 0.34, 0.30, 0.34],
     },
     dust: [0.8, 0.62, 0.30], dustAmt: 0.55,
-    bloomThresh: 0.36, bloomK: 0.8, vig: 0.34,
+    bloomThresh: 0.30, bloomK: 0.8, vig: 0.34,
+    // cinematic night: cool moon fill, mixed windows, street haze, stars, sodium lamps
+    sunDir: [0.62, 0.70, 0.35], sunWarm: [0.75, 0.82, 1.10], sunK: 0.10,
+    rimK: 0.35, rimCol: [0.55, 0.70, 1.0], specK: 0.18,
+    winCool: [0.62, 0.80, 1.0], winLit: 0.40, floorDark: 0.18, penthouse: 0.7, winBleed: 1,
+    fogH: 0.55, starAmt: 0.9, milky: 0.35, skyGlowCol: [0.42, 0.24, 0.09], skyGlowAmt: 0.38, sunDiscAmt: 0,
+    lampCol: [1.0, 0.72, 0.38], lampAmt: 0.8, beaconAmt: 1,
+    expo: 1.15, sat: 1.12, tint: [1.02, 1.0, 0.99], sheenK: 0.5, rippleK: 0.35, animK: 1,
+    bloomPasses: 3, anamK: 1.6,
   },
   light: {
     css: '#e9ecef',
-    sky0: [0.845, 0.878, 0.905], sky1: [0.925, 0.94, 0.952],
-    ground0: [0.898, 0.909, 0.919], ground1: [0.838, 0.855, 0.872],
-    fog: [0.895, 0.915, 0.933], fogD: 11500, fogAmt: 0.55,
-    bldBase: [0.735, 0.725, 0.70], bldTop: [0.985, 0.978, 0.962],
+    sky0: [0.80, 0.845, 0.90], sky1: [0.965, 0.925, 0.865],
+    ground0: [0.912, 0.898, 0.872], ground1: [0.852, 0.838, 0.812],
+    fog: [0.93, 0.905, 0.868], fogD: 11500, fogAmt: 0.55,
+    bldBase: [0.742, 0.726, 0.695], bldTop: [0.99, 0.976, 0.948],
     win: [1.0, 0.9, 0.6], night: 0,
     flat: {
       park: [0.695, 0.83, 0.695, 1], cemetery: [0.73, 0.81, 0.73, 1],
@@ -56,6 +64,14 @@ const THEMES = {
     },
     dust: [1, 1, 1], dustAmt: 0,
     bloomThresh: 0.78, bloomK: 0.22, vig: 0.15,
+    // golden hour: low western sun, warm sun-facing facades, cool shade, sun disc
+    sunDir: [0.85, 0.35, 0.30], sunWarm: [1.12, 1.02, 0.86], sunK: 0.40,
+    rimK: 0.18, rimCol: [1.0, 0.95, 0.85], specK: 0.10,
+    winCool: [1.0, 0.9, 0.6], winLit: 0.38, floorDark: 0, penthouse: 0, winBleed: 0,
+    fogH: 0.35, starAmt: 0, milky: 0, skyGlowCol: [0.42, 0.28, 0.13], skyGlowAmt: 0.3, sunDiscAmt: 0.8,
+    lampCol: [1.0, 0.72, 0.38], lampAmt: 0, beaconAmt: 0,
+    expo: 1.05, sat: 1.05, tint: [1.04, 1.0, 0.95], sheenK: 0, rippleK: 0, animK: 0,
+    bloomPasses: 2, anamK: 1,
   },
 };
 let themeName = null;

@@ -299,6 +299,7 @@ const __qaBase = window.__qaExt;
 window.__qaExt = function (qs) {
   if (__qaBase) __qaBase(qs);
   if (/shel/.test(qs)) { shelOn = true; syncShelBtn(); positionShelters(); MAP.drawOnce(); }
+  if (/chips/.test(qs)) { $('homeChips').classList.add('show'); MAP.drawOnce(); }
   if (/navui/.test(qs)) { // מסלול סינתטי — צילום דטרמיניסטי בלי רשת
     const c = MAP.cam;
     NAV.on = true; NAV.mode = 'foot'; NAV.to = [c.cx + 260, c.cy + 180]; NAV.toName = 'קפה הדגמה';

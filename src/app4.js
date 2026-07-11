@@ -108,7 +108,12 @@ function heHours(str) {
 // lighter MSAA — with 2,144 businesses the desktop budget flattens mobile GPUs.
 const IS_MOBILE = matchMedia('(pointer: coarse)').matches || Math.min(innerWidth, innerHeight) <= 640;
 window.IS_MOBILE = IS_MOBILE;
-if (IS_MOBILE) { THEMES.dark.dustAmt = 0; THEMES.dark.bloomK = 0.55; }
+if (IS_MOBILE) { // trim GPU-heavy extras; the core cinematic look stays
+  THEMES.dark.dustAmt = 0; THEMES.dark.bloomK = 0.55;
+  THEMES.dark.milky = 0; THEMES.light.milky = 0;
+  THEMES.dark.bloomPasses = 2; THEMES.dark.anamK = 1;
+  THEMES.dark.sheenK = 0; THEMES.dark.lampAmt = 0.55;
+}
 const BIZ_POOL_N = IS_MOBILE ? 46 : 150;
 const bizPool = [];
 for (let i = 0; i < BIZ_POOL_N; i++) {
@@ -241,6 +246,35 @@ $('bizBtn').addEventListener('click', () => {
 });
 $('bizBtn').classList.toggle('on', bizLayerOn);
 window.__bizOn = bizLayerOn;
+
+// home quick chips: revealed when the search field gets focus, one tap lights a category
+(function () {
+  const wrap = $('homeChips');
+  if (!wrap) return;
+  const input = $('searchInput');
+  input.addEventListener('focus', () => { if (!aiPanel.classList.contains('open')) wrap.classList.add('show'); });
+  document.addEventListener('pointerdown', e => {
+    if (!e.target.closest('#searchWrap')) wrap.classList.remove('show');
+  });
+  wrap.addEventListener('click', e => {
+    const b = e.target.closest('.hc');
+    if (!b) return;
+    if (b.dataset.ev) { wrap.classList.remove('show'); renderEvList(); openPanel(); return; }
+    const wasOn = b.classList.contains('on');
+    wrap.querySelectorAll('.hc.on').forEach(x => x.classList.remove('on'));
+    if (wasOn) {
+      bizFocus = null;
+    } else {
+      b.classList.add('on');
+      bizFocus = new Set([b.dataset.cat]);
+      if (!bizLayerOn) $('bizBtn').click();
+      const c = bizCatById[b.dataset.cat];
+      showToast((c ? c.label : 'העסקים') + ' מודגשים על המפה — התקרבו לרחוב');
+    }
+    positionBiz(true);
+    MAP.requestRender();
+  });
+})();
 
 // ---------- business popup ----------
 function bizChipHtml(b) {
