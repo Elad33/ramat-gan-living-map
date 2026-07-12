@@ -18,7 +18,6 @@
   "deployUrl": "https://livemap-givatayim.vercel.app",
   "contentRawBase": null,
   "features": {
-    "subscribe": false,
     "admin": false
   },
   "themeColor": "#070b16"

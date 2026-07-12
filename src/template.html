@@ -519,40 +519,6 @@ textarea.f-in{resize:vertical;min-height:74px}
 #placeHint.show{transform:translate(-50%,0);opacity:1}
 #placeHint button{font-weight:700;text-decoration:underline;text-underline-offset:3px}
 
-/* ---------- email updates card ---------- */
-#subCard{position:fixed;bottom:96px;left:50%;transform:translate(-50%,24px);opacity:0;pointer-events:none;
-  z-index:26;width:min(400px,calc(100vw - 32px));background:color-mix(in srgb,var(--panel-solid) 92%,transparent);
-  backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);border:1px solid var(--hairline);
-  border-radius:var(--r-lg);box-shadow:var(--elev-3);padding:20px 22px 18px;
-  transition:transform var(--t-slow) var(--ease),opacity .35s}
-#subCard.show{transform:translate(-50%,0);opacity:1;pointer-events:auto}
-#subCard .eyebrow{font-size:11px;font-weight:700;letter-spacing:.2em;color:var(--gold)}
-#subCard h3{font-family:var(--font-display);font-weight:800;font-size:20px;margin-top:5px;line-height:1.3}
-#subCard .sub-line{font-size:13px;color:var(--ink-dim);margin-top:5px;line-height:1.55}
-.sub-form{display:flex;gap:8px;margin-top:13px}
-#subEmail{flex:1;min-width:0;background:var(--field);border:1px solid var(--line);
-  border-radius:var(--r-sm);min-height:46px;padding:10px 13px;outline:none;font-size:14px;direction:ltr;text-align:left;
-  transition:border-color var(--t-med)}
-#subEmail:focus{border-color:var(--gold)}
-#subEmail.bad{border-color:var(--danger)}
-#subGo{flex:none;display:flex;align-items:center;gap:7px;padding:10px 18px;border-radius:11px;
-  background:var(--grad-gold);color:var(--on-gold);font-weight:700;
-  font-size:14px;transition:filter .15s;white-space:nowrap}
-#subGo:hover{filter:brightness(1.08)}
-#subGo:disabled{opacity:.55;cursor:default}
-.sub-foot{display:flex;align-items:center;justify-content:space-between;margin-top:10px}
-#subErr{font-size:13px;color:var(--danger);min-height:1.2em}
-#subLater{font-size:13px;font-weight:600;color:var(--ink-faint);padding:6px 4px}
-#subLater:hover{color:var(--ink)}
-#subCard .sub-done{display:flex;align-items:center;gap:12px;padding:6px 0 2px;font-size:15px;font-weight:600}
-#subCard .sub-done svg{flex:none;color:var(--emerald)}
-@media (max-width:640px){
-  #subCard{bottom:calc(150px + env(safe-area-inset-bottom))} /* clear of the legend + dock */
-  .sub-form{flex-direction:column}
-  #subGo{justify-content:center;min-height:44px}
-  #subEmail{font-size:16px} /* ≥16px, or iOS zooms the page on focus */
-}
-
 /* ---------- businesses on the map ---------- */
 .bz{position:absolute;top:0;left:0;width:23px;height:23px;pointer-events:auto;cursor:pointer;will-change:transform;z-index:3}
 .bz::after{content:'';position:absolute;inset:-10px} /* finger-sized hit area */
@@ -701,7 +667,7 @@ textarea.f-in{resize:vertical;min-height:74px}
     width:42px;height:4px;border-radius:2px;background:var(--hairline)}
   .ai-form{margin:12px 20px 0}
   .ai-sugg{margin:9px 20px 0}
-  #aiInput,.f-in,#subEmail,#searchInput{font-size:16px} /* ≥16px, or iOS auto-zooms the page on focus */
+  #aiInput,.f-in,#searchInput{font-size:16px} /* ≥16px, or iOS auto-zooms the page on focus */
   #bizChips{padding:2px 20px 9px}
   #bizList{padding:10px 20px 24px}
   .bz-row{min-height:52px}
@@ -1005,19 +971,6 @@ textarea.f-in{resize:vertical;min-height:74px}
   <button id="placeCancel">ביטול</button>
 </div>
 
-<aside id="subCard" role="dialog" aria-label="הרשמה לעדכוני אירועים">
-  <div class="eyebrow">עדכוני אירועים</div>
-  <h3>מה קורה ב{{NAME_HE}}, ישר למייל</h3>
-  <div class="sub-line">עדכון קצר כשנוספים אירועים חדשים בעיר. בלי ספאם, אפשר לבטל בכל רגע.</div>
-  <form class="sub-form" id="subForm" novalidate>
-    <input id="subEmail" type="email" inputmode="email" autocomplete="email" placeholder="you@email.com" aria-label="כתובת מייל"/>
-    <button id="subGo" type="submit">עדכנו אותי</button>
-  </form>
-  <div class="sub-foot">
-    <span id="subErr" role="alert"></span>
-    <button id="subLater" type="button">לא עכשיו</button>
-  </div>
-</aside>
 <div id="toast"></div>
 <div id="attrib">© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors · <a href="https://overturemaps.org" target="_blank" rel="noopener">Overture Maps</a></div>
 
