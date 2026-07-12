@@ -1,27 +1,7 @@
 {
- "updated": "2026-07-12T13:54:40.405Z",
+ "updated": "2026-07-12T16:10:08.310Z",
  "source": "https://www.ramat-gan.muni.il/event-lobby",
  "events": [
-  {
-   "id": "muni-eventslectures-for-age-60-and-over",
-   "title": "הרצאות במועדונים לוותיקים",
-   "cat": "community",
-   "anim": "community",
-   "muniCat": "אזרחים ותיקים",
-   "audience": [
-    "הגיל השלישי (60+)"
-   ],
-   "date": "2026-07-12",
-   "time": "",
-   "locName": "מועדון אילנות",
-   "address": "רחוב האילנות 1 א'",
-   "x": 2043.4,
-   "y": -1347.3,
-   "approx": true,
-   "link": "https://www.ramat-gan.muni.il/events/lectures-for-age-60-and-over/",
-   "img": "https://www.ramat-gan.muni.il/media/gycpvo0p/עמוד-הרצאות_1540-8032.jpg",
-   "featured": false
-  },
   {
    "id": "muni-sworkshops-for-early-childhood-harmony-center-shikun-vatikim",
    "title": "סדנאות להורים ולגיל הרך במרכז הרמוניה שיכון ותיקים",
@@ -44,50 +24,6 @@
    "free": true
   },
   {
-   "id": "muni-eventsrg-eventsweb-site-event-563",
-   "title": "סדנאות נגרות פתוחה",
-   "cat": "community",
-   "anim": "community",
-   "muniCat": "מייקרס יצירה עירונית",
-   "audience": [
-    "צעירים (18-35)",
-    "מבוגרים (60- 35)",
-    "הגיל השלישי (60+)"
-   ],
-   "date": "2026-07-12",
-   "time": "13:00",
-   "locName": "מייקרס",
-   "address": "רחוב מסובים 2",
-   "x": 1714.2,
-   "y": -3740.9,
-   "approx": true,
-   "link": "https://www.ramat-gan.muni.il/events/rg-events/web-site-event-563/",
-   "img": null,
-   "featured": false,
-   "free": true
-  },
-  {
-   "id": "muni-eventsrg-eventsweb-site-event-1246",
-   "title": "שעות סיפור ברשת ספריות רמת-גן - יוני - יולי 2026",
-   "cat": "community",
-   "anim": "community",
-   "muniCat": "שעת סיפור",
-   "audience": [
-    "ילדים (4-11)"
-   ],
-   "date": "2026-07-12",
-   "time": "16:45",
-   "locName": "ספריית רמת אפעל",
-   "address": "רחוב היסמין 1 - סמינר אפעל, בניין יד טבנקין",
-   "x": 626.1,
-   "y": -940.9,
-   "approx": true,
-   "link": "https://www.ramat-gan.muni.il/events/rg-events/web-site-event-1246/",
-   "img": null,
-   "featured": false,
-   "free": true
-  },
-  {
    "id": "muni-eventsmbe-rg-eventsramatganchik-2026",
    "title": "רמתגנצ'יק אירועי שבוע 5-9.7",
    "cat": "community",
@@ -104,47 +40,6 @@
    "y": null,
    "link": "https://www.ramat-gan.muni.il/events/mbe-rg-events/ramatganchik-2026/",
    "img": "https://www.ramat-gan.muni.il/media/sw4ntzgj/רמתגנציק_התאמה-לאתר-מובייל_342-220.jpg",
-   "featured": false,
-   "free": true
-  },
-  {
-   "id": "muni-events2026-rg-afternoon",
-   "title": "אחה\"צ ר\"גוע חודשי יולי - אוגוסט",
-   "cat": "community",
-   "anim": "community",
-   "muniCat": "פעילויות לילדים ולגיל הרך",
-   "audience": [
-    "ילדים (4-11)"
-   ],
-   "date": "2026-07-12",
-   "time": "17:30",
-   "locName": "חוות \"טבע הקשר\"",
-   "address": "שדרות הצבי 10",
-   "x": -2321.9,
-   "y": 1154.7,
-   "approx": false,
-   "link": "https://www.ramat-gan.muni.il/events/2026-rg-afternoon/",
-   "img": "https://www.ramat-gan.muni.il/media/d30jt20u/התאמות-לאתר-_אחצ-רגוע-יולי-2026_342-220.jpg",
-   "featured": false,
-   "free": true
-  },
-  {
-   "id": "muni-events2026-zoom-story-time",
-   "title": "מעשה בזום לחודש יולי 2026",
-   "cat": "community",
-   "anim": "community",
-   "muniCat": "שעת סיפור",
-   "audience": [
-    "ילדים (4-11)"
-   ],
-   "date": "2026-07-12",
-   "time": "17:30",
-   "locName": "אונליין",
-   "address": "",
-   "x": null,
-   "y": null,
-   "link": "https://www.ramat-gan.muni.il/events/2026-zoom-story-time/",
-   "img": null,
    "featured": false,
    "free": true
   },
@@ -216,23 +111,24 @@
    "free": true
   },
   {
-   "id": "muni-eventssummer-ramat-gani-2026",
-   "title": "קיץ רמת גני",
+   "id": "muni-eventslectures-for-age-60-and-over",
+   "title": "הרצאות במועדונים לוותיקים",
    "cat": "community",
    "anim": "community",
-   "muniCat": "",
-   "audience": [],
-   "date": "2026-07-12",
-   "time": "20:30",
-   "locName": "בית דורון",
-   "address": "",
-   "x": -2163.8,
-   "y": 1241.7,
-   "approx": false,
-   "link": "https://www.ramat-gan.muni.il/events/summer-ramat-gani-2026/",
-   "img": "https://www.ramat-gan.muni.il/media/1wpgegrx/קיץ-2026_התאמות-לאתר_342-220.jpg",
-   "featured": true,
-   "free": true
+   "muniCat": "אזרחים ותיקים",
+   "audience": [
+    "הגיל השלישי (60+)"
+   ],
+   "date": "2026-07-13",
+   "time": "",
+   "locName": "מועדון בת שוע",
+   "address": "רחוב בת שוע 7",
+   "x": -11.6,
+   "y": -87.6,
+   "approx": true,
+   "link": "https://www.ramat-gan.muni.il/events/lectures-for-age-60-and-over/",
+   "img": "https://www.ramat-gan.muni.il/media/gycpvo0p/עמוד-הרצאות_1540-8032.jpg",
+   "featured": false
   },
   {
    "id": "muni-eventsrg-eventsweb-site-event-409",
@@ -326,6 +222,27 @@
    "free": true
   },
   {
+   "id": "muni-eventsrg-eventsweb-site-event-1246",
+   "title": "שעות סיפור ברשת ספריות רמת-גן - יוני - יולי 2026",
+   "cat": "community",
+   "anim": "community",
+   "muniCat": "שעת סיפור",
+   "audience": [
+    "ילדים (4-11)"
+   ],
+   "date": "2026-07-13",
+   "time": "16:45",
+   "locName": "ספריית רמת עמידר",
+   "address": "רחוב מנדל מתיתיהו 11 בבית ראסל",
+   "x": 608.5,
+   "y": -243.5,
+   "approx": false,
+   "link": "https://www.ramat-gan.muni.il/events/rg-events/web-site-event-1246/",
+   "img": null,
+   "featured": false,
+   "free": true
+  },
+  {
    "id": "muni-eventsbackgammon-painting-workshop",
    "title": "סדנת ציור על שש בש",
    "cat": "community",
@@ -344,6 +261,27 @@
    "link": "https://www.ramat-gan.muni.il/events/backgammon-painting-workshop/",
    "img": "https://www.ramat-gan.muni.il/media/1bjb0yt0/220_342מובייל.jpg",
    "featured": false
+  },
+  {
+   "id": "muni-events2026-rg-afternoon",
+   "title": "אחה\"צ ר\"גוע חודשי יולי - אוגוסט",
+   "cat": "community",
+   "anim": "community",
+   "muniCat": "פעילויות לילדים ולגיל הרך",
+   "audience": [
+    "ילדים (4-11)"
+   ],
+   "date": "2026-07-13",
+   "time": "17:30",
+   "locName": "מרכז קהילתי רמת חן",
+   "address": "רחוב רמת חן 43",
+   "x": -972,
+   "y": -1895.1,
+   "approx": false,
+   "link": "https://www.ramat-gan.muni.il/events/2026-rg-afternoon/",
+   "img": "https://www.ramat-gan.muni.il/media/d30jt20u/התאמות-לאתר-_אחצ-רגוע-יולי-2026_342-220.jpg",
+   "featured": false,
+   "free": true
   },
   {
    "id": "muni-eventsisraeli-panorama",
@@ -409,6 +347,24 @@
    "link": "https://www.ramat-gan.muni.il/events/rg-events/web-site-event-3996/",
    "img": "https://www.ramat-gan.muni.il/media/gouprv00/220_342מובייל.jpg",
    "featured": false,
+   "free": true
+  },
+  {
+   "id": "muni-eventssummer-ramat-gani-2026",
+   "title": "קיץ רמת גני",
+   "cat": "community",
+   "anim": "community",
+   "muniCat": "",
+   "audience": [],
+   "date": "2026-07-13",
+   "time": "20:30",
+   "locName": "מרכז קהילה ותרבות רמת יצחק",
+   "address": "",
+   "x": null,
+   "y": null,
+   "link": "https://www.ramat-gan.muni.il/events/summer-ramat-gani-2026/",
+   "img": "https://www.ramat-gan.muni.il/media/1wpgegrx/קיץ-2026_התאמות-לאתר_342-220.jpg",
+   "featured": true,
    "free": true
   },
   {
@@ -655,6 +611,29 @@
    "free": true
   },
   {
+   "id": "muni-eventsrg-eventsweb-site-event-563",
+   "title": "סדנאות נגרות פתוחה",
+   "cat": "community",
+   "anim": "community",
+   "muniCat": "מייקרס יצירה עירונית",
+   "audience": [
+    "צעירים (18-35)",
+    "מבוגרים (60- 35)",
+    "הגיל השלישי (60+)"
+   ],
+   "date": "2026-07-15",
+   "time": "13:00",
+   "locName": "מייקרס",
+   "address": "רחוב מסובים 2",
+   "x": 1714.2,
+   "y": -3740.9,
+   "approx": true,
+   "link": "https://www.ramat-gan.muni.il/events/rg-events/web-site-event-563/",
+   "img": null,
+   "featured": false,
+   "free": true
+  },
+  {
    "id": "muni-eventssaying-goodbye-to-diapers-together",
    "title": "נפרדים מחיתולים ביחד",
    "cat": "community",
@@ -892,6 +871,26 @@
    "y": -3740.9,
    "approx": true,
    "link": "https://www.ramat-gan.muni.il/events/rg-events/web-site-event-328/",
+   "img": null,
+   "featured": false,
+   "free": true
+  },
+  {
+   "id": "muni-events2026-zoom-story-time",
+   "title": "מעשה בזום לחודש יולי 2026",
+   "cat": "community",
+   "anim": "community",
+   "muniCat": "שעת סיפור",
+   "audience": [
+    "ילדים (4-11)"
+   ],
+   "date": "2026-07-19",
+   "time": "17:30",
+   "locName": "אונליין",
+   "address": "",
+   "x": null,
+   "y": null,
+   "link": "https://www.ramat-gan.muni.il/events/2026-zoom-story-time/",
    "img": null,
    "featured": false,
    "free": true
