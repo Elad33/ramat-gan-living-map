@@ -1,5 +1,5 @@
 {
- "updated": "2026-07-12T16:10:08.310Z",
+ "updated": "2026-07-12T19:29:34.615Z",
  "source": "https://www.ramat-gan.muni.il/event-lobby",
  "events": [
   {
@@ -20,93 +20,6 @@
    "approx": false,
    "link": "https://www.ramat-gan.muni.il/events/workshops-for-early-childhood-harmony-center-shikun-vatikim/",
    "img": "https://www.ramat-gan.muni.il/media/yxuo0gau/לאתר-סדנאות-להורים-ולגיל-הרך_יולי-2026_342-220.jpg",
-   "featured": false,
-   "free": true
-  },
-  {
-   "id": "muni-eventsmbe-rg-eventsramatganchik-2026",
-   "title": "רמתגנצ'יק אירועי שבוע 5-9.7",
-   "cat": "community",
-   "anim": "community",
-   "muniCat": "פעילויות לילדים ולגיל הרך",
-   "audience": [
-    "הגיל הרך (0-3)"
-   ],
-   "date": "2026-07-12",
-   "time": "17:15",
-   "locName": "אונליין",
-   "address": "",
-   "x": null,
-   "y": null,
-   "link": "https://www.ramat-gan.muni.il/events/mbe-rg-events/ramatganchik-2026/",
-   "img": "https://www.ramat-gan.muni.il/media/sw4ntzgj/רמתגנציק_התאמה-לאתר-מובייל_342-220.jpg",
-   "featured": false,
-   "free": true
-  },
-  {
-   "id": "muni-eventsbeit-zvi-rg-eventsweb-site-event-1178",
-   "title": "יאקיש ופופצ'ה",
-   "cat": "sport",
-   "anim": "sport",
-   "muniCat": "תיאטרון אמנות מוזיקה וספורט",
-   "audience": [
-    "צעירים (18-35)",
-    "מבוגרים (60- 35)",
-    "הגיל השלישי (60+)"
-   ],
-   "date": "2026-07-12",
-   "time": "19:30",
-   "locName": "תיאטרון בית צבי",
-   "address": "רחוב שועלי שמשון 2",
-   "x": -471.1,
-   "y": 866.7,
-   "approx": true,
-   "link": "https://www.ramat-gan.muni.il/events/beit-zvi-rg-events/web-site-event-1178/",
-   "img": "https://www.ramat-gan.muni.il/media/vhbpmdkv/yakish220-342.jpg",
-   "featured": false,
-   "free": true
-  },
-  {
-   "id": "muni-eventsdancing-bachata-for-beginners",
-   "title": "בצ'אטה מתחילים",
-   "cat": "community",
-   "anim": "community",
-   "muniCat": "הקהילה הגאה",
-   "audience": [
-    "צעירים (18-35)",
-    "מבוגרים (60- 35)"
-   ],
-   "date": "2026-07-12",
-   "time": "20:00",
-   "locName": "המרכז הגאה",
-   "address": "רחוב ביאליק 42",
-   "x": -1144.8,
-   "y": 1361.2,
-   "approx": false,
-   "link": "https://www.ramat-gan.muni.il/events/dancing-bachata-for-beginners/",
-   "img": "https://www.ramat-gan.muni.il/media/wz1jotjf/גריד-לקהילה-הגאה_התאמה-לאתר_342-22014.jpg",
-   "featured": false,
-   "free": true
-  },
-  {
-   "id": "muni-eventsrg-eventsweb-site-event-1086",
-   "title": "בצ'אטה ממשיכים",
-   "cat": "community",
-   "anim": "community",
-   "muniCat": "הקהילה הגאה",
-   "audience": [
-    "צעירים (18-35)",
-    "מבוגרים (60- 35)"
-   ],
-   "date": "2026-07-12",
-   "time": "20:00",
-   "locName": "המרכז הגאה",
-   "address": "רחוב ביאליק 42",
-   "x": -1144.8,
-   "y": 1361.2,
-   "approx": false,
-   "link": "https://www.ramat-gan.muni.il/events/rg-events/web-site-event-1086/",
-   "img": "https://www.ramat-gan.muni.il/media/wz1jotjf/גריד-לקהילה-הגאה_התאמה-לאתר_342-22014.jpg",
    "featured": false,
    "free": true
   },
@@ -243,6 +156,27 @@
    "free": true
   },
   {
+   "id": "muni-eventsmbe-rg-eventsramatganchik-2026",
+   "title": "רמתגנצ'יק אירועי שבוע 5-9.7",
+   "cat": "community",
+   "anim": "community",
+   "muniCat": "פעילויות לילדים ולגיל הרך",
+   "audience": [
+    "הגיל הרך (0-3)"
+   ],
+   "date": "2026-07-13",
+   "time": "17:15",
+   "locName": "מרכז קהילתי בית עמנואל",
+   "address": "רחוב חיבת ציון 18",
+   "x": -428,
+   "y": 944.1,
+   "approx": true,
+   "link": "https://www.ramat-gan.muni.il/events/mbe-rg-events/ramatganchik-2026/",
+   "img": "https://www.ramat-gan.muni.il/media/sw4ntzgj/רמתגנציק_התאמה-לאתר-מובייל_342-220.jpg",
+   "featured": false,
+   "free": true
+  },
+  {
    "id": "muni-eventsbackgammon-painting-workshop",
    "title": "סדנת ציור על שש בש",
    "cat": "community",
@@ -302,6 +236,29 @@
    "approx": false,
    "link": "https://www.ramat-gan.muni.il/events/israeli-panorama/",
    "img": "https://www.ramat-gan.muni.il/media/eyqn2x5o/התאמות-פנורמה-ישראלית_342-220.jpg",
+   "featured": false,
+   "free": true
+  },
+  {
+   "id": "muni-eventsbeit-zvi-rg-eventsweb-site-event-1178",
+   "title": "יאקיש ופופצ'ה",
+   "cat": "sport",
+   "anim": "sport",
+   "muniCat": "תיאטרון אמנות מוזיקה וספורט",
+   "audience": [
+    "צעירים (18-35)",
+    "מבוגרים (60- 35)",
+    "הגיל השלישי (60+)"
+   ],
+   "date": "2026-07-13",
+   "time": "19:30",
+   "locName": "תיאטרון בית צבי",
+   "address": "רחוב שועלי שמשון 2",
+   "x": -471.1,
+   "y": 866.7,
+   "approx": true,
+   "link": "https://www.ramat-gan.muni.il/events/beit-zvi-rg-events/web-site-event-1178/",
+   "img": "https://www.ramat-gan.muni.il/media/vhbpmdkv/yakish220-342.jpg",
    "featured": false,
    "free": true
   },
@@ -914,6 +871,50 @@
    "approx": false,
    "link": "https://www.ramat-gan.muni.il/events/rg-events/web-site-event-130/",
    "img": "https://www.ramat-gan.muni.il/media/hpihvcpr/גריד-לקהילה-הגאה_התאמה-לאתר_342-2202.jpg",
+   "featured": false,
+   "free": true
+  },
+  {
+   "id": "muni-eventsdancing-bachata-for-beginners",
+   "title": "בצ'אטה מתחילים",
+   "cat": "community",
+   "anim": "community",
+   "muniCat": "הקהילה הגאה",
+   "audience": [
+    "צעירים (18-35)",
+    "מבוגרים (60- 35)"
+   ],
+   "date": "2026-07-19",
+   "time": "20:00",
+   "locName": "המרכז הגאה",
+   "address": "רחוב ביאליק 42",
+   "x": -1144.8,
+   "y": 1361.2,
+   "approx": false,
+   "link": "https://www.ramat-gan.muni.il/events/dancing-bachata-for-beginners/",
+   "img": "https://www.ramat-gan.muni.il/media/wz1jotjf/גריד-לקהילה-הגאה_התאמה-לאתר_342-22014.jpg",
+   "featured": false,
+   "free": true
+  },
+  {
+   "id": "muni-eventsrg-eventsweb-site-event-1086",
+   "title": "בצ'אטה ממשיכים",
+   "cat": "community",
+   "anim": "community",
+   "muniCat": "הקהילה הגאה",
+   "audience": [
+    "צעירים (18-35)",
+    "מבוגרים (60- 35)"
+   ],
+   "date": "2026-07-19",
+   "time": "20:00",
+   "locName": "המרכז הגאה",
+   "address": "רחוב ביאליק 42",
+   "x": -1144.8,
+   "y": 1361.2,
+   "approx": false,
+   "link": "https://www.ramat-gan.muni.il/events/rg-events/web-site-event-1086/",
+   "img": "https://www.ramat-gan.muni.il/media/wz1jotjf/גריד-לקהילה-הגאה_התאמה-לאתר_342-22014.jpg",
    "featured": false,
    "free": true
   },
