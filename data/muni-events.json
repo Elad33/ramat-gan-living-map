@@ -1,5 +1,5 @@
 {
- "updated": "2026-07-11T22:06:06.552Z",
+ "updated": "2026-07-12T10:41:52.256Z",
  "source": "https://www.ramat-gan.muni.il/event-lobby",
  "events": [
   {
@@ -13,36 +13,14 @@
    ],
    "date": "2026-07-12",
    "time": "",
-   "locName": "מועדון בת שוע",
-   "address": "רחוב בת שוע 7",
-   "x": -11.6,
-   "y": -87.6,
+   "locName": "מרכז וותיקי בית רוזן",
+   "address": "רחוב ביאליק 89",
+   "x": -1698.6,
+   "y": 1733.5,
    "approx": true,
    "link": "https://www.ramat-gan.muni.il/events/lectures-for-age-60-and-over/",
    "img": "https://www.ramat-gan.muni.il/media/gycpvo0p/עמוד-הרצאות_1540-8032.jpg",
    "featured": false
-  },
-  {
-   "id": "muni-eventssummer-workshops-for-children-at-the-makers",
-   "title": "סדנאות קיץ לילדים במייקרס",
-   "cat": "community",
-   "anim": "community",
-   "muniCat": "מייקרס יצירה עירונית",
-   "audience": [
-    "ילדים (4-11)",
-    "נוער (12-18)"
-   ],
-   "date": "2026-07-12",
-   "time": "10:00",
-   "locName": "מייקרס",
-   "address": "רחוב מסובים 2",
-   "x": 1714.2,
-   "y": -3740.9,
-   "approx": true,
-   "link": "https://www.ramat-gan.muni.il/events/summer-workshops-for-children-at-the-makers/",
-   "img": "https://www.ramat-gan.muni.il/media/xdvlpvwf/220_342מובייל.jpg",
-   "featured": false,
-   "free": true
   },
   {
    "id": "muni-sworkshops-for-early-childhood-harmony-center-shikun-vatikim",
@@ -143,11 +121,11 @@
    ],
    "date": "2026-07-12",
    "time": "17:15",
-   "locName": "בית דורון",
-   "address": "רחוב הראשונים 1",
-   "x": -2159.4,
-   "y": 1231.7,
-   "approx": false,
+   "locName": "מרכז קהילתי מרום נווה",
+   "address": "רחוב חזון אי\"ש 90",
+   "x": 620.5,
+   "y": 23,
+   "approx": true,
    "link": "https://www.ramat-gan.muni.il/events/mbe-rg-events/ramatganchik-2026/",
    "img": "https://www.ramat-gan.muni.il/media/sw4ntzgj/רמתגנציק_התאמה-לאתר-מובייל_342-220.jpg",
    "featured": false,
@@ -502,28 +480,6 @@
    "featured": false
   },
   {
-   "id": "muni-eventsrg-eventsweb-site-event-3817",
-   "title": "בונים אהבה מחדש",
-   "cat": "community",
-   "anim": "community",
-   "muniCat": " סדנאות והרצאות",
-   "audience": [
-    "מבוגרים (60- 35)",
-    "הגיל השלישי (60+)"
-   ],
-   "date": "2026-07-14",
-   "time": "17:00",
-   "locName": "בית יד לבנים",
-   "address": "רחוב מעלה הבנים 30",
-   "x": -586.8,
-   "y": 731.7,
-   "approx": true,
-   "link": "https://www.ramat-gan.muni.il/events/rg-events/web-site-event-3817/",
-   "img": "https://www.ramat-gan.muni.il/media/1xob0mgi/התאמות-סדנת-בונים-אהבה-מחדש_342-220.jpg",
-   "featured": false,
-   "free": true
-  },
-  {
    "id": "muni-eventsrg-eventsweb-site-event-3991",
    "title": "סדנת אביזרי קיץ בעיצוב אישי",
    "cat": "community",
@@ -543,6 +499,28 @@
    "approx": false,
    "link": "https://www.ramat-gan.muni.il/events/rg-events/web-site-event-3991/",
    "img": "https://www.ramat-gan.muni.il/media/1m2cpbeq/220_342מובייל.jpg",
+   "featured": false,
+   "free": true
+  },
+  {
+   "id": "muni-eventsrg-eventsweb-site-event-3817",
+   "title": "בונים אהבה מחדש",
+   "cat": "community",
+   "anim": "community",
+   "muniCat": " סדנאות והרצאות",
+   "audience": [
+    "מבוגרים (60- 35)",
+    "הגיל השלישי (60+)"
+   ],
+   "date": "2026-07-14",
+   "time": "17:00",
+   "locName": "בית יד לבנים",
+   "address": "רחוב מעלה הבנים 30",
+   "x": -586.8,
+   "y": 731.7,
+   "approx": true,
+   "link": "https://www.ramat-gan.muni.il/events/rg-events/web-site-event-3817/",
+   "img": "https://www.ramat-gan.muni.il/media/1xob0mgi/התאמות-סדנת-בונים-אהבה-מחדש_342-220.jpg",
    "featured": false,
    "free": true
   },
@@ -808,6 +786,29 @@
    "free": true
   },
   {
+   "id": "muni-eventsrg-eventsweb-site-event-305",
+   "title": "סדנת ריתוך עם דניאל בר-עם",
+   "cat": "community",
+   "anim": "community",
+   "muniCat": "מייקרס יצירה עירונית",
+   "audience": [
+    "צעירים (18-35)",
+    "מבוגרים (60- 35)",
+    "הגיל השלישי (60+)"
+   ],
+   "date": "2026-07-17",
+   "time": "09:00",
+   "locName": "מייקרס",
+   "address": "רחוב מסובים 2",
+   "x": 1714.2,
+   "y": -3740.9,
+   "approx": true,
+   "link": "https://www.ramat-gan.muni.il/events/rg-events/web-site-event-305/",
+   "img": null,
+   "featured": false,
+   "free": true
+  },
+  {
    "id": "muni-eventsstand-up-after-dark-at-the-ramat-gan-theater",
    "title": "After Dark - סטנדאפ בתיאטרון רמת גן",
    "cat": "sport",
@@ -826,6 +827,28 @@
    "approx": true,
    "link": "https://www.ramat-gan.muni.il/events/stand-up-after-dark-at-the-ramat-gan-theater/",
    "img": "https://www.ramat-gan.muni.il/media/0r0jvajw/התאמות-לאתר_קומדיה-בשישי_03_342-220.jpg",
+   "featured": false,
+   "free": true
+  },
+  {
+   "id": "muni-eventssummer-workshops-for-children-at-the-makers",
+   "title": "סדנאות קיץ לילדים במייקרס",
+   "cat": "community",
+   "anim": "community",
+   "muniCat": "מייקרס יצירה עירונית",
+   "audience": [
+    "ילדים (4-11)",
+    "נוער (12-18)"
+   ],
+   "date": "2026-07-19",
+   "time": "10:00",
+   "locName": "מייקרס",
+   "address": "רחוב מסובים 2",
+   "x": 1714.2,
+   "y": -3740.9,
+   "approx": true,
+   "link": "https://www.ramat-gan.muni.il/events/summer-workshops-for-children-at-the-makers/",
+   "img": "https://www.ramat-gan.muni.il/media/xdvlpvwf/220_342מובייל.jpg",
    "featured": false,
    "free": true
   },
@@ -979,6 +1002,28 @@
    "img": "https://www.ramat-gan.muni.il/media/ke4nclb3/התאמות-טורניר-יום-השחמט-227_342-220.jpg",
    "featured": false,
    "free": true
+  },
+  {
+   "id": "muni-eventsfrom-october-7-to-the-night-of-tisha-beav",
+   "title": "מה-7 באוקטובר אל ליל ט' באב",
+   "cat": "community",
+   "anim": "community",
+   "muniCat": "אירועי הקהל הדתי",
+   "audience": [
+    "הגיל השלישי (60+)",
+    "צעירים (18-35)",
+    "מבוגרים (60- 35)"
+   ],
+   "date": "2026-07-22",
+   "time": "21:00",
+   "locName": "מרכז קהילתי גאולים",
+   "address": "רחוב סטרומה 10",
+   "x": -1055,
+   "y": 2160.5,
+   "approx": false,
+   "link": "https://www.ramat-gan.muni.il/events/from-october-7-to-the-night-of-tisha-beav/",
+   "img": "https://www.ramat-gan.muni.il/media/ttuck4hl/לאתר-ליל-ט-באב-המחלקה-למורשת-ישראל_342-220.jpg",
+   "featured": false
   },
   {
    "id": "muni-eventsrg-eventsweb-site-event-121",
