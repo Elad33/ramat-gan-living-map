@@ -1,28 +1,7 @@
 {
- "updated": "2026-07-12T19:29:34.615Z",
+ "updated": "2026-07-13T03:57:55.590Z",
  "source": "https://www.ramat-gan.muni.il/event-lobby",
  "events": [
-  {
-   "id": "muni-sworkshops-for-early-childhood-harmony-center-shikun-vatikim",
-   "title": "סדנאות להורים ולגיל הרך במרכז הרמוניה שיכון ותיקים",
-   "cat": "community",
-   "anim": "community",
-   "muniCat": "פעילויות לילדים ולגיל הרך",
-   "audience": [
-    "הגיל הרך (0-3)"
-   ],
-   "date": "2026-07-12",
-   "time": "10:30",
-   "locName": "הרמוניה",
-   "address": "רחוב המרגנית 10",
-   "x": -1278.5,
-   "y": 2553.9,
-   "approx": false,
-   "link": "https://www.ramat-gan.muni.il/events/workshops-for-early-childhood-harmony-center-shikun-vatikim/",
-   "img": "https://www.ramat-gan.muni.il/media/yxuo0gau/לאתר-סדנאות-להורים-ולגיל-הרך_יולי-2026_342-220.jpg",
-   "featured": false,
-   "free": true
-  },
   {
    "id": "muni-eventslectures-for-age-60-and-over",
    "title": "הרצאות במועדונים לוותיקים",
