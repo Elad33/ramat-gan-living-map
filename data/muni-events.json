@@ -1,5 +1,5 @@
 {
- "updated": "2026-07-13T15:09:59.350Z",
+ "updated": "2026-07-13T19:47:03.444Z",
  "source": "https://www.ramat-gan.muni.il/event-lobby",
  "events": [
   {
@@ -69,73 +69,6 @@
    "featured": false
   },
   {
-   "id": "muni-eventsisraeli-panorama",
-   "title": "פנורמה ישראלית",
-   "cat": "community",
-   "anim": "community",
-   "muniCat": " סדנאות והרצאות",
-   "audience": [
-    "מבוגרים (60- 35)",
-    "הגיל השלישי (60+)"
-   ],
-   "date": "2026-07-13",
-   "time": "19:00",
-   "locName": "מוזיאון רמת גן לאמנות ישראלית",
-   "address": "רחוב אבא הלל סילבר 146",
-   "x": -730.3,
-   "y": 2614.9,
-   "approx": false,
-   "link": "https://www.ramat-gan.muni.il/events/israeli-panorama/",
-   "img": "https://www.ramat-gan.muni.il/media/eyqn2x5o/התאמות-פנורמה-ישראלית_342-220.jpg",
-   "featured": false,
-   "free": true
-  },
-  {
-   "id": "muni-eventsbeit-zvi-rg-eventsweb-site-event-1178",
-   "title": "יאקיש ופופצ'ה",
-   "cat": "sport",
-   "anim": "sport",
-   "muniCat": "תיאטרון אמנות מוזיקה וספורט",
-   "audience": [
-    "צעירים (18-35)",
-    "מבוגרים (60- 35)",
-    "הגיל השלישי (60+)"
-   ],
-   "date": "2026-07-13",
-   "time": "19:30",
-   "locName": "תיאטרון בית צבי",
-   "address": "רחוב שועלי שמשון 2",
-   "x": -471.1,
-   "y": 866.7,
-   "approx": true,
-   "link": "https://www.ramat-gan.muni.il/events/beit-zvi-rg-events/web-site-event-1178/",
-   "img": "https://www.ramat-gan.muni.il/media/vhbpmdkv/yakish220-342.jpg",
-   "featured": false,
-   "free": true
-  },
-  {
-   "id": "muni-eventsrg-eventsweb-site-event-798",
-   "title": "קבוצת טניס גאה Sunflowers Tennis Group",
-   "cat": "community",
-   "anim": "community",
-   "muniCat": "הקהילה הגאה",
-   "audience": [
-    "צעירים (18-35)",
-    "מבוגרים (60- 35)"
-   ],
-   "date": "2026-07-13",
-   "time": "19:45",
-   "locName": "המרכז הגאה",
-   "address": "רחוב ביאליק 42",
-   "x": -1144.8,
-   "y": 1361.2,
-   "approx": false,
-   "link": "https://www.ramat-gan.muni.il/events/rg-events/web-site-event-798/",
-   "img": "https://www.ramat-gan.muni.il/media/nvjjws3b/גריד-לקהילה-הגאה_התאמה-לאתר_342-2206.jpg",
-   "featured": false,
-   "free": true
-  },
-  {
    "id": "muni-eventsrg-eventsweb-site-event-3996",
    "title": "ערב בריאות מינית במרכז הגאה רמת גן",
    "cat": "community",
@@ -154,47 +87,6 @@
    "approx": false,
    "link": "https://www.ramat-gan.muni.il/events/rg-events/web-site-event-3996/",
    "img": "https://www.ramat-gan.muni.il/media/gouprv00/220_342מובייל.jpg",
-   "featured": false,
-   "free": true
-  },
-  {
-   "id": "muni-eventssummer-ramat-gani-2026",
-   "title": "קיץ רמת גני",
-   "cat": "community",
-   "anim": "community",
-   "muniCat": "",
-   "audience": [],
-   "date": "2026-07-13",
-   "time": "20:30",
-   "locName": "הפארק הלאומי",
-   "address": "",
-   "x": -359.3,
-   "y": -2368,
-   "approx": false,
-   "link": "https://www.ramat-gan.muni.il/events/summer-ramat-gani-2026/",
-   "img": "https://www.ramat-gan.muni.il/media/1wpgegrx/קיץ-2026_התאמות-לאתר_342-220.jpg",
-   "featured": true
-  },
-  {
-   "id": "muni-eventsbeit-zvi-rg-eventsweb-site-event-1177",
-   "title": "פליישר",
-   "cat": "sport",
-   "anim": "sport",
-   "muniCat": "תיאטרון אמנות מוזיקה וספורט",
-   "audience": [
-    "צעירים (18-35)",
-    "הגיל השלישי (60+)",
-    "מבוגרים (60- 35)"
-   ],
-   "date": "2026-07-13",
-   "time": "21:00",
-   "locName": "תיאטרון בית צבי",
-   "address": "רחוב שועלי שמשון 2",
-   "x": -471.1,
-   "y": 866.7,
-   "approx": true,
-   "link": "https://www.ramat-gan.muni.il/events/beit-zvi-rg-events/web-site-event-1177/",
-   "img": "https://www.ramat-gan.muni.il/media/jdqbpv1a/flaisher220-342.jpg",
    "featured": false,
    "free": true
   },
@@ -349,6 +241,29 @@
    "free": true
   },
   {
+   "id": "muni-eventsbeit-zvi-rg-eventsweb-site-event-1178",
+   "title": "יאקיש ופופצ'ה",
+   "cat": "sport",
+   "anim": "sport",
+   "muniCat": "תיאטרון אמנות מוזיקה וספורט",
+   "audience": [
+    "צעירים (18-35)",
+    "מבוגרים (60- 35)",
+    "הגיל השלישי (60+)"
+   ],
+   "date": "2026-07-14",
+   "time": "19:30",
+   "locName": "תיאטרון בית צבי",
+   "address": "רחוב שועלי שמשון 2",
+   "x": -471.1,
+   "y": 866.7,
+   "approx": true,
+   "link": "https://www.ramat-gan.muni.il/events/beit-zvi-rg-events/web-site-event-1178/",
+   "img": "https://www.ramat-gan.muni.il/media/vhbpmdkv/yakish220-342.jpg",
+   "featured": false,
+   "free": true
+  },
+  {
    "id": "muni-eventsrussian-chair-2026",
    "title": "Кафедра Рамат-Ган",
    "cat": "community",
@@ -435,6 +350,24 @@
    "img": null,
    "featured": false,
    "free": true
+  },
+  {
+   "id": "muni-eventssummer-ramat-gani-2026",
+   "title": "קיץ רמת גני",
+   "cat": "community",
+   "anim": "community",
+   "muniCat": "",
+   "audience": [],
+   "date": "2026-07-14",
+   "time": "20:30",
+   "locName": "הפארק הלאומי",
+   "address": "",
+   "x": -359.3,
+   "y": -2368,
+   "approx": false,
+   "link": "https://www.ramat-gan.muni.il/events/summer-ramat-gani-2026/",
+   "img": "https://www.ramat-gan.muni.il/media/1wpgegrx/קיץ-2026_התאמות-לאתר_342-220.jpg",
+   "featured": true
   },
   {
    "id": "muni-eventspublic-singing",
@@ -608,6 +541,29 @@
    "approx": false,
    "link": "https://www.ramat-gan.muni.il/events/rg-events/web-site-event-1174/",
    "img": null,
+   "featured": false,
+   "free": true
+  },
+  {
+   "id": "muni-eventsbeit-zvi-rg-eventsweb-site-event-1177",
+   "title": "פליישר",
+   "cat": "sport",
+   "anim": "sport",
+   "muniCat": "תיאטרון אמנות מוזיקה וספורט",
+   "audience": [
+    "צעירים (18-35)",
+    "הגיל השלישי (60+)",
+    "מבוגרים (60- 35)"
+   ],
+   "date": "2026-07-15",
+   "time": "21:00",
+   "locName": "תיאטרון בית צבי",
+   "address": "רחוב שועלי שמשון 2",
+   "x": -471.1,
+   "y": 866.7,
+   "approx": true,
+   "link": "https://www.ramat-gan.muni.il/events/beit-zvi-rg-events/web-site-event-1177/",
+   "img": "https://www.ramat-gan.muni.il/media/jdqbpv1a/flaisher220-342.jpg",
    "featured": false,
    "free": true
   },
@@ -871,6 +827,28 @@
    "approx": false,
    "link": "https://www.ramat-gan.muni.il/events/mbe-rg-events/web-site-event-7277/",
    "img": "https://www.ramat-gan.muni.il/media/llahsz1f/לאתר-ילדות-קסומה-67-בית-קריניצי_342-220.jpg",
+   "featured": false,
+   "free": true
+  },
+  {
+   "id": "muni-eventsrg-eventsweb-site-event-798",
+   "title": "קבוצת טניס גאה Sunflowers Tennis Group",
+   "cat": "community",
+   "anim": "community",
+   "muniCat": "הקהילה הגאה",
+   "audience": [
+    "צעירים (18-35)",
+    "מבוגרים (60- 35)"
+   ],
+   "date": "2026-07-20",
+   "time": "19:45",
+   "locName": "המרכז הגאה",
+   "address": "רחוב ביאליק 42",
+   "x": -1144.8,
+   "y": 1361.2,
+   "approx": false,
+   "link": "https://www.ramat-gan.muni.il/events/rg-events/web-site-event-798/",
+   "img": "https://www.ramat-gan.muni.il/media/nvjjws3b/גריד-לקהילה-הגאה_התאמה-לאתר_342-2206.jpg",
    "featured": false,
    "free": true
   },
