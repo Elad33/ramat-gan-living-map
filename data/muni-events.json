@@ -1,27 +1,7 @@
 {
- "updated": "2026-07-13T03:57:55.590Z",
+ "updated": "2026-07-13T15:09:59.350Z",
  "source": "https://www.ramat-gan.muni.il/event-lobby",
  "events": [
-  {
-   "id": "muni-eventslectures-for-age-60-and-over",
-   "title": "הרצאות במועדונים לוותיקים",
-   "cat": "community",
-   "anim": "community",
-   "muniCat": "אזרחים ותיקים",
-   "audience": [
-    "הגיל השלישי (60+)"
-   ],
-   "date": "2026-07-13",
-   "time": "",
-   "locName": "מועדון בת שוע",
-   "address": "רחוב בת שוע 7",
-   "x": -11.6,
-   "y": -87.6,
-   "approx": true,
-   "link": "https://www.ramat-gan.muni.il/events/lectures-for-age-60-and-over/",
-   "img": "https://www.ramat-gan.muni.il/media/gycpvo0p/עמוד-הרצאות_1540-8032.jpg",
-   "featured": false
-  },
   {
    "id": "muni-eventsrg-eventsweb-site-event-409",
    "title": "קורס תפירה למתקדמים-יצירה ותיקונים",
@@ -69,93 +49,6 @@
    "free": true
   },
   {
-   "id": "muni-eventsrg-eventsweb-site-event-1105",
-   "title": "סדנת יסודות התפירה",
-   "cat": "community",
-   "anim": "community",
-   "muniCat": "מייקרס יצירה עירונית",
-   "audience": [
-    "צעירים (18-35)",
-    "מבוגרים (60- 35)",
-    "הגיל השלישי (60+)"
-   ],
-   "date": "2026-07-13",
-   "time": "16:00",
-   "locName": "מייקרס",
-   "address": "רחוב מסובים 2",
-   "x": 1714.2,
-   "y": -3740.9,
-   "approx": true,
-   "link": "https://www.ramat-gan.muni.il/events/rg-events/web-site-event-1105/",
-   "img": null,
-   "featured": false,
-   "free": true
-  },
-  {
-   "id": "muni-eventsmbe-rg-eventsweb-site-event-7277",
-   "title": "ילדות קסומה בחצר של קריניצי",
-   "cat": "community",
-   "anim": "community",
-   "muniCat": "קיץ רמת גני 2026",
-   "audience": [
-    "לכל המשפחה",
-    "ילדים (4-11)"
-   ],
-   "date": "2026-07-13",
-   "time": "16:45",
-   "locName": "בית קריניצי",
-   "address": "רחוב קריניצי 64",
-   "x": -692.1,
-   "y": 1370.1,
-   "approx": false,
-   "link": "https://www.ramat-gan.muni.il/events/mbe-rg-events/web-site-event-7277/",
-   "img": "https://www.ramat-gan.muni.il/media/llahsz1f/לאתר-ילדות-קסומה-67-בית-קריניצי_342-220.jpg",
-   "featured": false,
-   "free": true
-  },
-  {
-   "id": "muni-eventsrg-eventsweb-site-event-1246",
-   "title": "שעות סיפור ברשת ספריות רמת-גן - יוני - יולי 2026",
-   "cat": "community",
-   "anim": "community",
-   "muniCat": "שעת סיפור",
-   "audience": [
-    "ילדים (4-11)"
-   ],
-   "date": "2026-07-13",
-   "time": "16:45",
-   "locName": "ספריית רמת עמידר",
-   "address": "רחוב מנדל מתיתיהו 11 בבית ראסל",
-   "x": 608.5,
-   "y": -243.5,
-   "approx": false,
-   "link": "https://www.ramat-gan.muni.il/events/rg-events/web-site-event-1246/",
-   "img": null,
-   "featured": false,
-   "free": true
-  },
-  {
-   "id": "muni-eventsmbe-rg-eventsramatganchik-2026",
-   "title": "רמתגנצ'יק אירועי שבוע 5-9.7",
-   "cat": "community",
-   "anim": "community",
-   "muniCat": "פעילויות לילדים ולגיל הרך",
-   "audience": [
-    "הגיל הרך (0-3)"
-   ],
-   "date": "2026-07-13",
-   "time": "17:15",
-   "locName": "מרכז קהילתי בית עמנואל",
-   "address": "רחוב חיבת ציון 18",
-   "x": -428,
-   "y": 944.1,
-   "approx": true,
-   "link": "https://www.ramat-gan.muni.il/events/mbe-rg-events/ramatganchik-2026/",
-   "img": "https://www.ramat-gan.muni.il/media/sw4ntzgj/רמתגנציק_התאמה-לאתר-מובייל_342-220.jpg",
-   "featured": false,
-   "free": true
-  },
-  {
    "id": "muni-eventsbackgammon-painting-workshop",
    "title": "סדנת ציור על שש בש",
    "cat": "community",
@@ -174,27 +67,6 @@
    "link": "https://www.ramat-gan.muni.il/events/backgammon-painting-workshop/",
    "img": "https://www.ramat-gan.muni.il/media/1bjb0yt0/220_342מובייל.jpg",
    "featured": false
-  },
-  {
-   "id": "muni-events2026-rg-afternoon",
-   "title": "אחה\"צ ר\"גוע חודשי יולי - אוגוסט",
-   "cat": "community",
-   "anim": "community",
-   "muniCat": "פעילויות לילדים ולגיל הרך",
-   "audience": [
-    "ילדים (4-11)"
-   ],
-   "date": "2026-07-13",
-   "time": "17:30",
-   "locName": "מרכז קהילתי רמת חן",
-   "address": "רחוב רמת חן 43",
-   "x": -972,
-   "y": -1895.1,
-   "approx": false,
-   "link": "https://www.ramat-gan.muni.il/events/2026-rg-afternoon/",
-   "img": "https://www.ramat-gan.muni.il/media/d30jt20u/התאמות-לאתר-_אחצ-רגוע-יולי-2026_342-220.jpg",
-   "featured": false,
-   "free": true
   },
   {
    "id": "muni-eventsisraeli-panorama",
@@ -294,14 +166,14 @@
    "audience": [],
    "date": "2026-07-13",
    "time": "20:30",
-   "locName": "מרכז קהילה ותרבות רמת יצחק",
+   "locName": "הפארק הלאומי",
    "address": "",
-   "x": null,
-   "y": null,
+   "x": -359.3,
+   "y": -2368,
+   "approx": false,
    "link": "https://www.ramat-gan.muni.il/events/summer-ramat-gani-2026/",
    "img": "https://www.ramat-gan.muni.il/media/1wpgegrx/קיץ-2026_התאמות-לאתר_342-220.jpg",
-   "featured": true,
-   "free": true
+   "featured": true
   },
   {
    "id": "muni-eventsbeit-zvi-rg-eventsweb-site-event-1177",
@@ -327,6 +199,26 @@
    "free": true
   },
   {
+   "id": "muni-eventslectures-for-age-60-and-over",
+   "title": "הרצאות במועדונים לוותיקים",
+   "cat": "community",
+   "anim": "community",
+   "muniCat": "אזרחים ותיקים",
+   "audience": [
+    "הגיל השלישי (60+)"
+   ],
+   "date": "2026-07-14",
+   "time": "",
+   "locName": "מועדון בת שוע",
+   "address": "רחוב בת שוע 7",
+   "x": -11.6,
+   "y": -87.6,
+   "approx": true,
+   "link": "https://www.ramat-gan.muni.il/events/lectures-for-age-60-and-over/",
+   "img": "https://www.ramat-gan.muni.il/media/gycpvo0p/עמוד-הרצאות_1540-8032.jpg",
+   "featured": false
+  },
+  {
    "id": "muni-eventsgames-of-the-past",
    "title": "משחקים של פעם",
    "cat": "community",
@@ -347,6 +239,27 @@
    "link": "https://www.ramat-gan.muni.il/events/games-of-the-past/",
    "img": "https://www.ramat-gan.muni.il/media/3pwpfoux/התאמות-לאתר-משחקים-של-פעם-בגינות-העיר_342-220.jpg",
    "featured": false
+  },
+  {
+   "id": "muni-eventsrg-eventsweb-site-event-1246",
+   "title": "שעות סיפור ברשת ספריות רמת-גן - יוני - יולי 2026",
+   "cat": "community",
+   "anim": "community",
+   "muniCat": "שעת סיפור",
+   "audience": [
+    "ילדים (4-11)"
+   ],
+   "date": "2026-07-14",
+   "time": "16:45",
+   "locName": "ספריית בית לזרוס",
+   "address": "רחוב אינשטיין 16 במתנ\"ס",
+   "x": -50.7,
+   "y": -855,
+   "approx": true,
+   "link": "https://www.ramat-gan.muni.il/events/rg-events/web-site-event-1246/",
+   "img": null,
+   "featured": false,
+   "free": true
   },
   {
    "id": "muni-eventsrg-eventsweb-site-event-3991",
@@ -390,6 +303,27 @@
    "approx": true,
    "link": "https://www.ramat-gan.muni.il/events/rg-events/web-site-event-3817/",
    "img": "https://www.ramat-gan.muni.il/media/1xob0mgi/התאמות-סדנת-בונים-אהבה-מחדש_342-220.jpg",
+   "featured": false,
+   "free": true
+  },
+  {
+   "id": "muni-eventsmbe-rg-eventsramatganchik-2026",
+   "title": "רמתגנצ'יק אירועי שבוע 5-9.7",
+   "cat": "community",
+   "anim": "community",
+   "muniCat": "פעילויות לילדים ולגיל הרך",
+   "audience": [
+    "הגיל הרך (0-3)"
+   ],
+   "date": "2026-07-14",
+   "time": "17:15",
+   "locName": "בית דורון",
+   "address": "רחוב הראשונים 1",
+   "x": -2159.4,
+   "y": 1231.7,
+   "approx": false,
+   "link": "https://www.ramat-gan.muni.il/events/mbe-rg-events/ramatganchik-2026/",
+   "img": "https://www.ramat-gan.muni.il/media/sw4ntzgj/רמתגנציק_התאמה-לאתר-מובייל_342-220.jpg",
    "featured": false,
    "free": true
   },
@@ -611,6 +545,27 @@
    "link": "https://www.ramat-gan.muni.il/events/night-lamp-making-workshop/",
    "img": "https://www.ramat-gan.muni.il/media/b5jh3dc4/220_342מובייל.jpg",
    "featured": false
+  },
+  {
+   "id": "muni-events2026-rg-afternoon",
+   "title": "אחה\"צ ר\"גוע חודשי יולי - אוגוסט",
+   "cat": "community",
+   "anim": "community",
+   "muniCat": "פעילויות לילדים ולגיל הרך",
+   "audience": [
+    "ילדים (4-11)"
+   ],
+   "date": "2026-07-15",
+   "time": "17:30",
+   "locName": "מרכז קהילה ותרבות רמת יצחק",
+   "address": "רחוב שד' ירושלים 38",
+   "x": -379.8,
+   "y": 448.4,
+   "approx": true,
+   "link": "https://www.ramat-gan.muni.il/events/2026-rg-afternoon/",
+   "img": "https://www.ramat-gan.muni.il/media/d30jt20u/התאמות-לאתר-_אחצ-רגוע-יולי-2026_342-220.jpg",
+   "featured": false,
+   "free": true
   },
   {
    "id": "muni-eventstogether-with-you-in-menopause",
@@ -898,6 +853,28 @@
    "free": true
   },
   {
+   "id": "muni-eventsmbe-rg-eventsweb-site-event-7277",
+   "title": "ילדות קסומה בחצר של קריניצי",
+   "cat": "community",
+   "anim": "community",
+   "muniCat": "קיץ רמת גני 2026",
+   "audience": [
+    "לכל המשפחה",
+    "ילדים (4-11)"
+   ],
+   "date": "2026-07-20",
+   "time": "16:45",
+   "locName": "בית קריניצי",
+   "address": "רחוב קריניצי 64",
+   "x": -692.1,
+   "y": 1370.1,
+   "approx": false,
+   "link": "https://www.ramat-gan.muni.il/events/mbe-rg-events/web-site-event-7277/",
+   "img": "https://www.ramat-gan.muni.il/media/llahsz1f/לאתר-ילדות-קסומה-67-בית-קריניצי_342-220.jpg",
+   "featured": false,
+   "free": true
+  },
+  {
    "id": "muni-eventsrg-eventsweb-site-event-979",
    "title": "אבא גנוב",
    "cat": "community",
@@ -1052,22 +1029,18 @@
    "title": "סאמר ספלאש RAVE- מסיבת קיץ מטורפת לילדים והורים",
    "cat": "community",
    "anim": "community",
-   "muniCat": "קיץ רמת גני 2026",
-   "audience": [
-    "לכל המשפחה",
-    "ילדים (4-11)",
-    "צעירים (18-35)"
-   ],
+   "muniCat": "",
+   "audience": [],
    "date": "2026-07-24",
    "time": "11:00",
    "locName": "הפארק הלאומי",
-   "address": "רחוב אחד העם 3",
+   "address": "",
    "x": -359.3,
    "y": -2368,
    "approx": false,
    "link": "https://www.ramat-gan.muni.il/events/mbe-rg-events/web-site-event-23500/",
    "img": "https://www.ramat-gan.muni.il/media/prekjzum/התאמות-לאתר-סאמר-רייב_342-220.jpg",
-   "featured": false,
+   "featured": true,
    "free": true
   },
   {
@@ -1110,6 +1083,29 @@
    "approx": false,
    "link": "https://www.ramat-gan.muni.il/events/rg-events/web-site-event-3907/",
    "img": "https://www.ramat-gan.muni.il/media/pgqllmbk/220_342מובייל.jpg",
+   "featured": false,
+   "free": true
+  },
+  {
+   "id": "muni-eventsrg-eventsweb-site-event-1105",
+   "title": "יסודות התפירה - 4 מפגשים",
+   "cat": "community",
+   "anim": "community",
+   "muniCat": "מייקרס יצירה עירונית",
+   "audience": [
+    "צעירים (18-35)",
+    "מבוגרים (60- 35)",
+    "הגיל השלישי (60+)"
+   ],
+   "date": "2026-07-27",
+   "time": "16:00",
+   "locName": "מייקרס",
+   "address": "רחוב מסובים 2",
+   "x": 1714.2,
+   "y": -3740.9,
+   "approx": true,
+   "link": "https://www.ramat-gan.muni.il/events/rg-events/web-site-event-1105/",
+   "img": null,
    "featured": false,
    "free": true
   },
