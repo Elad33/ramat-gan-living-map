@@ -1,95 +1,7 @@
 {
- "updated": "2026-07-13T19:47:03.444Z",
+ "updated": "2026-07-14T08:27:05.496Z",
  "source": "https://www.ramat-gan.muni.il/event-lobby",
  "events": [
-  {
-   "id": "muni-eventsrg-eventsweb-site-event-409",
-   "title": "קורס תפירה למתקדמים-יצירה ותיקונים",
-   "cat": "community",
-   "anim": "community",
-   "muniCat": "מייקרס יצירה עירונית",
-   "audience": [
-    "צעירים (18-35)",
-    "מבוגרים (60- 35)",
-    "הגיל השלישי (60+)"
-   ],
-   "date": "2026-07-13",
-   "time": "13:00",
-   "locName": "מייקרס",
-   "address": "רחוב מסובים 2",
-   "x": 1714.2,
-   "y": -3740.9,
-   "approx": true,
-   "link": "https://www.ramat-gan.muni.il/events/rg-events/web-site-event-409/",
-   "img": null,
-   "featured": false,
-   "free": true
-  },
-  {
-   "id": "muni-eventstour-to-jerusalem",
-   "title": "В тени Храмовой горы",
-   "cat": "community",
-   "anim": "community",
-   "muniCat": "עליה וקליטה",
-   "audience": [
-    "צעירים (18-35)",
-    "מבוגרים (60- 35)",
-    "הגיל השלישי (60+)"
-   ],
-   "date": "2026-07-13",
-   "time": "13:00",
-   "locName": "רחוב ז'בוטינסקי ",
-   "address": "",
-   "x": -1086.2,
-   "y": 2011.2,
-   "approx": true,
-   "link": "https://www.ramat-gan.muni.il/events/tour-to-jerusalem/",
-   "img": "https://www.ramat-gan.muni.il/media/1yenmrfd/התאמות-סיור-לירושלים_342-220.jpg",
-   "featured": false,
-   "free": true
-  },
-  {
-   "id": "muni-eventsbackgammon-painting-workshop",
-   "title": "סדנת ציור על שש בש",
-   "cat": "community",
-   "anim": "community",
-   "muniCat": "נוער רמתגני בכיתות ז'-יב'",
-   "audience": [
-    "נוער (12-18)"
-   ],
-   "date": "2026-07-13",
-   "time": "17:30",
-   "locName": "מרכז נהורה",
-   "address": "רחוב תרצה 19",
-   "x": 220,
-   "y": 88.8,
-   "approx": false,
-   "link": "https://www.ramat-gan.muni.il/events/backgammon-painting-workshop/",
-   "img": "https://www.ramat-gan.muni.il/media/1bjb0yt0/220_342מובייל.jpg",
-   "featured": false
-  },
-  {
-   "id": "muni-eventsrg-eventsweb-site-event-3996",
-   "title": "ערב בריאות מינית במרכז הגאה רמת גן",
-   "cat": "community",
-   "anim": "community",
-   "muniCat": "הקהילה הגאה",
-   "audience": [
-    "צעירים (18-35)",
-    "מבוגרים (60- 35)"
-   ],
-   "date": "2026-07-13",
-   "time": "20:00",
-   "locName": "המרכז הגאה",
-   "address": "רחוב ביאליק 42",
-   "x": -1144.8,
-   "y": 1361.2,
-   "approx": false,
-   "link": "https://www.ramat-gan.muni.il/events/rg-events/web-site-event-3996/",
-   "img": "https://www.ramat-gan.muni.il/media/gouprv00/220_342מובייל.jpg",
-   "featured": false,
-   "free": true
-  },
   {
    "id": "muni-eventslectures-for-age-60-and-over",
    "title": "הרצאות במועדונים לוותיקים",
@@ -101,11 +13,11 @@
    ],
    "date": "2026-07-14",
    "time": "",
-   "locName": "מועדון בת שוע",
-   "address": "רחוב בת שוע 7",
-   "x": -11.6,
-   "y": -87.6,
-   "approx": true,
+   "locName": "מרכז חברתי תמיר",
+   "address": "רחוב רמז 5",
+   "x": -703.6,
+   "y": -164.1,
+   "approx": false,
    "link": "https://www.ramat-gan.muni.il/events/lectures-for-age-60-and-over/",
    "img": "https://www.ramat-gan.muni.il/media/gycpvo0p/עמוד-הרצאות_1540-8032.jpg",
    "featured": false
@@ -308,28 +220,6 @@
    "free": true
   },
   {
-   "id": "muni-eventsworld-cup-2026",
-   "title": "מונדיאל LIVE",
-   "cat": "sport",
-   "anim": "sport",
-   "muniCat": "תיאטרון אמנות מוזיקה וספורט",
-   "audience": [
-    "צעירים (18-35)",
-    "מבוגרים (60- 35)",
-    "נוער (12-18)"
-   ],
-   "date": "2026-07-14",
-   "time": "20:00",
-   "locName": "הפארק הלאומי",
-   "address": "רחוב אחד העם 3",
-   "x": -359.3,
-   "y": -2368,
-   "approx": false,
-   "link": "https://www.ramat-gan.muni.il/events/world-cup-2026/",
-   "img": "https://www.ramat-gan.muni.il/media/znlbzvnx/התאמות-לאתר_-שידורי-מונדיאל-20206-בפארק-הלאומי_342-220.jpg",
-   "featured": false
-  },
-  {
    "id": "muni-eventsfirst-aid-course-babies-and-kids-2026",
    "title": "קורסי החייאה ועזרה ראשונה לתינוקות וילדים",
    "cat": "community",
@@ -389,6 +279,24 @@
    "link": "https://www.ramat-gan.muni.il/events/public-singing/",
    "img": "https://www.ramat-gan.muni.il/media/ftdgeygy/לאתר-שירה-בציבור_342-220.jpg",
    "featured": false
+  },
+  {
+   "id": "muni-eventsworld-cup-2026",
+   "title": "מונדיאל LIVE",
+   "cat": "community",
+   "anim": "community",
+   "muniCat": "",
+   "audience": [],
+   "date": "2026-07-14",
+   "time": "22:00",
+   "locName": "הפארק הלאומי",
+   "address": "",
+   "x": -359.3,
+   "y": -2368,
+   "approx": false,
+   "link": "https://www.ramat-gan.muni.il/events/world-cup-2026/",
+   "img": "https://www.ramat-gan.muni.il/media/znlbzvnx/התאמות-לאתר_-שידורי-מונדיאל-20206-בפארק-הלאומי_342-220.jpg",
+   "featured": true
   },
   {
    "id": "muni-eventsweb-site-event-329",
@@ -1007,18 +915,22 @@
    "title": "סאמר ספלאש RAVE- מסיבת קיץ מטורפת לילדים והורים",
    "cat": "community",
    "anim": "community",
-   "muniCat": "",
-   "audience": [],
+   "muniCat": "קיץ רמת גני 2026",
+   "audience": [
+    "לכל המשפחה",
+    "ילדים (4-11)",
+    "צעירים (18-35)"
+   ],
    "date": "2026-07-24",
    "time": "11:00",
    "locName": "הפארק הלאומי",
-   "address": "",
+   "address": "רחוב אחד העם 3",
    "x": -359.3,
    "y": -2368,
    "approx": false,
    "link": "https://www.ramat-gan.muni.il/events/mbe-rg-events/web-site-event-23500/",
    "img": "https://www.ramat-gan.muni.il/media/prekjzum/התאמות-לאתר-סאמר-רייב_342-220.jpg",
-   "featured": true,
+   "featured": false,
    "free": true
   },
   {
