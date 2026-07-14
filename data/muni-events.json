@@ -1,70 +1,7 @@
 {
- "updated": "2026-07-14T08:27:05.496Z",
+ "updated": "2026-07-14T19:41:49.659Z",
  "source": "https://www.ramat-gan.muni.il/event-lobby",
  "events": [
-  {
-   "id": "muni-eventslectures-for-age-60-and-over",
-   "title": "הרצאות במועדונים לוותיקים",
-   "cat": "community",
-   "anim": "community",
-   "muniCat": "אזרחים ותיקים",
-   "audience": [
-    "הגיל השלישי (60+)"
-   ],
-   "date": "2026-07-14",
-   "time": "",
-   "locName": "מרכז חברתי תמיר",
-   "address": "רחוב רמז 5",
-   "x": -703.6,
-   "y": -164.1,
-   "approx": false,
-   "link": "https://www.ramat-gan.muni.il/events/lectures-for-age-60-and-over/",
-   "img": "https://www.ramat-gan.muni.il/media/gycpvo0p/עמוד-הרצאות_1540-8032.jpg",
-   "featured": false
-  },
-  {
-   "id": "muni-eventsgames-of-the-past",
-   "title": "משחקים של פעם",
-   "cat": "community",
-   "anim": "community",
-   "muniCat": "פעילויות לילדים ולגיל הרך",
-   "audience": [
-    "צעירים (18-35)",
-    "מבוגרים (60- 35)",
-    "ילדים (4-11)"
-   ],
-   "date": "2026-07-14",
-   "time": "16:30",
-   "locName": "גן אחווה",
-   "address": "רחוב אחד העם 34",
-   "x": -660.7,
-   "y": -2461.4,
-   "approx": false,
-   "link": "https://www.ramat-gan.muni.il/events/games-of-the-past/",
-   "img": "https://www.ramat-gan.muni.il/media/3pwpfoux/התאמות-לאתר-משחקים-של-פעם-בגינות-העיר_342-220.jpg",
-   "featured": false
-  },
-  {
-   "id": "muni-eventsrg-eventsweb-site-event-1246",
-   "title": "שעות סיפור ברשת ספריות רמת-גן - יוני - יולי 2026",
-   "cat": "community",
-   "anim": "community",
-   "muniCat": "שעת סיפור",
-   "audience": [
-    "ילדים (4-11)"
-   ],
-   "date": "2026-07-14",
-   "time": "16:45",
-   "locName": "ספריית בית לזרוס",
-   "address": "רחוב אינשטיין 16 במתנ\"ס",
-   "x": -50.7,
-   "y": -855,
-   "approx": true,
-   "link": "https://www.ramat-gan.muni.il/events/rg-events/web-site-event-1246/",
-   "img": null,
-   "featured": false,
-   "free": true
-  },
   {
    "id": "muni-eventsrg-eventsweb-site-event-3991",
    "title": "סדנת אביזרי קיץ בעיצוב אישי",
@@ -111,23 +48,24 @@
    "free": true
   },
   {
-   "id": "muni-eventsmbe-rg-eventsramatganchik-2026",
-   "title": "רמתגנצ'יק אירועי שבוע 5-9.7",
-   "cat": "community",
-   "anim": "community",
-   "muniCat": "פעילויות לילדים ולגיל הרך",
+   "id": "muni-eventsrunning-group",
+   "title": "רצים יחד ברמת גן",
+   "cat": "sport",
+   "anim": "sport",
+   "muniCat": "תיאטרון אמנות מוזיקה וספורט",
    "audience": [
-    "הגיל הרך (0-3)"
+    "מבוגרים (60- 35)",
+    "צעירים (18-35)"
    ],
    "date": "2026-07-14",
-   "time": "17:15",
-   "locName": "בית דורון",
-   "address": "רחוב הראשונים 1",
-   "x": -2159.4,
-   "y": 1231.7,
+   "time": "18:00",
+   "locName": "הפארק הלאומי",
+   "address": "רחוב אחד העם 3",
+   "x": -359.3,
+   "y": -2368,
    "approx": false,
-   "link": "https://www.ramat-gan.muni.il/events/mbe-rg-events/ramatganchik-2026/",
-   "img": "https://www.ramat-gan.muni.il/media/sw4ntzgj/רמתגנציק_התאמה-לאתר-מובייל_342-220.jpg",
+   "link": "https://www.ramat-gan.muni.il/events/running-group/",
+   "img": null,
    "featured": false,
    "free": true
   },
@@ -153,150 +91,24 @@
    "free": true
   },
   {
-   "id": "muni-eventsbeit-zvi-rg-eventsweb-site-event-1178",
-   "title": "יאקיש ופופצ'ה",
-   "cat": "sport",
-   "anim": "sport",
-   "muniCat": "תיאטרון אמנות מוזיקה וספורט",
+   "id": "muni-eventslectures-for-age-60-and-over",
+   "title": "הרצאות במועדונים לוותיקים",
+   "cat": "community",
+   "anim": "community",
+   "muniCat": "אזרחים ותיקים",
    "audience": [
-    "צעירים (18-35)",
-    "מבוגרים (60- 35)",
     "הגיל השלישי (60+)"
    ],
-   "date": "2026-07-14",
-   "time": "19:30",
-   "locName": "תיאטרון בית צבי",
-   "address": "רחוב שועלי שמשון 2",
-   "x": -471.1,
-   "y": 866.7,
-   "approx": true,
-   "link": "https://www.ramat-gan.muni.il/events/beit-zvi-rg-events/web-site-event-1178/",
-   "img": "https://www.ramat-gan.muni.il/media/vhbpmdkv/yakish220-342.jpg",
-   "featured": false,
-   "free": true
-  },
-  {
-   "id": "muni-eventsrussian-chair-2026",
-   "title": "Кафедра Рамат-Ган",
-   "cat": "community",
-   "anim": "community",
-   "muniCat": "עליה וקליטה",
-   "audience": [
-    "מבוגרים (60- 35)",
-    "הגיל השלישי (60+)"
-   ],
-   "date": "2026-07-14",
-   "time": "19:30",
-   "locName": "בית קריניצי",
-   "address": "רחוב קריניצי 64",
-   "x": -692.1,
-   "y": 1370.1,
+   "date": "2026-07-15",
+   "time": "",
+   "locName": "מרכז חברתי תמיר",
+   "address": "רחוב רמז 5",
+   "x": -703.6,
+   "y": -164.1,
    "approx": false,
-   "link": "https://www.ramat-gan.muni.il/events/russian-chair-2026/",
-   "img": "https://www.ramat-gan.muni.il/media/14rbqael/התאמה-לאתר-אימגים_קתדרת-קיץ-מאי-יולי-רוסית-2025_342-220.jpg",
-   "featured": false,
-   "free": true
-  },
-  {
-   "id": "muni-eventsrg-eventsweb-site-event-695",
-   "title": "קבוצת שחייה",
-   "cat": "community",
-   "anim": "community",
-   "muniCat": "הקהילה הגאה",
-   "audience": [
-    "צעירים (18-35)",
-    "מבוגרים (60- 35)"
-   ],
-   "date": "2026-07-14",
-   "time": "20:00",
-   "locName": "קאנטרי רמת גן",
-   "address": "רחוב מנדל מתיתיהו 12",
-   "x": 608.5,
-   "y": -243.5,
-   "approx": true,
-   "link": "https://www.ramat-gan.muni.il/events/rg-events/web-site-event-695/",
-   "img": "https://www.ramat-gan.muni.il/media/wlykjlvg/גריד-לקהילה-הגאה_התאמה-לאתר_342-2203.jpg",
-   "featured": false,
-   "free": true
-  },
-  {
-   "id": "muni-eventsfirst-aid-course-babies-and-kids-2026",
-   "title": "קורסי החייאה ועזרה ראשונה לתינוקות וילדים",
-   "cat": "community",
-   "anim": "community",
-   "muniCat": "בריאות",
-   "audience": [
-    "צעירים (18-35)",
-    "מבוגרים (60- 35)"
-   ],
-   "date": "2026-07-14",
-   "time": "20:15",
-   "locName": "בית דורון",
-   "address": "רחוב הראשונים 1",
-   "x": -2159.4,
-   "y": 1231.7,
-   "approx": false,
-   "link": "https://www.ramat-gan.muni.il/events/first-aid-course-babies-and-kids-2026/",
-   "img": null,
-   "featured": false,
-   "free": true
-  },
-  {
-   "id": "muni-eventssummer-ramat-gani-2026",
-   "title": "קיץ רמת גני",
-   "cat": "community",
-   "anim": "community",
-   "muniCat": "",
-   "audience": [],
-   "date": "2026-07-14",
-   "time": "20:30",
-   "locName": "הפארק הלאומי",
-   "address": "",
-   "x": -359.3,
-   "y": -2368,
-   "approx": false,
-   "link": "https://www.ramat-gan.muni.il/events/summer-ramat-gani-2026/",
-   "img": "https://www.ramat-gan.muni.il/media/1wpgegrx/קיץ-2026_התאמות-לאתר_342-220.jpg",
-   "featured": true
-  },
-  {
-   "id": "muni-eventspublic-singing",
-   "title": "שירה בציבור ברחבי העיר",
-   "cat": "sport",
-   "anim": "sport",
-   "muniCat": "תיאטרון אמנות מוזיקה וספורט",
-   "audience": [
-    "מבוגרים (60- 35)",
-    "הגיל השלישי (60+)"
-   ],
-   "date": "2026-07-14",
-   "time": "20:30",
-   "locName": "הפארק הלאומי",
-   "address": "רחוב אחד העם 3",
-   "x": -359.3,
-   "y": -2368,
-   "approx": false,
-   "link": "https://www.ramat-gan.muni.il/events/public-singing/",
-   "img": "https://www.ramat-gan.muni.il/media/ftdgeygy/לאתר-שירה-בציבור_342-220.jpg",
+   "link": "https://www.ramat-gan.muni.il/events/lectures-for-age-60-and-over/",
+   "img": "https://www.ramat-gan.muni.il/media/gycpvo0p/עמוד-הרצאות_1540-8032.jpg",
    "featured": false
-  },
-  {
-   "id": "muni-eventsworld-cup-2026",
-   "title": "מונדיאל LIVE",
-   "cat": "community",
-   "anim": "community",
-   "muniCat": "",
-   "audience": [],
-   "date": "2026-07-14",
-   "time": "22:00",
-   "locName": "הפארק הלאומי",
-   "address": "",
-   "x": -359.3,
-   "y": -2368,
-   "approx": false,
-   "link": "https://www.ramat-gan.muni.il/events/world-cup-2026/",
-   "img": "https://www.ramat-gan.muni.il/media/znlbzvnx/התאמות-לאתר_-שידורי-מונדיאל-20206-בפארק-הלאומי_342-220.jpg",
-   "featured": true
   },
   {
    "id": "muni-eventsweb-site-event-329",
@@ -364,6 +176,27 @@
    "approx": true,
    "link": "https://www.ramat-gan.muni.il/events/saying-goodbye-to-diapers-together/",
    "img": "https://www.ramat-gan.muni.il/media/f4ck3nzu/גמילה-מחיתולים-התאמות-לאתר_342-220.jpg",
+   "featured": false,
+   "free": true
+  },
+  {
+   "id": "muni-eventsmbe-rg-eventsramatganchik-2026",
+   "title": "רמתגנצ'יק אירועי שבוע 5-9.7",
+   "cat": "community",
+   "anim": "community",
+   "muniCat": "פעילויות לילדים ולגיל הרך",
+   "audience": [
+    "הגיל הרך (0-3)"
+   ],
+   "date": "2026-07-15",
+   "time": "17:15",
+   "locName": "מרכז קהילתי מרום נווה",
+   "address": "רחוב חזון אי\"ש 90",
+   "x": 620.5,
+   "y": 23,
+   "approx": true,
+   "link": "https://www.ramat-gan.muni.il/events/mbe-rg-events/ramatganchik-2026/",
+   "img": "https://www.ramat-gan.muni.il/media/sw4ntzgj/רמתגנציק_התאמה-לאתר-מובייל_342-220.jpg",
    "featured": false,
    "free": true
   },
@@ -453,6 +286,48 @@
    "free": true
   },
   {
+   "id": "muni-eventsbeit-zvi-rg-eventsweb-site-event-1178",
+   "title": "יאקיש ופופצ'ה",
+   "cat": "sport",
+   "anim": "sport",
+   "muniCat": "תיאטרון אמנות מוזיקה וספורט",
+   "audience": [
+    "צעירים (18-35)",
+    "מבוגרים (60- 35)",
+    "הגיל השלישי (60+)"
+   ],
+   "date": "2026-07-15",
+   "time": "19:30",
+   "locName": "תיאטרון בית צבי",
+   "address": "רחוב שועלי שמשון 2",
+   "x": -471.1,
+   "y": 866.7,
+   "approx": true,
+   "link": "https://www.ramat-gan.muni.il/events/beit-zvi-rg-events/web-site-event-1178/",
+   "img": "https://www.ramat-gan.muni.il/media/vhbpmdkv/yakish220-342.jpg",
+   "featured": false,
+   "free": true
+  },
+  {
+   "id": "muni-eventssummer-ramat-gani-2026",
+   "title": "קיץ רמת גני",
+   "cat": "community",
+   "anim": "community",
+   "muniCat": "",
+   "audience": [],
+   "date": "2026-07-15",
+   "time": "20:30",
+   "locName": "תיאטרון ראסל",
+   "address": "",
+   "x": 674.1,
+   "y": -281.5,
+   "approx": true,
+   "link": "https://www.ramat-gan.muni.il/events/summer-ramat-gani-2026/",
+   "img": "https://www.ramat-gan.muni.il/media/1wpgegrx/קיץ-2026_התאמות-לאתר_342-220.jpg",
+   "featured": true,
+   "free": true
+  },
+  {
    "id": "muni-eventsbeit-zvi-rg-eventsweb-site-event-1177",
    "title": "פליישר",
    "cat": "sport",
@@ -474,6 +349,24 @@
    "img": "https://www.ramat-gan.muni.il/media/jdqbpv1a/flaisher220-342.jpg",
    "featured": false,
    "free": true
+  },
+  {
+   "id": "muni-eventsworld-cup-2026",
+   "title": "מונדיאל LIVE",
+   "cat": "community",
+   "anim": "community",
+   "muniCat": "",
+   "audience": [],
+   "date": "2026-07-15",
+   "time": "22:00",
+   "locName": "הפארק הלאומי",
+   "address": "",
+   "x": -359.3,
+   "y": -2368,
+   "approx": false,
+   "link": "https://www.ramat-gan.muni.il/events/world-cup-2026/",
+   "img": "https://www.ramat-gan.muni.il/media/znlbzvnx/התאמות-לאתר_-שידורי-מונדיאל-20206-בפארק-הלאומי_342-220.jpg",
+   "featured": true
   },
   {
    "id": "muni-eventsweb-site-event-206",
@@ -514,6 +407,28 @@
    "approx": false,
    "link": "https://www.ramat-gan.muni.il/events/rg-events/web-site-event-3925/",
    "img": "https://www.ramat-gan.muni.il/media/o4ppms4v/220_342מובייל.jpg",
+   "featured": false,
+   "free": true
+  },
+  {
+   "id": "muni-eventsrg-eventsweb-site-event-695",
+   "title": "קבוצת שחייה",
+   "cat": "community",
+   "anim": "community",
+   "muniCat": "הקהילה הגאה",
+   "audience": [
+    "צעירים (18-35)",
+    "מבוגרים (60- 35)"
+   ],
+   "date": "2026-07-16",
+   "time": "20:00",
+   "locName": "קאנטרי רמת גן",
+   "address": "רחוב מנדל מתיתיהו 12",
+   "x": 608.5,
+   "y": -243.5,
+   "approx": true,
+   "link": "https://www.ramat-gan.muni.il/events/rg-events/web-site-event-695/",
+   "img": "https://www.ramat-gan.muni.il/media/wlykjlvg/גריד-לקהילה-הגאה_התאמה-לאתר_342-2203.jpg",
    "featured": false,
    "free": true
   },
@@ -626,6 +541,27 @@
    "y": -3740.9,
    "approx": true,
    "link": "https://www.ramat-gan.muni.il/events/rg-events/web-site-event-328/",
+   "img": null,
+   "featured": false,
+   "free": true
+  },
+  {
+   "id": "muni-eventsrg-eventsweb-site-event-1246",
+   "title": "שעות סיפור ברשת ספריות רמת-גן - יוני - יולי 2026",
+   "cat": "community",
+   "anim": "community",
+   "muniCat": "שעת סיפור",
+   "audience": [
+    "ילדים (4-11)"
+   ],
+   "date": "2026-07-19",
+   "time": "16:45",
+   "locName": "ספריית נווה יהושע",
+   "address": "רחוב עמק החולה 17",
+   "x": -1539.1,
+   "y": 3233.1,
+   "approx": true,
+   "link": "https://www.ramat-gan.muni.il/events/rg-events/web-site-event-1246/",
    "img": null,
    "featured": false,
    "free": true
@@ -824,6 +760,28 @@
    "free": true
   },
   {
+   "id": "muni-eventsfirst-aid-course-babies-and-kids-2026",
+   "title": "קורסי החייאה ועזרה ראשונה לתינוקות וילדים",
+   "cat": "community",
+   "anim": "community",
+   "muniCat": "בריאות",
+   "audience": [
+    "צעירים (18-35)",
+    "מבוגרים (60- 35)"
+   ],
+   "date": "2026-07-21",
+   "time": "20:15",
+   "locName": "הרמוניה",
+   "address": "רחוב המרגנית 10",
+   "x": -1278.5,
+   "y": 2553.9,
+   "approx": false,
+   "link": "https://www.ramat-gan.muni.il/events/first-aid-course-babies-and-kids-2026/",
+   "img": null,
+   "featured": false,
+   "free": true
+  },
+  {
    "id": "muni-eventsthe-connection-between-walking-and-memory",
    "title": "הקשר בין הליכה לזיכרון",
    "cat": "community",
@@ -841,28 +799,6 @@
    "approx": true,
    "link": "https://www.ramat-gan.muni.il/events/the-connection-between-walking-and-memory/",
    "img": "https://www.ramat-gan.muni.il/media/4emh1vdj/התאמות-הרצאה-הקשר-בין-הליכה-לזיכרון_342-220.jpg",
-   "featured": false,
-   "free": true
-  },
-  {
-   "id": "muni-eventsmbe-rg-eventsweb-site-event-23455",
-   "title": "Kings And Queens Night: International Chess Day Event",
-   "cat": "community",
-   "anim": "community",
-   "muniCat": "עליה וקליטה",
-   "audience": [
-    "צעירים (18-35)",
-    "מבוגרים (60- 35)"
-   ],
-   "date": "2026-07-22",
-   "time": "19:30",
-   "locName": "פאב הספסל",
-   "address": "רחוב ביאליק 26",
-   "x": -1109.1,
-   "y": 1166.2,
-   "approx": false,
-   "link": "https://www.ramat-gan.muni.il/events/mbe-rg-events/web-site-event-23455/",
-   "img": "https://www.ramat-gan.muni.il/media/ke4nclb3/התאמות-טורניר-יום-השחמט-227_342-220.jpg",
    "featured": false,
    "free": true
   },
@@ -909,6 +845,28 @@
    "img": "https://www.ramat-gan.muni.il/media/osodp41k/גריד-לקהילה-הגאה_התאמה-לאתר_342-22010.jpg",
    "featured": false,
    "free": true
+  },
+  {
+   "id": "muni-eventsa-morning-of-treasures",
+   "title": "בוקר של אוצרות",
+   "cat": "sport",
+   "anim": "sport",
+   "muniCat": "תיאטרון אמנות מוזיקה וספורט",
+   "audience": [
+    "צעירים (18-35)",
+    "מבוגרים (60- 35)",
+    "הגיל השלישי (60+)"
+   ],
+   "date": "2026-07-24",
+   "time": "09:00",
+   "locName": "מרכז אוצרות לריהוט יד שניה ווינטג'",
+   "address": "רחוב מנדס 67",
+   "x": 2228.4,
+   "y": -1688,
+   "approx": true,
+   "link": "https://www.ramat-gan.muni.il/events/a-morning-of-treasures/",
+   "img": "https://www.ramat-gan.muni.il/media/jyaf4d5b/לאתר-בוקר-של-אוצרות_342-220.jpg",
+   "featured": false
   },
   {
    "id": "muni-eventsmbe-rg-eventsweb-site-event-23500",
@@ -1155,6 +1113,27 @@
    "free": true
   },
   {
+   "id": "muni-eventsrg-eventsweb-site-event-3909",
+   "title": "❤️ שבוע האהבה של הקומה השנייה | BlendDate - סדנת קוקטיילים זוגית 🍸",
+   "cat": "community",
+   "anim": "community",
+   "muniCat": "הקומה השנייה: מרכז צעירים",
+   "audience": [
+    "צעירים (18-35)"
+   ],
+   "date": "2026-07-28",
+   "time": "20:00",
+   "locName": "דודו אנד דלי",
+   "address": "רחוב עוזיאל 129",
+   "x": -529.9,
+   "y": -506.1,
+   "approx": true,
+   "link": "https://www.ramat-gan.muni.il/events/rg-events/web-site-event-3909/",
+   "img": "https://www.ramat-gan.muni.il/media/babluil2/220_342מובייל.jpg",
+   "featured": false,
+   "free": true
+  },
+  {
    "id": "muni-eventstu-berg-festival",
    "title": "פסטיבל ט\"ו בר\"ג",
    "cat": "city",
@@ -1170,6 +1149,48 @@
    "link": "https://www.ramat-gan.muni.il/events/tu-berg-festival/",
    "img": "https://www.ramat-gan.muni.il/media/wimj0jyf/לאתר-פסטיבל-ט-ו-באב-בכיכר-רמב-ם_342-220.jpg",
    "featured": true
+  },
+  {
+   "id": "muni-eventspublic-singing",
+   "title": "שירה בציבור ברחבי העיר",
+   "cat": "sport",
+   "anim": "sport",
+   "muniCat": "תיאטרון אמנות מוזיקה וספורט",
+   "audience": [
+    "מבוגרים (60- 35)",
+    "הגיל השלישי (60+)"
+   ],
+   "date": "2026-08-04",
+   "time": "20:30",
+   "locName": "כיכר רמב\"ם",
+   "address": "כיכר רמב\"ם 5",
+   "x": -1158.3,
+   "y": 1447.3,
+   "approx": true,
+   "link": "https://www.ramat-gan.muni.il/events/public-singing/",
+   "img": "https://www.ramat-gan.muni.il/media/ftdgeygy/לאתר-שירה-בציבור_342-220.jpg",
+   "featured": false
+  },
+  {
+   "id": "muni-eventsmbe-rg-eventsweb-site-event-23428",
+   "title": "הרצאה מזמרת - קפה, שיר וסיפור",
+   "cat": "community",
+   "anim": "community",
+   "muniCat": "אזרחים ותיקים",
+   "audience": [
+    "הגיל השלישי (60+)"
+   ],
+   "date": "2026-08-13",
+   "time": "10:00",
+   "locName": "מרכז קהילה ותרבות רמת יצחק",
+   "address": "רחוב שד' ירושלים 38",
+   "x": -379.8,
+   "y": 448.4,
+   "approx": true,
+   "link": "https://www.ramat-gan.muni.il/events/mbe-rg-events/web-site-event-23428/",
+   "img": "https://www.ramat-gan.muni.il/media/b5gdoudr/לאתר-הרצאה-מזמרת-46_342-220.jpg",
+   "featured": false,
+   "free": true
   },
   {
    "id": "muni-eventsrameat-gan-international-festival",
