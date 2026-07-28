@@ -89,7 +89,10 @@ input,select,textarea{font-family:inherit;font-size:inherit;color:var(--ink)}
 
 /* ---------- search ---------- */
 /* above the sheets (40): search results must never hide behind an open panel */
-#searchWrap{position:fixed;top:92px;right:24px;z-index:44;width:min(390px,calc(100vw - 48px));animation:fadeSlide .6s .25s ease backwards}
+/* the wrap's box spans the full search column — pointer-events pass through the
+   empty parts so it never swallows taps meant for whatever sits underneath */
+#searchWrap{position:fixed;top:92px;right:24px;z-index:30;width:min(390px,calc(100vw - 48px));animation:fadeSlide .6s .25s ease backwards;pointer-events:none}
+#searchWrap > *{pointer-events:auto}
 #searchBox{display:flex;align-items:center;gap:10px;background:var(--panel);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);
   border:1px solid var(--line);border-radius:999px;height:48px;padding:0 18px;box-shadow:var(--elev-2);transition:border-color var(--t-med),box-shadow var(--t-med)}
 #searchBox:focus-within{border-color:var(--gold);box-shadow:var(--elev-3)}
@@ -660,7 +663,9 @@ body.search-active #bizPill{opacity:0;pointer-events:none}
   /* searching opens chips/results exactly where the bell sits — step aside */
   body.search-active #bellBtn{opacity:0;pointer-events:none}
   #navInstr{font-size:15px}
-  #searchWrap{top:64px;right:16px;width:calc(100vw - 32px)}
+  /* on phones search floats above the sheets (results must win) — desktop keeps
+     it under panels so a side panel's header and ✕ are never covered */
+  #searchWrap{top:64px;right:16px;width:calc(100vw - 32px);z-index:44}
   #results{max-height:42vh}
   #bizPill{top:122px;right:16px;max-width:calc(100vw - 90px)} /* leaves the bell its corner */
   #ctrls{bottom:calc(92px + env(safe-area-inset-bottom));left:10px}
@@ -681,7 +686,8 @@ body.search-active #bizPill{opacity:0;pointer-events:none}
   /* panels become bottom sheets — the assistant gets almost the whole screen */
   #evPanel,#aiPanel{top:auto;left:0;right:0;width:100%;height:min(74vh,620px);border-left:none;
     border-top:1px solid var(--hairline);border-radius:var(--r-xl) var(--r-xl) 0 0;
-    transform:translateY(108%);padding-bottom:env(safe-area-inset-bottom)}
+    transform:translateY(108%);padding-bottom:env(safe-area-inset-bottom);
+    max-height:calc(100dvh - 130px)} /* the sheet's ✕ must clear the search bar on short phones */
   #aiPanel{height:min(88dvh,760px)}
   #evPanel.open,#aiPanel.open{transform:none}
   #evPanel::before,#aiPanel::before{content:'';position:absolute;top:9px;left:50%;transform:translateX(-50%);

@@ -447,6 +447,107 @@ function anchorSnap(ovRecs, osmRecs) {
   console.log('anchor consensus: relocated', snapped, 'mislocated Overture records');
 }
 
+/* ---------------- street-address snap ----------------
+   Beyond named venues, plenty of Facebook pins simply sit on the wrong street
+   ("רשת קפה לנדוור, אבא הילל סילבר 301" pinned 2km away near רמב"ם). The baked
+   city data already carries every OSM address point, so a record's own stated
+   street+number IS a local geocoder: when the pin is >150m from its stated
+   address, the address wins. OSM records are never moved. */
+const STREETWORDS = new Set(['דרך', 'שדרות', 'שד', 'רחוב', 'רח', 'סמטת', 'סמטה', 'כיכר',
+  'st', 'street', 'rd', 'road', 'ave', 'avenue', 'blvd', 'boulevard', 'sq', 'israel']);
+const normTok = s => String(s).toLowerCase().replace(/["'`’׳״.]/g, '');
+const hebSquash = t => t.length > 2 ? t.replace(/[יו]/g, '') : t; // malé/haser: הילל == הלל
+function tokForms(t) { // comparable forms: exact, vowel-squashed, skeleton, h-less skeleton
+  const out = new Set([t]);
+  if (/[א-ת]/.test(t)) out.add(hebSquash(t));
+  const sk = skeleton(t);
+  if (sk.length) { out.add('~' + sk); out.add('~' + sk.replace(/h/g, '')); }
+  return out;
+}
+const addrWords = raw => normTok(clean(raw)).replace(/[(),\-–־&|\/]/g, ' ').split(/\s+/).filter(Boolean);
+function buildAddrIndex() {
+  const m = /"addr":\{/.exec(dataJs);
+  if (!m) return [];
+  let i = m.index + 7, depth = 0; const start = i;
+  for (; ; i++) { if (dataJs[i] === '{') depth++; else if (dataJs[i] === '}') { depth--; if (!depth) break; } }
+  const addr = JSON.parse(dataJs.slice(start, i + 1));
+  const streets = [];
+  for (const [name, pts] of Object.entries(addr)) {
+    const toks = addrWords(name).filter(t => !STREETWORDS.has(t) && !/^\d+$/.test(t) && t.length >= 2);
+    if (!toks.length) continue;
+    const nums = new Map();
+    for (const [nm, x, y] of pts) { const n = parseInt(nm, 10); if (n && !nums.has(n)) nums.set(n, [x, y]); }
+    if (!nums.size) continue;
+    streets.push({ name, toks, vars: toks.map(tokForms), nums });
+  }
+  return streets;
+}
+function addrSnap(ovRecs) {
+  const streets = buildAddrIndex();
+  if (!streets.length) { console.log('address snap: no address index — skipped'); return; }
+  // an address that names another town is that town's problem — never pull it here
+  const OTHER_CITIES = ['רמת גן', 'גבעתיים', 'תל אביב', 'בני ברק', 'אור יהודה', 'פתח תקוו', 'חולון', 'ראשון לציון',
+    'קרית אונו', 'קריית אונו', 'גני תקווה', 'ramat gan', 'givatayim', 'tel aviv', 'bnei brak', 'or yehuda']
+    .filter(c => !normTok(cfg.nameHe).includes(normTok(c)) && !cfg.nameEn.toLowerCase().includes(c));
+  let snapped = 0;
+  for (const it of ovRecs) {
+    if (!it.addr) continue;
+    const rawNorm = normTok(clean(it.addr));
+    if (OTHER_CITIES.some(c => rawNorm.includes(c))) continue;
+    const words = [], nums = [];
+    for (const t of addrWords(it.addr)) {
+      const mNum = /^(\d{1,3})[א-ת]?$/.exec(t);
+      if (mNum) nums.push(+mNum[1]);
+      else if (!STREETWORDS.has(t) && t.length >= 2) words.push(t);
+    }
+    if (!nums.length || !words.length) continue;
+    const wForms = words.map(tokForms);
+    let best = null;
+    for (const st of streets) {
+      let matched = 0, solid = false;
+      for (const v of st.vars) {
+        let hit = false;
+        for (const wf of wForms) {
+          for (const f of v) if (wf.has(f)) { hit = true; if (!f.startsWith('~')) solid = true; break; }
+          if (hit) break;
+        }
+        if (hit) matched++;
+      }
+      const ratio = matched / st.toks.length;
+      if (!matched || ratio < 0.6) continue;
+      if (st.toks.length === 1 && !solid) continue; // lone-token street: phonetics alone are too noisy
+      if (!solid && ratio < 1) continue;            // phonetic-only match must cover the whole name
+      // exact house number preferred; OSM address coverage has holes, so a strong
+      // street match may fall back to the nearest number a few doors away
+      let num = nums.find(n => st.nums.has(n)), delta = 0;
+      if (num === undefined && ratio >= 0.8) {
+        let bd = 5;
+        for (const n of nums) for (const sn of st.nums.keys())
+          if (Math.abs(sn - n) < bd) { bd = Math.abs(sn - n); num = sn; }
+        delta = bd;
+      }
+      if (num === undefined) continue;
+      const cand = { st, num, ratio, matched, exact: delta === 0, delta };
+      const better = !best || cand.ratio > best.ratio
+        || (cand.ratio === best.ratio && (cand.exact - best.exact > 0
+          || (cand.exact === best.exact && (cand.delta < best.delta
+            || (cand.delta === best.delta && cand.matched > best.matched)))));
+      if (better) best = cand;
+    }
+    if (!best) continue;
+    const [ax, ay] = best.st.nums.get(best.num);
+    // 40m: tight enough that same-address duplicates land inside the 60m merge
+    // gate (snap jitter ±8m), loose enough to keep storefront-precise pins put
+    if (Math.hypot(it.x - ax, it.y - ay) <= 400) continue;
+    const h1 = Math.abs((it.x * 12.9898 + it.y * 78.233) % 1);
+    const h2 = Math.abs((it.x * 3.1415 + it.y * 2.7182) % 1);
+    it.x = Math.round(ax + (h1 - 0.5) * 160); // ±8m deterministic scatter off the door
+    it.y = Math.round(ay + (h2 - 0.5) * 160);
+    snapped++;
+  }
+  console.log('address snap: relocated', snapped, 'records onto their stated street+number');
+}
+
 async function main() {
   const [osmRaw, ovAll] = [await fetchOSM(), loadOverture()];
   const osmItems = osmRaw ? processOSM(osmRaw) : [];
@@ -471,8 +572,10 @@ async function main() {
   }
   console.log('Overture after dedupe:', kept.length, '(dropped', ovItems.length - kept.length, 'duplicate pages)');
 
-  // fix Facebook's garbage pins before position-sensitive matching
+  // fix Facebook's garbage pins before position-sensitive matching:
+  // named-venue consensus first, then each record's own stated street+number
   anchorSnap(kept, osmItems);
+  addrSnap(kept);
 
   // match Overture ↔ OSM (grid index over OSM; 120m for exact-token matches, 60m for phonetic/contact)
   const grid = new Map();
