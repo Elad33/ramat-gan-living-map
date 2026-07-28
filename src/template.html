@@ -88,7 +88,8 @@ input,select,textarea{font-family:inherit;font-size:inherit;color:var(--ink)}
 @keyframes fadeSlide{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:none}}
 
 /* ---------- search ---------- */
-#searchWrap{position:fixed;top:92px;right:24px;z-index:30;width:min(390px,calc(100vw - 48px));animation:fadeSlide .6s .25s ease backwards}
+/* above the sheets (40): search results must never hide behind an open panel */
+#searchWrap{position:fixed;top:92px;right:24px;z-index:44;width:min(390px,calc(100vw - 48px));animation:fadeSlide .6s .25s ease backwards}
 #searchBox{display:flex;align-items:center;gap:10px;background:var(--panel);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);
   border:1px solid var(--line);border-radius:999px;height:48px;padding:0 18px;box-shadow:var(--elev-2);transition:border-color var(--t-med),box-shadow var(--t-med)}
 #searchBox:focus-within{border-color:var(--gold);box-shadow:var(--elev-3)}
@@ -228,6 +229,7 @@ input,select,textarea{font-family:inherit;font-size:inherit;color:var(--ink)}
   border-left:1px solid var(--line);box-shadow:var(--elev-3);transform:translateX(105%);transition:transform var(--t-slow) var(--ease);
   display:flex;flex-direction:column}
 #evPanel.open{transform:none}
+.grab{display:none;position:absolute;top:0;left:50%;transform:translateX(-50%);width:130px;height:28px;z-index:2}
 .ev-head{padding:24px 24px 16px;border-bottom:1px solid var(--line)}
 .ev-head-row{display:flex;align-items:center;justify-content:space-between}
 .ev-head h2{font-family:var(--font-display);font-weight:800;font-size:24px}
@@ -447,7 +449,9 @@ input,select,textarea{font-family:inherit;font-size:inherit;color:var(--ink)}
 @media (prefers-reduced-motion:reduce){.mk .pulse{animation:none;opacity:.25}.ldr-mark{animation:none}}
 
 /* ---------- popup card ---------- */
-#pop{position:absolute;z-index:8;width:min(324px,calc(100vw - 40px));--tail-x:50%;
+/* fixed + above the chrome (bell/search/dock) so map cards are never covered by
+   buttons; still below the sheets (40) and modals (60) */
+#pop{position:fixed;z-index:38;width:min(324px,calc(100vw - 40px));--tail-x:50%;
   background:color-mix(in srgb,var(--panel-solid) 94%,transparent);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);border:1px solid var(--hairline);border-radius:var(--r-lg);box-shadow:var(--elev-3);
   padding:18px 20px;pointer-events:auto;display:none}
 #pop.open{display:block;animation:popIn .22s var(--ease)}
@@ -639,7 +643,10 @@ textarea.f-in{resize:vertical;min-height:74px}
   #brand .t1{font-size:21px}
   #brand .t2{font-size:11px;letter-spacing:.26em}
   #aboutBtn{top:12px;left:14px}
-  #bellBtn{top:122px;left:14px} /* below the search bar, not under it */
+  #bellBtn{top:122px;left:14px;transition:opacity .2s} /* below the search bar, not under it */
+  /* searching opens chips/results exactly where the bell sits — step aside */
+  body.search-active #bellBtn{opacity:0;pointer-events:none}
+  #navInstr{font-size:15px}
   #searchWrap{top:64px;right:16px;width:calc(100vw - 32px)}
   #results{max-height:42vh}
   #ctrls{bottom:calc(92px + env(safe-area-inset-bottom));left:10px}
@@ -665,6 +672,7 @@ textarea.f-in{resize:vertical;min-height:74px}
   #evPanel.open,#aiPanel.open{transform:none}
   #evPanel::before,#aiPanel::before{content:'';position:absolute;top:9px;left:50%;transform:translateX(-50%);
     width:42px;height:4px;border-radius:2px;background:var(--hairline)}
+  .grab{display:block} /* the handle really closes the sheet on phones */
   .ai-form{margin:12px 20px 0}
   .ai-sugg{margin:9px 20px 0}
   #aiInput,.f-in,#searchInput{font-size:16px} /* ≥16px, or iOS auto-zooms the page on focus */
@@ -710,8 +718,8 @@ textarea.f-in{resize:vertical;min-height:74px}
     <svg width="30" height="30" viewBox="0 0 24 24" fill="#3f9cf5" stroke="#fff" stroke-width="1.4"><path d="M12 22s-7-5.8-7-11a7 7 0 0 1 14 0c0 5.2-7 11-7 11Z"/><circle cx="12" cy="10.6" r="2.7" fill="#fff" stroke="none"/></svg>
   </div>
   <div id="geoDot"></div>
-  <div id="pop"></div>
 </div>
+<div id="pop"></div>
 
 <div id="brand">
   <svg viewBox="0 0 64 64" fill="none" aria-hidden="true">{{LOGO_PATHS}}</svg>
@@ -848,6 +856,7 @@ textarea.f-in{resize:vertical;min-height:74px}
 <div id="navSteps" role="list" aria-label="שלבי המסלול"></div>
 
 <aside id="evPanel" aria-label="אירועים בעיר">
+  <button class="grab" type="button" aria-label="סגירת הרשימה"></button>
   <div class="ev-head">
     <div class="ev-head-row">
       <h2>אירועים בעיר</h2>
@@ -875,6 +884,7 @@ textarea.f-in{resize:vertical;min-height:74px}
 </aside>
 
 <aside id="aiPanel" aria-label="מה בא לך היום — עסקים ואירועים סביבך">
+  <button class="grab" type="button" aria-label="סגירת החלון"></button>
   <div class="ev-head">
     <div class="ev-head-row">
       <h2>מה בא לך היום?</h2>

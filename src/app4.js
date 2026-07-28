@@ -254,9 +254,16 @@ window.__bizOn = bizLayerOn;
   const wrap = $('homeChips');
   if (!wrap) return;
   const input = $('searchInput');
-  input.addEventListener('focus', () => { if (!aiPanel.classList.contains('open')) wrap.classList.add('show'); });
+  // chips visible = search context: the bell hides underneath them on phones
+  input.addEventListener('focus', () => {
+    if (!aiPanel.classList.contains('open')) wrap.classList.add('show');
+    document.body.classList.add('search-active');
+  });
   document.addEventListener('pointerdown', e => {
-    if (!e.target.closest('#searchWrap')) wrap.classList.remove('show');
+    if (!e.target.closest('#searchWrap')) {
+      wrap.classList.remove('show');
+      if (document.activeElement !== input) document.body.classList.remove('search-active');
+    }
   });
   wrap.addEventListener('click', e => {
     const b = e.target.closest('.hc');

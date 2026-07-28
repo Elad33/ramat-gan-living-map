@@ -636,6 +636,22 @@ sInput.addEventListener('input', () => {
   clearTimeout(sDebounce);
   sDebounce = setTimeout(() => renderResults(runSearch(sInput.value)), 90);
 });
+// searching is a focused context: open sheets would cover the results, and on
+// phones the bell sits exactly where the chips/results drop — clear both
+sInput.addEventListener('focus', () => {
+  document.body.classList.add('search-active');
+  if ($('evPanel').classList.contains('open')) closePanel();
+  if ($('aiPanel').classList.contains('open') && typeof closeAiPanel === 'function') closeAiPanel();
+});
+sInput.addEventListener('blur', () => setTimeout(() => {
+  if (!document.activeElement || !document.activeElement.closest('#searchWrap'))
+    document.body.classList.remove('search-active');
+}, 150));
+// the sheet handle is a real close button on phones
+for (const [pid, closer] of [['evPanel', () => closePanel()], ['aiPanel', () => typeof closeAiPanel === 'function' && closeAiPanel()]]) {
+  const g = document.querySelector('#' + pid + ' .grab');
+  if (g) g.addEventListener('click', closer);
+}
 sInput.addEventListener('keydown', e => {
   if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
     e.preventDefault();

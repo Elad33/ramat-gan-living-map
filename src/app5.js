@@ -107,11 +107,20 @@ $('navSteps').addEventListener('click', e => {
   const st = NAV.route && NAV.route.steps[+row.dataset.i];
   if (st) MAP.flyTo({ cx: st.x, cy: st.y, dist: 320, T: 800 });
 });
+// the bar's height varies (long street names wrap on phones) — pin the steps
+// list right above whatever height the bar actually has, never underneath it
+function syncStepsPos() {
+  const bar = $('navBar');
+  if (!bar.classList.contains('on')) return;
+  $('navSteps').style.bottom = Math.round(innerHeight - bar.getBoundingClientRect().top + 10) + 'px';
+}
 $('navStepsBtn').addEventListener('click', () => {
   const open = !$('navSteps').classList.contains('open');
+  syncStepsPos();
   $('navSteps').classList.toggle('open', open);
   $('navStepsBtn').classList.toggle('open', open);
 });
+window.addEventListener('resize', () => { if ($('navSteps').classList.contains('open')) syncStepsPos(); });
 
 /* ---------- מצב הניווט ---------- */
 function navSetMeta(prefixInstr) {
@@ -120,6 +129,7 @@ function navSetMeta(prefixInstr) {
   $('navInstr').textContent = prefixInstr;
   $('navMeta').textContent = (r.approx ? '≈ ' : '') + fmtDist(r.dist) + ' · ' + navFmtDur(r.dur) +
     (NAV.mode === 'foot' ? ' הליכה' : ' נסיעה') + (NAV.toName ? ' אל ' + NAV.toName : '') + live;
+  if ($('navSteps').classList.contains('open')) syncStepsPos();
 }
 function navApplyRoute(r) {
   NAV.route = r;
@@ -299,7 +309,7 @@ const __qaBase = window.__qaExt;
 window.__qaExt = function (qs) {
   if (__qaBase) __qaBase(qs);
   if (/shel/.test(qs)) { shelOn = true; syncShelBtn(); positionShelters(); MAP.drawOnce(); }
-  if (/chips/.test(qs)) { $('homeChips').classList.add('show'); MAP.drawOnce(); }
+  if (/chips/.test(qs)) { $('homeChips').classList.add('show'); document.body.classList.add('search-active'); MAP.drawOnce(); }
   if (/navui/.test(qs)) { // מסלול סינתטי — צילום דטרמיניסטי בלי רשת
     const c = MAP.cam;
     NAV.on = true; NAV.mode = 'foot'; NAV.to = [c.cx + 260, c.cy + 180]; NAV.toName = 'קפה הדגמה';
@@ -316,7 +326,7 @@ window.__qaExt = function (qs) {
       ],
       dist: 960, dur: 770, approx: false,
     });
-    $('navSteps').classList.add('open'); $('navStepsBtn').classList.add('open');
+    $('navSteps').classList.add('open'); $('navStepsBtn').classList.add('open'); syncStepsPos();
     navRenderSteps();
     MAP.drawOnce();
   }
