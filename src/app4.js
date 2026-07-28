@@ -130,10 +130,12 @@ for (let i = 0; i < BIZ_POOL_N; i++) {
   markersRoot.appendChild(el);
   bizPool.push(el);
 }
-const BIZ_KEY = 'rg.biz.v1';
-let bizLayerOn = store.getItem(BIZ_KEY) !== 'off';
-let bizFocus = null;          // Set of cat ids (panel chip / assistant) — extends visibility range
-let bizHi = null;             // Set of biz ids highlighted by the assistant
+// businesses are on-demand only: a search match (bizHi), an assistant answer (bizHi),
+// or a category chip (bizFocus). there is no always-on layer — the map stays clean
+// and marker work costs nothing while nothing is requested.
+let bizFocus = null;          // Set of cat ids (home/panel chip or assistant)
+let bizHi = null;             // Set of biz ids matched by search / the assistant
+let bizPillLabel = '';        // what the exit pill says while businesses are shown
 function bizIconHtml(ci) {
   const c = bizCats[ci] || bizCats[0];
   return '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">' + c.icon.replace('<path ', '<path fill="none" ') + '</svg>';
@@ -142,19 +144,13 @@ function bizIconHtml(ci) {
 // re-projects the few chosen ones — this is what keeps panning smooth on phones
 let bizSel = [];               // [{b, hi, nm, fx, fy}] fan offsets in screen px
 let bizSelV = -2, bizSelT = 0;
-// Google-Maps-style progressive reveal: far → a few prominent, zoom in → more.
-// (bizHi = search/assistant matches: always all of them, at any zoom.)
+// bizHi = search/assistant matches: always all of them, at any zoom.
+// bizFocus = one tapped category: a bounded nearest-to-center set within city range.
 function bizBudget(d) {
   if (bizHi) return BIZ_POOL_N;
-  const base = d >= 1050 ? 0
-    : d >= 820 ? 9
-    : d >= 620 ? 20
-    : d >= 450 ? 38
-    : d >= 330 ? 64
-    : BIZ_POOL_N;
-  return IS_MOBILE ? Math.round(base * 0.6) : base;
+  return IS_MOBILE ? 42 : 84;
 }
-function bizMaxDist() { return bizHi ? 1e9 : bizFocus ? 3200 : 1050; }
+function bizMaxDist() { return bizHi ? 1e9 : 3200; }
 function selectBiz(d) {
   const budget = bizBudget(d);
   bizSel = [];
@@ -200,8 +196,8 @@ function selectBiz(d) {
 }
 function positionBiz(force) {
   const d = MAP.cam.dist;
-  // search/assistant matches (bizHi) show even when the layer is off, at any zoom
-  const active = (bizLayerOn || bizHi) && bizAll.length && d < bizMaxDist();
+  // markers exist only while something asked for them — search, assistant, or a chip
+  const active = (bizHi || bizFocus) && bizAll.length && d < bizMaxDist();
   let used = 0;
   if (active) {
     const t = nowMs();
@@ -237,17 +233,29 @@ function positionBiz(force) {
   }
 }
 window.__bizTick = () => positionBiz(false);
-$('bizBtn').addEventListener('click', () => {
-  bizLayerOn = !bizLayerOn;
-  window.__bizOn = bizLayerOn;
-  store.setItem(BIZ_KEY, bizLayerOn ? 'on' : 'off');
-  $('bizBtn').classList.toggle('on', bizLayerOn);
-  if (window.syncLayerButtons) syncLayerButtons();
+
+// exit pill — the one obvious way out of "businesses on the map"
+function syncBizPill() {
+  const on = !!(bizHi || bizFocus);
+  if (on) {
+    const n = bizHi ? bizHi.size : 0;
+    $('bizPillTxt').textContent = (bizPillLabel || 'עסקים על המפה') + (n ? ' · ' + n : '');
+  }
+  $('bizPill').classList.toggle('show', on);
+}
+function clearBizDisplay() {
+  bizHi = null; bizFocus = null; bizPillLabel = '';
+  bizChipSel = 'all';
+  if (assistResults) clearAssist(false);
+  if ($('bizChips').childElementCount) syncBizChips();
+  const hc = $('homeChips');
+  if (hc) hc.querySelectorAll('.hc.on').forEach(x => x.classList.remove('on'));
+  if (typeof sInput !== 'undefined' && sInput.value) { sInput.value = ''; if (typeof closeResults === 'function') closeResults(); }
+  syncBizPill();
   positionBiz(true);
-  if (bizLayerOn) showToast('עסקים מוצגים על המפה — התקרבו לרחוב כדי לראות אותם');
-});
-$('bizBtn').classList.toggle('on', bizLayerOn);
-window.__bizOn = bizLayerOn;
+  MAP.requestRender();
+}
+$('bizPill').addEventListener('click', clearBizDisplay);
 
 // home quick chips: revealed when the search field gets focus, one tap lights a category
 (function () {
@@ -273,13 +281,15 @@ window.__bizOn = bizLayerOn;
     wrap.querySelectorAll('.hc.on').forEach(x => x.classList.remove('on'));
     if (wasOn) {
       bizFocus = null;
+      bizPillLabel = '';
     } else {
       b.classList.add('on');
       bizFocus = new Set([b.dataset.cat]);
-      if (!bizLayerOn) $('bizBtn').click();
       const c = bizCatById[b.dataset.cat];
-      showToast((c ? c.label : 'העסקים') + ' מודגשים על המפה — התקרבו לרחוב');
+      bizPillLabel = c ? c.label : 'עסקים';
+      showToast((c ? c.label : 'העסקים') + ' מוצגים על המפה — התקרבו לרחוב');
     }
+    syncBizPill();
     positionBiz(true);
     MAP.requestRender();
   });
@@ -370,11 +380,14 @@ function renderBizChips() {
   host.addEventListener('click', e => {
     const chip = e.target.closest('.bz-chip');
     if (!chip) return;
-    bizChipSel = chip.dataset.cat;
+    const sel = chip.dataset.cat;
     clearAssist(false);
-    bizFocus = bizChipSel === 'all' ? null : new Set([bizChipSel]);
+    bizChipSel = sel;
+    bizFocus = sel === 'all' ? null : new Set([sel]);
+    bizPillLabel = sel === 'all' ? '' : (bizCatById[sel] ? bizCatById[sel].label : 'עסקים');
     syncBizChips();
     renderBizList();
+    syncBizPill();
     positionBiz(true);
   });
   syncBizChips();
@@ -588,7 +601,10 @@ function highlightResults(rows) {
 function clearAssist(rerender) {
   assistResults = null;
   bizHi = null;
+  bizFocus = null;
+  bizPillLabel = '';
   $('aiInput').value = '';
+  syncBizPill();
   if (rerender !== false) { renderBizList(); positionBiz(true); }
 }
 async function runAssist(qRaw, opts = {}) {
@@ -604,9 +620,11 @@ async function runAssist(qRaw, opts = {}) {
   assistResults = { reply: intent.reply || 'זה מה שמצאתי:', src: intent.src, rows };
   bizChipSel = 'all';
   bizFocus = intent.bizCats && intent.bizCats.length ? new Set(intent.bizCats) : null;
+  bizPillLabel = 'המלצות העוזר';
   syncBizChips();
   renderBizList();
   highlightResults(rows);
+  syncBizPill();
   aiBusy = false;
   $('aiGo').classList.remove('busy');
 }
@@ -646,6 +664,9 @@ for (const b of bizAll) {
 // shows ONLY those (bizHi), hiding everything else until the search is cleared.
 window.setBizSearchHighlight = ids => {
   bizHi = (ids && ids.size) ? ids : null;
+  if (bizHi) bizPillLabel = 'תוצאות חיפוש';
+  else if (!bizFocus) bizPillLabel = '';
+  syncBizPill();
   positionBiz(true);
   MAP.requestRender();
 };
@@ -677,9 +698,11 @@ window.__qaExt = function (qs) {
     const rows = execIntent(intent);
     assistResults = { reply: intent.reply, src: intent.src, rows };
     bizFocus = intent.bizCats.length ? new Set(intent.bizCats) : null;
+    bizPillLabel = 'המלצות העוזר';
     renderBizList();
     const bizIds = rows.filter(r => r.kind === 'biz').map(r => r.ref.id);
     bizHi = bizIds.length ? new Set(bizIds) : null;
+    syncBizPill();
     positionBiz(true);
     MAP.drawOnce();
   }
@@ -692,7 +715,13 @@ window.__qaExt = function (qs) {
       MAP.drawOnce();
     }
   }
-  if (/bizmk/.test(qs)) { positionBiz(true); MAP.drawOnce(); }
+  if (/bizmk/.test(qs)) { // markers need a request now — light every category
+    bizFocus = new Set(bizCats.map(c => c.id));
+    bizPillLabel = 'עסקים';
+    syncBizPill();
+    positionBiz(true);
+    MAP.drawOnce();
+  }
   if (/laypop/.test(qs)) { $('layersBtn').click(); MAP.drawOnce(); }
   if (/about/.test(qs)) { $('aboutBtn').click(); if ($('installBtn')) $('installBtn').style.display = ''; MAP.drawOnce(); }
 };

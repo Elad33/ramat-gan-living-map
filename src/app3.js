@@ -123,25 +123,47 @@ function showToast(html) {
   toastT = setTimeout(() => el.classList.remove('show'), 2800);
 }
 
-// ---------- mobile back button closes UI surfaces (history sentinels) ----------
-const UI_BACK = { stack: [], silent: 0 };
+// ---------- mobile back button closes UI surfaces (single history sentinel) ----------
+// ONE sentinel entry guards all open surfaces. armed is true only while our
+// sentinel verifiably sits on top of the history — pushState can throw (Safari
+// rate-limits it under rapid popup taps), and calling history.back() without a
+// sentinel would navigate the user clean out of the app.
+const UI_BACK = { stack: [], armed: false, silent: 0, disarmT: 0 };
+try { if (history.state && history.state.rgui) history.replaceState(null, ''); } catch (e) {}
 function uiOpened(key, closeFn) {
   if (/[?&#]pick\b/.test(location.search + location.hash)) return; // CMS iframe
   if (UI_BACK.stack.some(s => s.key === key)) return;
   UI_BACK.stack.push({ key, closeFn });
-  try { history.pushState({ rgui: key }, ''); } catch (e) {}
+  clearTimeout(UI_BACK.disarmT);
+  if (!UI_BACK.armed) {
+    try { history.pushState({ rgui: 1 }, ''); UI_BACK.armed = true; } catch (e) {}
+  }
 }
 function uiClosed(key) {
   const i = UI_BACK.stack.findIndex(s => s.key === key);
   if (i < 0) return;
   UI_BACK.stack.splice(i, 1);
-  UI_BACK.silent++;
-  try { history.back(); } catch (e) { UI_BACK.silent--; }
+  if (UI_BACK.stack.length || !UI_BACK.armed) return;
+  // last surface closed by an in-app tap: release the sentinel, but wait a tick —
+  // marker-to-marker taps close+reopen synchronously and should keep it armed
+  clearTimeout(UI_BACK.disarmT);
+  UI_BACK.disarmT = setTimeout(() => {
+    if (UI_BACK.stack.length || !UI_BACK.armed) return;
+    UI_BACK.armed = false;
+    UI_BACK.silent++;
+    try { history.back(); } catch (e) { UI_BACK.silent--; }
+  }, 80);
 }
 window.addEventListener('popstate', () => {
   if (UI_BACK.silent > 0) { UI_BACK.silent--; return; }
+  UI_BACK.armed = false; // the browser consumed our sentinel (or none existed)
   const top = UI_BACK.stack.pop();
-  if (top) top.closeFn(); // the closer got fromBack=true baked in
+  if (top) {
+    top.closeFn(); // the closer got fromBack=true baked in
+    if (UI_BACK.stack.length) {
+      try { history.pushState({ rgui: 1 }, ''); UI_BACK.armed = true; } catch (e) {}
+    }
+  }
 });
 
 // ---------- overlay: labels, markers, highlight ring ----------
@@ -671,7 +693,7 @@ sResults.addEventListener('click', e => {
 function closeResults() { sResults.classList.remove('open'); }
 function clearSearch() {
   sInput.value = ''; sBox.classList.remove('hasText'); closeResults();
-  if (window.setBizSearchHighlight) setBizSearchHighlight(null); // restore all businesses
+  if (window.setBizSearchHighlight) setBizSearchHighlight(null); // clear searched businesses off the map
 }
 $('searchClear').addEventListener('click', () => { clearSearch(); sInput.focus(); });
 document.addEventListener('pointerdown', e => {
@@ -1031,11 +1053,13 @@ function showVenuePop(mk) {
     '<div class="row1"><span class="official-chip">עירייה</span><span class="when">' + mk.count + ' אירועים קרובים</span></div>' +
     '<h3>' + escapeHtml(mk.locName || evs[0].locName || 'מוקד אירועים עירוני') + '</h3>' +
     '<div class="where"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="2" style="flex:none"><path d="M12 21s-7-5.8-7-11a7 7 0 0 1 14 0c0 5.2-7 11-7 11Z"/><circle cx="12" cy="10" r="2.6"/></svg>' + escapeHtml(evs[0].addr || '') + '</div>' +
-    '<div class="ven-list">' + evs.map(ev =>
-      '<a class="ven-row" href="' + escapeHtml(ev.link || '#') + '" target="_blank" rel="noopener">' +
-      '<span class="vw">' + escapeHtml(shortWhen(ev)).replace('\n', '<br/>') + '</span>' +
-      '<span class="vt">' + escapeHtml(ev.title) + '</span>' +
-      '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M7 17 17 7M8 7h9v9"/></svg></a>').join('') +
+    '<div class="ven-list">' + evs.map(ev => {
+      const linked = ev.link && /^https?:/i.test(ev.link); // no link → plain row, never a self-tab
+      return (linked ? '<a class="ven-row" href="' + escapeHtml(ev.link) + '" target="_blank" rel="noopener">' : '<span class="ven-row">') +
+        '<span class="vw">' + escapeHtml(shortWhen(ev)).replace('\n', '<br/>') + '</span>' +
+        '<span class="vt">' + escapeHtml(ev.title) + '</span>' +
+        (linked ? '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M7 17 17 7M8 7h9v9"/></svg></a>' : '</span>');
+    }).join('') +
     '</div>' +
     (mk.count > 9 ? '<div class="bus-note">ועוד ' + (mk.count - 9) + ' אירועים במקום הזה, ברשימה המלאה</div>' : '') +
     '<div class="acts">' + navActsHtml(mk.x, mk.y, mk.locName || 'מוקד אירועים') + '</div>';
@@ -1219,7 +1243,7 @@ let layerToastShown = { plans: false, transit: false };
 function syncLayerButtons() {
   $('plansBtn').classList.toggle('on', MAP.LAYERS.plans);
   $('transitBtn').classList.toggle('on', MAP.LAYERS.transit);
-  $('layersDot').classList.toggle('on', MAP.LAYERS.plans || MAP.LAYERS.transit || !!window.__bizOn);
+  $('layersDot').classList.toggle('on', MAP.LAYERS.plans || MAP.LAYERS.transit);
 }
 window.syncLayerButtons = syncLayerButtons;
 // layers popover (anchored beside the rail button)

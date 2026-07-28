@@ -50,7 +50,7 @@
 *::-webkit-scrollbar-track{background:transparent}
 *{scrollbar-width:thin;scrollbar-color:rgba(227,194,126,.3) transparent}
 html,body{height:100%}
-html{direction:rtl;touch-action:pan-x pan-y} /* page itself must never pinch-zoom — the map handles its own */
+html{direction:rtl;touch-action:pan-x pan-y;overscroll-behavior:none} /* no page pinch-zoom, no pull-to-refresh / swipe-nav — the map owns its gestures */
 body{direction:rtl;background:var(--bg);color:var(--ink);font-family:var(--font-ui);overflow:hidden;
   -webkit-font-smoothing:antialiased;font-size:15px;line-height:1.45}
 button{font-family:inherit;color:inherit;background:none;border:none;cursor:pointer;font-size:inherit}
@@ -271,6 +271,8 @@ input,select,textarea{font-family:inherit;font-size:inherit;color:var(--ink)}
   min-width:64px;line-height:1.3}
 .ven-row .vt{flex:1;min-width:0;font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ven-row svg{flex:none;opacity:.6}
+span.ven-row{cursor:default}
+span.ven-row:hover{background:none}
 .pop-hero{width:calc(100% + 40px);margin:-18px -20px 13px;height:106px;object-fit:cover;display:block;
   border-radius:calc(var(--r-lg) - 1px) calc(var(--r-lg) - 1px) 0 0}
 
@@ -516,6 +518,17 @@ textarea.f-in{resize:vertical;min-height:74px}
   transition:transform var(--t-slow) var(--ease),opacity .3s;
   display:flex;align-items:center;gap:9px;max-width:calc(100vw - 40px)}
 #toast.show{transform:translate(-50%,0);opacity:1}
+/* businesses-on-map exit pill: appears under the search bar whenever search / the
+   assistant / a category chip put businesses on the map — one tap clears them */
+#bizPill{position:fixed;z-index:30;top:150px;right:24px;display:flex;align-items:center;gap:8px;
+  background:var(--panel);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);
+  border:1px solid var(--hairline);border-radius:999px;padding:9px 14px;color:var(--ink);
+  font-size:13px;font-weight:700;box-shadow:var(--elev-2);cursor:pointer;max-width:min(340px,calc(100vw - 48px));
+  opacity:0;pointer-events:none;transform:translateY(-6px);transition:opacity var(--t-med),transform var(--t-med)}
+#bizPill.show{opacity:1;pointer-events:auto;transform:none}
+#bizPill span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#bizPill svg{flex:none;color:var(--gold)}
+body.search-active #bizPill{opacity:0;pointer-events:none}
 #placeHint{position:fixed;top:24px;left:50%;transform:translate(-50%,-160px);opacity:0;z-index:35;background:var(--grad-gold);
   color:var(--on-gold);border-radius:999px;padding:11px 22px;font-size:15px;font-weight:700;box-shadow:var(--shadow);
   transition:transform var(--t-slow) var(--ease),opacity .3s;display:flex;align-items:center;gap:12px}
@@ -649,6 +662,7 @@ textarea.f-in{resize:vertical;min-height:74px}
   #navInstr{font-size:15px}
   #searchWrap{top:64px;right:16px;width:calc(100vw - 32px)}
   #results{max-height:42vh}
+  #bizPill{top:122px;right:16px;max-width:calc(100vw - 90px)} /* leaves the bell its corner */
   #ctrls{bottom:calc(92px + env(safe-area-inset-bottom));left:10px}
   #ctrls .ctrl{width:48px;height:48px}
   #zoomCtrls{display:none} /* pinch is the zoom on touch */
@@ -796,11 +810,6 @@ textarea.f-in{resize:vertical;min-height:74px}
 
 <div id="layersPop" role="dialog" aria-label="שכבות המפה">
   <div class="lay-title">שכבות המפה</div>
-  <button class="lay-row" id="bizBtn">
-    <span class="lic"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round" stroke-linecap="round"><path d="M4.5 9.5 6 4.5h12l1.5 5M4.5 9.5a2.3 2.3 0 0 0 4.6 0 2.3 2.3 0 0 0 4.6 0 2.3 2.3 0 0 0 4.6 0M5.5 12v7.5h13V12M9.5 19.5v-5h5v5"/></svg></span>
-    <span class="ltx"><span class="lt">עסקים</span><span class="ld">מסעדות, חנויות ושירותים בגובה רחוב</span></span>
-    <i class="sw"></i>
-  </button>
   <button class="lay-row" id="transitBtn">
     <span class="lic"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round" stroke-linecap="round"><rect x="5.5" y="3.5" width="13" height="13.5" rx="3"/><path d="M5.5 10.5h13M9 20.5l-1.5-3M15 20.5l1.5-3M9.2 14h.01M14.8 14h.01"/></svg></span>
     <span class="ltx"><span class="lt">תחבורה ציבורית</span><span class="ld">תחנות עם זמני אמת והקו האדום</span></span>
@@ -982,6 +991,10 @@ textarea.f-in{resize:vertical;min-height:74px}
 </div>
 
 <div id="toast"></div>
+<button id="bizPill" type="button" aria-label="ניקוי העסקים מהמפה">
+  <span id="bizPillTxt"></span>
+  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+</button>
 <div id="attrib">© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors · <a href="https://overturemaps.org" target="_blank" rel="noopener">Overture Maps</a></div>
 
 <script>
