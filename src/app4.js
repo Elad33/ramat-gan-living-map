@@ -350,11 +350,13 @@ function openAiPanel() {
   renderBizChips();
   renderBizList();
   aiPanel.classList.add('open');
+  document.body.classList.add('sheet-open');
   uiOpened('aiPanel', () => closeAiPanel(true));
   updateAiRefLine();
 }
 function closeAiPanel(fromBack) {
   aiPanel.classList.remove('open');
+  if (!$('evPanel').classList.contains('open')) document.body.classList.remove('sheet-open');
   if (fromBack !== true) uiClosed('aiPanel');
 }
 $('aiToggle').addEventListener('click', openAiPanel);

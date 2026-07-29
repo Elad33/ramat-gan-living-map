@@ -692,7 +692,11 @@ body.search-active #bizPill{opacity:0;pointer-events:none}
   #navInstr{font-size:15px}
   /* on phones search floats above the sheets (results must win) — desktop keeps
      it under panels so a side panel's header and ✕ are never covered */
-  #searchWrap{top:64px;right:16px;width:calc(100vw - 32px);z-index:44}
+  #searchWrap{top:64px;right:16px;width:calc(100vw - 32px);z-index:44;transition:opacity .2s}
+  /* an open sheet owns the screen: search, bell and the biz pill step aside so
+     nothing hovers next to the sheet's ✕ and no stale results cover its list */
+  body.sheet-open #searchWrap,body.sheet-open #bizPill,body.sheet-open #bellBtn{
+    opacity:0;visibility:hidden;pointer-events:none}
   #results{max-height:42vh}
   #bizPill{top:122px;right:16px;max-width:calc(100vw - 90px)} /* leaves the bell its corner */
   #ctrls{bottom:calc(92px + env(safe-area-inset-bottom));left:10px}
@@ -5321,9 +5325,10 @@ window.addEventListener('mapclick', e => {
 });
 
 // panel open/close
-function openPanel() { $('evPanel').classList.add('open'); uiOpened('evPanel', () => closePanel(true)); }
+function openPanel() { $('evPanel').classList.add('open'); document.body.classList.add('sheet-open'); uiOpened('evPanel', () => closePanel(true)); }
 function closePanel(fromBack) {
   $('evPanel').classList.remove('open');
+  if (!$('aiPanel').classList.contains('open')) document.body.classList.remove('sheet-open');
   if (fromBack !== true) uiClosed('evPanel');
 }
 $('eventsRowBtn').addEventListener('click', () => { closeLayersPop(); renderEvList(); openPanel(); });
@@ -6422,11 +6427,13 @@ function openAiPanel() {
   renderBizChips();
   renderBizList();
   aiPanel.classList.add('open');
+  document.body.classList.add('sheet-open');
   uiOpened('aiPanel', () => closeAiPanel(true));
   updateAiRefLine();
 }
 function closeAiPanel(fromBack) {
   aiPanel.classList.remove('open');
+  if (!$('evPanel').classList.contains('open')) document.body.classList.remove('sheet-open');
   if (fromBack !== true) uiClosed('aiPanel');
 }
 $('aiToggle').addEventListener('click', openAiPanel);

@@ -665,7 +665,11 @@ body.search-active #bizPill{opacity:0;pointer-events:none}
   #navInstr{font-size:15px}
   /* on phones search floats above the sheets (results must win) — desktop keeps
      it under panels so a side panel's header and ✕ are never covered */
-  #searchWrap{top:64px;right:16px;width:calc(100vw - 32px);z-index:44}
+  #searchWrap{top:64px;right:16px;width:calc(100vw - 32px);z-index:44;transition:opacity .2s}
+  /* an open sheet owns the screen: search, bell and the biz pill step aside so
+     nothing hovers next to the sheet's ✕ and no stale results cover its list */
+  body.sheet-open #searchWrap,body.sheet-open #bizPill,body.sheet-open #bellBtn{
+    opacity:0;visibility:hidden;pointer-events:none}
   #results{max-height:42vh}
   #bizPill{top:122px;right:16px;max-width:calc(100vw - 90px)} /* leaves the bell its corner */
   #ctrls{bottom:calc(92px + env(safe-area-inset-bottom));left:10px}

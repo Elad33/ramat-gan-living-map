@@ -1149,9 +1149,10 @@ window.addEventListener('mapclick', e => {
 });
 
 // panel open/close
-function openPanel() { $('evPanel').classList.add('open'); uiOpened('evPanel', () => closePanel(true)); }
+function openPanel() { $('evPanel').classList.add('open'); document.body.classList.add('sheet-open'); uiOpened('evPanel', () => closePanel(true)); }
 function closePanel(fromBack) {
   $('evPanel').classList.remove('open');
+  if (!$('aiPanel').classList.contains('open')) document.body.classList.remove('sheet-open');
   if (fromBack !== true) uiClosed('evPanel');
 }
 $('eventsRowBtn').addEventListener('click', () => { closeLayersPop(); renderEvList(); openPanel(); });
