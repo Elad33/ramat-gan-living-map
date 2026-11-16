@@ -1,15 +1,17 @@
 {
- "updated": "2026-11-16T06:21:43.375Z",
+ "updated": "2026-11-16T19:33:08.128Z",
  "source": "https://www.ramat-gan.muni.il/event-lobby",
  "events": [
   {
-   "id": "muni-eventssenior-citizen-month-2026",
-   "title": "חודש האזרח הוותיק ברמת גן",
-   "cat": "community",
-   "anim": "community",
-   "muniCat": "חודש האזרח הוותיק 2026",
+   "id": "muni-eventsor-spitzs-sweet-foodtruck-arrives-to-ramat-gan",
+   "title": "פודטראק המתוקים של אור שפיץ מגיע לרמת גן 27.11-13.11",
+   "cat": "sport",
+   "anim": "sport",
+   "muniCat": "תיאטרון אמנות מוזיקה וספורט",
    "audience": [
-    "הגיל השלישי (60+)"
+    "צעירים (18-35)",
+    "מבוגרים (60- 35)",
+    "לכל המשפחה"
    ],
    "date": "2026-11-16",
    "time": "",
@@ -18,32 +20,9 @@
    "x": -359.3,
    "y": -2368,
    "approx": false,
-   "link": "https://www.ramat-gan.muni.il/events/senior-citizen-month-2026/",
-   "img": "https://www.ramat-gan.muni.il/media/i03lhup4/220_342מובייל.jpg",
-   "featured": true,
-   "free": true
-  },
-  {
-   "id": "muni-eventssharon-haziz-show",
-   "title": "המופע של שרון חזיז",
-   "cat": "sport",
-   "anim": "sport",
-   "muniCat": "תיאטרון אמנות מוזיקה וספורט",
-   "audience": [
-    "צעירים (18-35)",
-    "מבוגרים (60- 35)"
-   ],
-   "date": "2026-11-16",
-   "time": "",
-   "locName": "תיאטרון היהלום",
-   "address": "רחוב היצירה 3",
-   "x": -2345,
-   "y": 1676.2,
-   "approx": true,
-   "link": "https://www.ramat-gan.muni.il/events/sharon-haziz-show/",
-   "img": "https://www.ramat-gan.muni.il/media/nnrnykbx/220_342מובייל.jpg",
-   "featured": false,
-   "free": true
+   "link": "https://www.ramat-gan.muni.il/events/or-spitzs-sweet-foodtruck-arrives-to-ramat-gan/",
+   "img": "https://www.ramat-gan.muni.il/media/ziddfupa/לאתר-אור-שפיץ_342-220.jpg",
+   "featured": true
   },
   {
    "id": "muni-eventsrg-eventsweb-site-event-4549",
@@ -67,135 +46,24 @@
    "free": true
   },
   {
-   "id": "muni-eventsrg-eventsweb-site-event-1181",
-   "title": "טרנספייס",
+   "id": "muni-eventssenior-citizen-month-2026",
+   "title": "חודש האזרח הוותיק ברמת גן",
    "cat": "community",
    "anim": "community",
-   "muniCat": "הקהילה הגאה",
+   "muniCat": "חודש האזרח הוותיק 2026",
    "audience": [
-    "צעירים (18-35)",
-    "מבוגרים (60- 35)"
+    "הגיל השלישי (60+)"
    ],
-   "date": "2026-11-16",
+   "date": "2026-11-17",
    "time": "",
-   "locName": "המרכז הגאה",
-   "address": "רחוב ביאליק 42",
-   "x": -1144.8,
-   "y": 1361.2,
-   "approx": false,
-   "link": "https://www.ramat-gan.muni.il/events/rg-events/web-site-event-1181/",
-   "img": "https://www.ramat-gan.muni.il/media/0owlj5gz/220_342מובייל.jpg",
-   "featured": false,
-   "free": true
-  },
-  {
-   "id": "muni-eventsrg-eventsweb-site-event-798",
-   "title": "קבוצת טניס גאה Sunflowers Tennis Group",
-   "cat": "community",
-   "anim": "community",
-   "muniCat": "הקהילה הגאה",
-   "audience": [
-    "צעירים (18-35)",
-    "מבוגרים (60- 35)"
-   ],
-   "date": "2026-11-16",
-   "time": "",
-   "locName": "המרכז הגאה",
-   "address": "רחוב ביאליק 42",
-   "x": -1144.8,
-   "y": 1361.2,
-   "approx": false,
-   "link": "https://www.ramat-gan.muni.il/events/rg-events/web-site-event-798/",
-   "img": "https://www.ramat-gan.muni.il/media/nvjjws3b/גריד-לקהילה-הגאה_התאמה-לאתר_342-2206.jpg",
-   "featured": false,
-   "free": true
-  },
-  {
-   "id": "muni-eventsmbe-rg-eventsweb-site-event-23888",
-   "title": "פיצה סרט - דג ושמו באסה",
-   "cat": "culture",
-   "anim": "concert",
-   "muniCat": "פעילויות לילדים ולגיל הרך",
-   "audience": [
-    "מבוגרים (60- 35)",
-    "צעירים (18-35)",
-    "לכל המשפחה"
-   ],
-   "date": "2026-11-16",
-   "time": "",
-   "locName": "תיאטרון ראסל",
-   "address": "רחוב מנדל מתיתיהו 11",
-   "x": 608.5,
-   "y": -243.5,
-   "approx": false,
-   "link": "https://www.ramat-gan.muni.il/events/mbe-rg-events/web-site-event-23888/",
-   "img": "https://www.ramat-gan.muni.il/media/iarfwiqz/התאמות-לאתר-פיצה-סרט-דג-ושמו-באסה_342-220.jpg",
-   "featured": false,
-   "free": true
-  },
-  {
-   "id": "muni-eventsmbe-rg-eventsramatganchik-2026",
-   "title": "רמתגנצ'יק אירועי שבוע 15-19.11",
-   "cat": "community",
-   "anim": "community",
-   "muniCat": "פעילויות לילדים ולגיל הרך",
-   "audience": [
-    "הגיל הרך (0-3)"
-   ],
-   "date": "2026-11-16",
-   "time": "",
-   "locName": "משחקיית ר\"געים",
-   "address": "רחוב ביאליק 89",
-   "x": -1698.6,
-   "y": 1733.5,
+   "locName": "מרכז קהילתי רמת שקמה",
+   "address": "רחוב שלם 32",
+   "x": -1097.7,
+   "y": -2289.1,
    "approx": true,
-   "link": "https://www.ramat-gan.muni.il/events/mbe-rg-events/ramatganchik-2026/",
-   "img": "https://www.ramat-gan.muni.il/media/sw4ntzgj/רמתגנציק_התאמה-לאתר-מובייל_342-220.jpg",
-   "featured": false,
-   "free": true
-  },
-  {
-   "id": "muni-eventsrg-eventsweb-site-event-409",
-   "title": "קורס תפירה למתקדמים-יצירה ותיקונים",
-   "cat": "community",
-   "anim": "community",
-   "muniCat": "מייקרס יצירה עירונית",
-   "audience": [
-    "צעירים (18-35)",
-    "מבוגרים (60- 35)"
-   ],
-   "date": "2026-11-16",
-   "time": "",
-   "locName": "מייקרס",
-   "address": "רחוב מסובים 2",
-   "x": 1711.5,
-   "y": -3747.9,
-   "approx": true,
-   "link": "https://www.ramat-gan.muni.il/events/rg-events/web-site-event-409/",
-   "img": null,
-   "featured": false,
-   "free": true
-  },
-  {
-   "id": "muni-eventsrg-eventsweb-site-event-1246",
-   "title": "שעות סיפור ברשת ספריות רמת-גן - נובמבר 2026",
-   "cat": "community",
-   "anim": "community",
-   "muniCat": "שעת סיפור",
-   "audience": [
-    "ילדים (4-11)"
-   ],
-   "date": "2026-11-16",
-   "time": "",
-   "locName": "ספריית רמת עמידר",
-   "address": "רחוב מנדל מתיתיהו 11 בבית ראסל",
-   "x": 608.5,
-   "y": -243.5,
-   "approx": false,
-   "link": "https://www.ramat-gan.muni.il/events/rg-events/web-site-event-1246/",
-   "img": null,
-   "featured": false,
-   "free": true
+   "link": "https://www.ramat-gan.muni.il/events/senior-citizen-month-2026/",
+   "img": "https://www.ramat-gan.muni.il/media/i03lhup4/220_342מובייל.jpg",
+   "featured": true
   },
   {
    "id": "muni-eventsmeeting-at-the-museum",
@@ -216,6 +84,115 @@
    "approx": false,
    "link": "https://www.ramat-gan.muni.il/events/meeting-at-the-museum/",
    "img": "https://www.ramat-gan.muni.il/media/abvjluji/220_342מובייל.jpg",
+   "featured": false,
+   "free": true
+  },
+  {
+   "id": "muni-eventssocial-skills-in-early-childhood",
+   "title": "מיומנויות חברתיות בגיל הרך",
+   "cat": "community",
+   "anim": "community",
+   "muniCat": "פעילויות לילדים ולגיל הרך",
+   "audience": [
+    "צעירים (18-35)",
+    "מבוגרים (60- 35)"
+   ],
+   "date": "2026-11-17",
+   "time": "",
+   "locName": "אונליין",
+   "address": "",
+   "x": null,
+   "y": null,
+   "link": "https://www.ramat-gan.muni.il/events/social-skills-in-early-childhood/",
+   "img": "https://www.ramat-gan.muni.il/media/tu2b0q2a/לאתר-מיומנויות-חברתיות-בגיל-הרך_342-220.jpg",
+   "featured": false,
+   "free": true
+  },
+  {
+   "id": "muni-eventsmbe-rg-eventsramatganchik-2026",
+   "title": "רמתגנצ'יק אירועי שבוע 15-19.11",
+   "cat": "community",
+   "anim": "community",
+   "muniCat": "פעילויות לילדים ולגיל הרך",
+   "audience": [
+    "הגיל הרך (0-3)"
+   ],
+   "date": "2026-11-17",
+   "time": "",
+   "locName": "משחקיית ר\"געים",
+   "address": "רחוב ביאליק 89",
+   "x": -1698.6,
+   "y": 1733.5,
+   "approx": true,
+   "link": "https://www.ramat-gan.muni.il/events/mbe-rg-events/ramatganchik-2026/",
+   "img": "https://www.ramat-gan.muni.il/media/sw4ntzgj/רמתגנציק_התאמה-לאתר-מובייל_342-220.jpg",
+   "featured": false,
+   "free": true
+  },
+  {
+   "id": "muni-eventsgraffiti-and-street-art-tour",
+   "title": "סיור גרפיטי ואמנות רחוב",
+   "cat": "culture",
+   "anim": "concert",
+   "muniCat": "קורסים וסיורים",
+   "audience": [
+    "צעירים (18-35)",
+    "מבוגרים (60- 35)"
+   ],
+   "date": "2026-11-17",
+   "time": "",
+   "locName": "תובל 40",
+   "address": "מתחם הבורסה",
+   "x": null,
+   "y": null,
+   "link": "https://www.ramat-gan.muni.il/events/graffiti-and-street-art-tour/",
+   "img": "https://www.ramat-gan.muni.il/media/bhvik3yf/poster_mobile-b.png",
+   "featured": false,
+   "free": true
+  },
+  {
+   "id": "muni-eventsrg-eventsweb-site-event-1040",
+   "title": "סדנת קרמיקה - טכניקות בסיסיות",
+   "cat": "community",
+   "anim": "community",
+   "muniCat": "מייקרס יצירה עירונית",
+   "audience": [
+    "צעירים (18-35)",
+    "מבוגרים (60- 35)",
+    "הגיל השלישי (60+)"
+   ],
+   "date": "2026-11-17",
+   "time": "",
+   "locName": "מייקרס",
+   "address": "רחוב מסובים 2",
+   "x": 1711.5,
+   "y": -3747.9,
+   "approx": true,
+   "link": "https://www.ramat-gan.muni.il/events/rg-events/web-site-event-1040/",
+   "img": null,
+   "featured": false,
+   "free": true
+  },
+  {
+   "id": "muni-eventsrg-eventsweb-site-event-563",
+   "title": "סדנאות נגרות פתוחה",
+   "cat": "community",
+   "anim": "community",
+   "muniCat": "מייקרס יצירה עירונית",
+   "audience": [
+    "צעירים (18-35)",
+    "מבוגרים (60- 35)",
+    "הגיל השלישי (60+)"
+   ],
+   "date": "2026-11-17",
+   "time": "",
+   "locName": "מייקרס",
+   "address": "רחוב מסובים 2",
+   "x": 1711.5,
+   "y": -3747.9,
+   "approx": true,
+   "link": "https://www.ramat-gan.muni.il/events/rg-events/web-site-event-563/",
+   "img": null,
    "featured": false,
    "free": true
   },
@@ -309,68 +286,44 @@
    "free": true
   },
   {
-   "id": "muni-eventssocial-skills-in-early-childhood",
-   "title": "מיומנויות חברתיות בגיל הרך",
+   "id": "muni-eventsmbe-rg-eventsweb-site-event-24786",
+   "title": "Лекция \"Название израильских городов и улиц\"",
    "cat": "community",
    "anim": "community",
-   "muniCat": "פעילויות לילדים ולגיל הרך",
+   "muniCat": "עליה וקליטה",
    "audience": [
-    "צעירים (18-35)",
-    "מבוגרים (60- 35)"
-   ],
-   "date": "2026-11-17",
-   "time": "",
-   "locName": "אונליין",
-   "address": "",
-   "x": null,
-   "y": null,
-   "link": "https://www.ramat-gan.muni.il/events/social-skills-in-early-childhood/",
-   "img": "https://www.ramat-gan.muni.il/media/tu2b0q2a/לאתר-מיומנויות-חברתיות-בגיל-הרך_342-220.jpg",
-   "featured": false,
-   "free": true
-  },
-  {
-   "id": "muni-eventsrg-eventsweb-site-event-1040",
-   "title": "סדנת קרמיקה - טכניקות בסיסיות",
-   "cat": "community",
-   "anim": "community",
-   "muniCat": "מייקרס יצירה עירונית",
-   "audience": [
-    "צעירים (18-35)",
     "מבוגרים (60- 35)",
     "הגיל השלישי (60+)"
    ],
    "date": "2026-11-17",
    "time": "",
-   "locName": "מייקרס",
-   "address": "רחוב מסובים 2",
-   "x": 1711.5,
-   "y": -3747.9,
-   "approx": true,
-   "link": "https://www.ramat-gan.muni.il/events/rg-events/web-site-event-1040/",
-   "img": null,
+   "locName": "בית קריניצי",
+   "address": "רחוב קריניצי 64",
+   "x": -692.1,
+   "y": 1370.1,
+   "approx": false,
+   "link": "https://www.ramat-gan.muni.il/events/mbe-rg-events/web-site-event-24786/",
+   "img": "https://www.ramat-gan.muni.il/media/fa5bewb5/התאמות-הרצאה-בנושא-היסטוריה_342-220.jpg",
    "featured": false,
    "free": true
   },
   {
-   "id": "muni-eventsrg-eventsweb-site-event-563",
-   "title": "סדנאות נגרות פתוחה",
+   "id": "muni-eventsrg-eventsweb-site-event-1246",
+   "title": "שעות סיפור ברשת ספריות רמת-גן - נובמבר 2026",
    "cat": "community",
    "anim": "community",
-   "muniCat": "מייקרס יצירה עירונית",
+   "muniCat": "שעת סיפור",
    "audience": [
-    "צעירים (18-35)",
-    "מבוגרים (60- 35)",
-    "הגיל השלישי (60+)"
+    "ילדים (4-11)"
    ],
    "date": "2026-11-17",
    "time": "",
-   "locName": "מייקרס",
-   "address": "רחוב מסובים 2",
-   "x": 1711.5,
-   "y": -3747.9,
+   "locName": "ספריית בית לזרוס",
+   "address": "רחוב אינשטיין 16 במתנ\"ס",
+   "x": -50.7,
+   "y": -855,
    "approx": true,
-   "link": "https://www.ramat-gan.muni.il/events/rg-events/web-site-event-563/",
+   "link": "https://www.ramat-gan.muni.il/events/rg-events/web-site-event-1246/",
    "img": null,
    "featured": false,
    "free": true
@@ -398,49 +351,6 @@
    "free": true
   },
   {
-   "id": "muni-eventsgraffiti-and-street-art-tour",
-   "title": "סיור גרפיטי ואמנות רחוב",
-   "cat": "culture",
-   "anim": "concert",
-   "muniCat": "קורסים וסיורים",
-   "audience": [
-    "צעירים (18-35)",
-    "מבוגרים (60- 35)"
-   ],
-   "date": "2026-11-17",
-   "time": "",
-   "locName": "תובל 40",
-   "address": "מתחם הבורסה",
-   "x": null,
-   "y": null,
-   "link": "https://www.ramat-gan.muni.il/events/graffiti-and-street-art-tour/",
-   "img": "https://www.ramat-gan.muni.il/media/bhvik3yf/poster_mobile-b.png",
-   "featured": false,
-   "free": true
-  },
-  {
-   "id": "muni-eventsmbe-rg-eventsweb-site-event-24786",
-   "title": "Лекция \"Название израильских городов и улиц\"",
-   "cat": "community",
-   "anim": "community",
-   "muniCat": "עליה וקליטה",
-   "audience": [
-    "מבוגרים (60- 35)",
-    "הגיל השלישי (60+)"
-   ],
-   "date": "2026-11-17",
-   "time": "",
-   "locName": "בית קריניצי",
-   "address": "רחוב קריניצי 64",
-   "x": -692.1,
-   "y": 1370.1,
-   "approx": false,
-   "link": "https://www.ramat-gan.muni.il/events/mbe-rg-events/web-site-event-24786/",
-   "img": "https://www.ramat-gan.muni.il/media/fa5bewb5/התאמות-הרצאה-בנושא-היסטוריה_342-220.jpg",
-   "featured": false,
-   "free": true
-  },
-  {
    "id": "muni-eventsnovember-without-consumption-2026",
    "title": "נובמבר ללא צריכה 2026",
    "cat": "community",
@@ -460,6 +370,29 @@
    "link": "https://www.ramat-gan.muni.il/events/november-without-consumption-2026/",
    "img": "https://www.ramat-gan.muni.il/media/tr4bnd5n/התאמות-לאתר-נובמבר-ללא-צריכה-2026_342-220.jpg",
    "featured": true,
+   "free": true
+  },
+  {
+   "id": "muni-eventsrg-eventsweb-site-event-329",
+   "title": "הסדנאות הפתוחות שלנו במסגרייה",
+   "cat": "community",
+   "anim": "community",
+   "muniCat": "מייקרס יצירה עירונית",
+   "audience": [
+    "צעירים (18-35)",
+    "מבוגרים (60- 35)",
+    "הגיל השלישי (60+)"
+   ],
+   "date": "2026-11-18",
+   "time": "",
+   "locName": "מייקרס",
+   "address": "רחוב מסובים 2",
+   "x": 1711.5,
+   "y": -3747.9,
+   "approx": true,
+   "link": "https://www.ramat-gan.muni.il/events/rg-events/web-site-event-329/",
+   "img": null,
+   "featured": false,
    "free": true
   },
   {
@@ -502,29 +435,6 @@
    "approx": false,
    "link": "https://www.ramat-gan.muni.il/events/rg-events/web-site-event-1174/",
    "img": "https://www.ramat-gan.muni.il/media/cwfnzwwg/התאמות-לאתר-ספינינג_342-220.jpg",
-   "featured": false,
-   "free": true
-  },
-  {
-   "id": "muni-eventsrg-eventsweb-site-event-329",
-   "title": "הסדנאות הפתוחות שלנו במסגרייה",
-   "cat": "community",
-   "anim": "community",
-   "muniCat": "מייקרס יצירה עירונית",
-   "audience": [
-    "צעירים (18-35)",
-    "מבוגרים (60- 35)",
-    "הגיל השלישי (60+)"
-   ],
-   "date": "2026-11-18",
-   "time": "",
-   "locName": "מייקרס",
-   "address": "רחוב מסובים 2",
-   "x": 1711.5,
-   "y": -3747.9,
-   "approx": true,
-   "link": "https://www.ramat-gan.muni.il/events/rg-events/web-site-event-329/",
-   "img": null,
    "featured": false,
    "free": true
   },
@@ -614,6 +524,27 @@
    "featured": false
   },
   {
+   "id": "muni-events2026-rg-afternoon",
+   "title": "אחה\"צ ר\"גוע חודש נובמבר",
+   "cat": "community",
+   "anim": "community",
+   "muniCat": "פעילויות לילדים ולגיל הרך",
+   "audience": [
+    "ילדים (4-11)"
+   ],
+   "date": "2026-11-19",
+   "time": "",
+   "locName": "מרכז פיס גאולים",
+   "address": "רחוב סטרומה 10",
+   "x": -1055,
+   "y": 2160.5,
+   "approx": false,
+   "link": "https://www.ramat-gan.muni.il/events/2026-rg-afternoon/",
+   "img": "https://www.ramat-gan.muni.il/media/nspj2kiu/התאמות-לאתר-_אחצ-רגוע-נובמבר-2026_342-220.jpg",
+   "featured": false,
+   "free": true
+  },
+  {
    "id": "muni-eventsrg-eventsweb-site-event-121",
    "title": "משחקי קופסה",
    "cat": "community",
@@ -632,27 +563,6 @@
    "approx": false,
    "link": "https://www.ramat-gan.muni.il/events/rg-events/web-site-event-121/",
    "img": "https://www.ramat-gan.muni.il/media/osodp41k/גריד-לקהילה-הגאה_התאמה-לאתר_342-22010.jpg",
-   "featured": false,
-   "free": true
-  },
-  {
-   "id": "muni-events2026-rg-afternoon",
-   "title": "אחה\"צ ר\"גוע חודש נובמבר",
-   "cat": "community",
-   "anim": "community",
-   "muniCat": "פעילויות לילדים ולגיל הרך",
-   "audience": [
-    "ילדים (4-11)"
-   ],
-   "date": "2026-11-19",
-   "time": "",
-   "locName": "מרכז פיס גאולים",
-   "address": "רחוב סטרומה 10",
-   "x": -1055,
-   "y": 2160.5,
-   "approx": false,
-   "link": "https://www.ramat-gan.muni.il/events/2026-rg-afternoon/",
-   "img": "https://www.ramat-gan.muni.il/media/nspj2kiu/התאמות-לאתר-_אחצ-רגוע-נובמבר-2026_342-220.jpg",
    "featured": false,
    "free": true
   },
@@ -762,6 +672,29 @@
    "featured": false
   },
   {
+   "id": "muni-eventsgluten-free-workshop-for-hanukkah",
+   "title": "סדנה לא גלוטן לכבוד חנוכה",
+   "cat": "community",
+   "anim": "community",
+   "muniCat": "פעילויות לילדים ולגיל הרך",
+   "audience": [
+    "צעירים (18-35)",
+    "מבוגרים (60- 35)",
+    "ילדים (4-11)"
+   ],
+   "date": "2026-11-22",
+   "time": "",
+   "locName": "מועדון האם",
+   "address": "רחוב האם 2",
+   "x": 488.2,
+   "y": -1332.7,
+   "approx": true,
+   "link": "https://www.ramat-gan.muni.il/events/gluten-free-workshop-for-hanukkah/",
+   "img": "https://www.ramat-gan.muni.il/media/nkdd3stw/התאמות-סדנה-ללא-גלוטן-לכבוד-חנוכה-2211_342-220.jpg",
+   "featured": false,
+   "free": true
+  },
+  {
    "id": "muni-eventsrg-eventsweb-site-event-1438",
    "title": "פונקציונלי גאות",
    "cat": "community",
@@ -850,29 +783,6 @@
    "free": true
   },
   {
-   "id": "muni-eventsgluten-free-workshop-for-hanukkah",
-   "title": "סדנה לא גלוטן לכבוד חנוכה",
-   "cat": "community",
-   "anim": "community",
-   "muniCat": "פעילויות לילדים ולגיל הרך",
-   "audience": [
-    "צעירים (18-35)",
-    "מבוגרים (60- 35)",
-    "ילדים (4-11)"
-   ],
-   "date": "2026-11-22",
-   "time": "",
-   "locName": "מועדון האם",
-   "address": "רחוב האם 2",
-   "x": 488.2,
-   "y": -1332.7,
-   "approx": true,
-   "link": "https://www.ramat-gan.muni.il/events/gluten-free-workshop-for-hanukkah/",
-   "img": "https://www.ramat-gan.muni.il/media/nkdd3stw/התאמות-סדנה-ללא-גלוטן-לכבוד-חנוכה-2211_342-220.jpg",
-   "featured": false,
-   "free": true
-  },
-  {
    "id": "muni-eventsparents-meeting-for-allergic-children",
    "title": "מפגש הורים לילדים אלרגיים למזון",
    "cat": "community",
@@ -955,6 +865,28 @@
    "approx": false,
    "link": "https://www.ramat-gan.muni.il/events/rg-events/web-site-event-4543/",
    "img": "https://www.ramat-gan.muni.il/media/441dovej/220_342מובייל.jpg",
+   "featured": false,
+   "free": true
+  },
+  {
+   "id": "muni-eventsrg-eventsweb-site-event-798",
+   "title": "קבוצת טניס גאה Sunflowers Tennis Group",
+   "cat": "community",
+   "anim": "community",
+   "muniCat": "הקהילה הגאה",
+   "audience": [
+    "צעירים (18-35)",
+    "מבוגרים (60- 35)"
+   ],
+   "date": "2026-11-23",
+   "time": "",
+   "locName": "המרכז הגאה",
+   "address": "רחוב ביאליק 42",
+   "x": -1144.8,
+   "y": 1361.2,
+   "approx": false,
+   "link": "https://www.ramat-gan.muni.il/events/rg-events/web-site-event-798/",
+   "img": "https://www.ramat-gan.muni.il/media/nvjjws3b/גריד-לקהילה-הגאה_התאמה-לאתר_342-2206.jpg",
    "featured": false,
    "free": true
   },
@@ -1202,6 +1134,28 @@
    "free": true
   },
   {
+   "id": "muni-eventsrg-eventsweb-site-event-1181",
+   "title": "טרנספייס",
+   "cat": "community",
+   "anim": "community",
+   "muniCat": "הקהילה הגאה",
+   "audience": [
+    "צעירים (18-35)",
+    "מבוגרים (60- 35)"
+   ],
+   "date": "2026-11-30",
+   "time": "",
+   "locName": "המרכז הגאה",
+   "address": "רחוב ביאליק 42",
+   "x": -1144.8,
+   "y": 1361.2,
+   "approx": false,
+   "link": "https://www.ramat-gan.muni.il/events/rg-events/web-site-event-1181/",
+   "img": "https://www.ramat-gan.muni.il/media/0owlj5gz/220_342מובייל.jpg",
+   "featured": false,
+   "free": true
+  },
+  {
    "id": "muni-eventsmbe-rg-eventsweb-site-event-24780",
    "title": "Voca people:The 20th Anniversary Show: The Cosmic A Cappella Tour!",
    "cat": "community",
@@ -1223,6 +1177,28 @@
    "img": "https://www.ramat-gan.muni.il/media/i3shyycb/220_342מובייל.jpg",
    "featured": false,
    "free": true
+  },
+  {
+   "id": "muni-eventsthe-familys-coping-with-grandpas-dementia",
+   "title": "הקרנת הסרט \"תסתכל, עוד מעט לא תראה כלום\"",
+   "cat": "culture",
+   "anim": "concert",
+   "muniCat": "חודש האזרח הוותיק 2026",
+   "audience": [
+    "צעירים (18-35)",
+    "מבוגרים (60- 35)",
+    "הגיל השלישי (60+)"
+   ],
+   "date": "2026-11-30",
+   "time": "",
+   "locName": "בית קריניצי",
+   "address": "רחוב קריניצי 64",
+   "x": -692.1,
+   "y": 1370.1,
+   "approx": false,
+   "link": "https://www.ramat-gan.muni.il/events/the-familys-coping-with-grandpas-dementia/",
+   "img": "https://www.ramat-gan.muni.il/media/el5jilus/לאתר-מפגש-סרט-ושיחה-לבני-משפחה-מטפלים_342-220.jpg",
+   "featured": false
   },
   {
    "id": "muni-eventsdocumentary-series-at-the-museum",
